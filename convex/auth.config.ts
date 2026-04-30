@@ -4,7 +4,7 @@ import { convexAuth } from "@convex-dev/auth/server";
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
-export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
+const authConfig = {
   providers: [
     Google({
       clientId: process.env.GOOGLE_OAUTH_CLIENT_ID,
@@ -25,4 +25,9 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
     totalDurationMs: THIRTY_DAYS_MS,
     inactiveDurationMs: THIRTY_DAYS_MS,
   },
-});
+};
+
+export default authConfig;
+
+export const { auth, signIn, signOut, store, isAuthenticated } =
+  convexAuth(authConfig);

@@ -1,6 +1,8 @@
+import { useConvexAuth } from "@convex-dev/auth/react";
 import { Routes, Route, useInRouterContext } from "react-router-dom";
 import { PrivacyBanner } from "@/components/PrivacyBanner";
 import { ConnectedPrivateCoachingView } from "@/components/PrivateCoachingView";
+import { SignIn } from "@/components/SignIn";
 
 function Home() {
   return (
@@ -15,7 +17,21 @@ function Home() {
 }
 
 export default function App() {
+  const { isLoading, isAuthenticated } = useConvexAuth();
   const inRouter = useInRouterContext();
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <p className="text-gray-500">Loading…</p>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return <SignIn />;
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
       {inRouter ? (
