@@ -64,6 +64,22 @@ export const insertStreamingMessage = internalMutation({
       v.literal("jointMessages"),
       v.literal("draftMessages"),
     ),
+    content: v.string(),
+    status: v.union(
+      v.literal("STREAMING"),
+      v.literal("COMPLETE"),
+      v.literal("ERROR"),
+    ),
+    createdAt: v.number(),
+    tokens: v.optional(v.number()),
+    caseId: v.optional(v.string()),
+    userId: v.optional(v.string()),
+    role: v.optional(v.string()),
+    authorType: v.optional(v.string()),
+    authorUserId: v.optional(v.string()),
+    isIntervention: v.optional(v.boolean()),
+    replyToId: v.optional(v.string()),
+    draftSessionId: v.optional(v.string()),
   },
   handler: async (ctx: any, args: any) => {
     const { table, ...fields } = args;
@@ -199,11 +215,13 @@ export async function streamAIResponse(
       maxTokens,
     });
   } catch (error: unknown) {
-    const errorMessage =
-      error instanceof Error ? error.message : "Unknown AI error";
+    const userMessage = error instanceof Error && error.message.includes("timeout")
+      ? "The AI response timed out. Please try again."
+      : "Something went wrong generating the AI response. Please try again.";
+    console.error("[streamAIResponse] AI call failed:", error);
     await ctx.runMutation(updateRef, {
       messageId,
-      content: `Error: ${errorMessage}`,
+      content: userMessage,
       status: "ERROR" as const,
     });
   }
@@ -239,12 +257,14 @@ async function callClaudeWithRetry(
 
       // Check for 429 rate limit — retry once with 2s backoff
       if (isRateLimitError(error) && attempt === 0) {
+        console.warn("[streamAIResponse] 429 rate limit hit, retrying after 2s backoff");
         await new Promise((r) => setTimeout(r, RETRY_BACKOFF_MS));
         continue;
       }
 
       // Content filter — set user-friendly message and mark ERROR
       if (isContentFilterStop(error)) {
+        console.warn("[streamAIResponse] Content filter triggered for message:", params.messageId);
         await ctx.runMutation(updateRef, {
           messageId: params.messageId,
           content: CONTENT_FILTER_MESSAGE,
@@ -258,6 +278,7 @@ async function callClaudeWithRetry(
   }
 
   // Exhausted retries (two 429s)
+  console.error("[streamAIResponse] Exhausted retries after two 429 responses");
   throw lastError;
 }
 
@@ -305,18 +326,20 @@ async function executeStream(
       throw new Error("Network timeout: no tokens received for 30s");
     }
 
+    let timeoutId: ReturnType<typeof setTimeout>;
     const result = await Promise.race([
       iterator.next(),
-      new Promise<never>((_, reject) =>
-        setTimeout(
+      new Promise<never>((_, reject) => {
+        timeoutId = setTimeout(
           () =>
             reject(
               new Error("Network timeout: no tokens received for 30s"),
             ),
           remainingMs,
-        ),
-      ),
+        );
+      }),
     ]);
+    clearTimeout(timeoutId!);
 
     if (result.done) break;
 

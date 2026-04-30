@@ -3,14 +3,9 @@ import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 /**
  * Tests for WOR-39: AI streaming infrastructure
  *
- * The module under test (convex/lib/streaming.ts) does not exist yet.
- * All tests import from it and will FAIL until the implementation is written.
- *
  * Each test maps to a specific acceptance criterion from the task spec.
  */
 
-// Import the helper that does not exist yet — this will cause all tests to fail
-// with a module-not-found error, which is the correct "red" state.
 import {
   streamAIResponse,
   type StreamAIResponseOptions,
