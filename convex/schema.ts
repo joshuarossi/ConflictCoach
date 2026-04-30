@@ -1,14 +1,31 @@
 import { defineSchema, defineTable } from "convex/server";
+import { authTables } from "@convex-dev/auth/server";
 import { v } from "convex/values";
 
 export default defineSchema({
+  // --- Auth tables (required by @convex-dev/auth) ---
+  ...authTables,
+
   // --- Users (managed partly by Convex Auth) ---
+  // Extends the default authTables.users with app-specific fields.
+  // Convex Auth fields (name, image, etc.) are optional; app fields
+  // (email, role, createdAt) are required and set via createOrUpdateUser callback.
   users: defineTable({
     email: v.string(),
     displayName: v.optional(v.string()),
     role: v.union(v.literal("USER"), v.literal("ADMIN")),
     createdAt: v.number(),
-  }).index("by_email", ["email"]),
+    // Convex Auth fields
+    name: v.optional(v.string()),
+    image: v.optional(v.string()),
+    emailVerificationTime: v.optional(v.number()),
+    phone: v.optional(v.string()),
+    phoneVerificationTime: v.optional(v.number()),
+    isAnonymous: v.optional(v.boolean()),
+  })
+    .index("email", ["email"])
+    .index("phone", ["phone"])
+    .index("by_email", ["email"]),
 
   // --- Cases ---
   // Invariant: cases.schemaVersion is present on every case for forward
