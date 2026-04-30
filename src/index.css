@@ -1,1 +1,82 @@
 @import "tailwindcss";
+
+/*
+ * Tailwind v4 theme extensions
+ * Maps CSS custom properties to Tailwind utility classes.
+ * Usage: bg-canvas, text-primary, border-default, shadow-1, rounded-lg, etc.
+ */
+@theme {
+  /* Colors — mapped to CSS vars from globals.css */
+  --color-canvas: var(--bg-canvas);
+  --color-surface: var(--bg-surface);
+  --color-surface-subtle: var(--bg-surface-subtle);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-text-tertiary: var(--text-tertiary);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-subtle: var(--accent-subtle);
+  --color-accent-on: var(--accent-on);
+  --color-danger: var(--danger);
+  --color-danger-subtle: var(--danger-subtle);
+  --color-warning: var(--warning);
+  --color-warning-subtle: var(--warning-subtle);
+  --color-success: var(--success);
+  --color-border-default: var(--border-default);
+  --color-border-strong: var(--border-strong);
+  --color-coach-accent: var(--coach-accent);
+  --color-coach-subtle: var(--coach-subtle);
+  --color-private-tint: var(--private-tint);
+  --color-party-initiator: var(--party-initiator);
+  --color-party-initiator-subtle: var(--party-initiator-subtle);
+  --color-party-invitee: var(--party-invitee);
+  --color-party-invitee-subtle: var(--party-invitee-subtle);
+
+  /* Typography — Font families */
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+
+  /* Typography — Font sizes (StyleGuide §3.3) */
+  --font-size-display: 32px;
+  --font-size-display--line-height: 40px;
+  --font-size-display--letter-spacing: -0.02em;
+
+  --font-size-h1: 24px;
+  --font-size-h1--line-height: 32px;
+  --font-size-h1--letter-spacing: -0.015em;
+
+  --font-size-h2: 20px;
+  --font-size-h2--line-height: 28px;
+  --font-size-h2--letter-spacing: -0.01em;
+
+  --font-size-h3: 17px;
+  --font-size-h3--line-height: 24px;
+
+  --font-size-body: 15px;
+  --font-size-body--line-height: 1.6;
+
+  --font-size-chat: 16px;
+  --font-size-chat--line-height: 1.55;
+
+  --font-size-label: 14px;
+  --font-size-label--line-height: 20px;
+
+  --font-size-meta: 13px;
+  --font-size-meta--line-height: 18px;
+
+  --font-size-timestamp: 12px;
+  --font-size-timestamp--line-height: 16px;
+
+  /* Border radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Box shadows */
+  --shadow-0: none;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.10);
+}

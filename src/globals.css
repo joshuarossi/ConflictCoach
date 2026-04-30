@@ -1,0 +1,162 @@
+/*
+ * Conflict Coach — Global Design Tokens
+ * Source of truth: DesignDoc §2 + STYLE_GUIDE §2–4
+ *
+ * All tokens are CSS custom properties on :root.
+ * Dark mode activates via prefers-color-scheme OR [data-theme="dark"].
+ */
+
+/* ===== Light theme (default) ===== */
+:root {
+  /* Neutrals */
+  --bg-canvas: #FAF8F5;
+  --bg-surface: #FFFFFF;
+  --bg-surface-subtle: #F3EFE9;
+  --text-primary: #1F1D1A;
+  --text-secondary: #5C5952;
+  --text-tertiary: #8A8680;
+  --border-default: #E5E0D8;
+  --border-strong: #CBC4B8;
+
+  /* Accent — Sage */
+  --accent: #6B8E7F;
+  --accent-hover: #5A7A6C;
+  --accent-subtle: #DCE7E0;
+  --accent-on: #FFFFFF;
+
+  /* Coach — Dusty Lavender */
+  --coach-accent: #8B7AB5;
+  --coach-subtle: #EAE4F2;
+
+  /* Party colors */
+  --party-initiator: #6B85A8;
+  --party-initiator-subtle: #DFE5EF;
+  --party-invitee: #B07A8F;
+  --party-invitee-subtle: #EFE0E4;
+
+  /* Feedback */
+  --danger: #B5594D;
+  --danger-subtle: #F2DCD8;
+  --warning: #B58B4D;
+  --warning-subtle: #F2E5D4;
+  --success: #6B8E7F;
+
+  /* Tints */
+  --private-tint: #F0E9E0;
+
+  /* Radius */
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-full: 9999px;
+
+  /* Shadows */
+  --shadow-0: none;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.10);
+}
+
+/* ===== Dark theme ===== */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg-canvas: #1A1816;
+    --bg-surface: #242220;
+    --bg-surface-subtle: #2E2B28;
+    --text-primary: #F2EFE9;
+    --text-secondary: #A8A39A;
+    --text-tertiary: #7A766E;
+    --border-default: #3A3632;
+    --border-strong: #4A4640;
+
+    --accent: #89A99B;
+    --accent-hover: #9ABAAC;
+    --accent-subtle: #2E3A35;
+    --accent-on: #1A1816;
+
+    --coach-accent: #A797CC;
+    --coach-subtle: #342E42;
+
+    --party-initiator: #8BA3C2;
+    --party-initiator-subtle: #2C3542;
+    --party-invitee: #CC96A9;
+    --party-invitee-subtle: #3E2E34;
+
+    --danger: #CC786D;
+    --danger-subtle: #3E2A27;
+    --warning: #CC9F6D;
+    --warning-subtle: #3E3228;
+    --success: #89A99B;
+
+    --private-tint: #2D2924;
+
+    --shadow-0: none;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.20);
+    --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.28);
+    --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.40);
+  }
+}
+
+[data-theme="dark"] {
+  --bg-canvas: #1A1816;
+  --bg-surface: #242220;
+  --bg-surface-subtle: #2E2B28;
+  --text-primary: #F2EFE9;
+  --text-secondary: #A8A39A;
+  --text-tertiary: #7A766E;
+  --border-default: #3A3632;
+  --border-strong: #4A4640;
+
+  --accent: #89A99B;
+  --accent-hover: #9ABAAC;
+  --accent-subtle: #2E3A35;
+  --accent-on: #1A1816;
+
+  --coach-accent: #A797CC;
+  --coach-subtle: #342E42;
+
+  --party-initiator: #8BA3C2;
+  --party-initiator-subtle: #2C3542;
+  --party-invitee: #CC96A9;
+  --party-invitee-subtle: #3E2E34;
+
+  --danger: #CC786D;
+  --danger-subtle: #3E2A27;
+  --warning: #CC9F6D;
+  --warning-subtle: #3E3228;
+  --success: #89A99B;
+
+  --private-tint: #2D2924;
+
+  --shadow-0: none;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, 0.20);
+  --shadow-2: 0 4px 12px rgba(0, 0, 0, 0.28);
+  --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.40);
+}
+
+/* ===== Global resets & font smoothing (StyleGuide §3.4) ===== */
+html {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  font-family: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--bg-canvas);
+  color: var(--text-primary);
+}
+
+/* Mono font: applied to code-like elements */
+code, kbd, pre, samp, .font-mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Force browser to download JetBrains Mono even if no element uses it yet */
+body::after {
+  font-family: "JetBrains Mono", monospace;
+  content: "\00a0";
+  position: absolute;
+  left: -10000px;
+}
