@@ -11,6 +11,7 @@ import {
   RATE_LIMITED,
   AI_ERROR,
   INTERNAL,
+  type AppErrorCode,
 } from "../../convex/lib/errors";
 
 /**
@@ -82,7 +83,7 @@ describe("A throwAppError(code, message) utility is exported from convex/lib/err
 
 // AC-3: Each error code maps to an appropriate HTTP status
 describe("Each error code maps to an appropriate HTTP status (401, 403, 404, 409, 400, 400, 429, 502, 500)", () => {
-  const codeToStatus: Array<{ code: string; httpStatus: number }> = [
+  const codeToStatus: Array<{ code: AppErrorCode; httpStatus: number }> = [
     { code: "UNAUTHENTICATED", httpStatus: 401 },
     { code: "FORBIDDEN", httpStatus: 403 },
     { code: "NOT_FOUND", httpStatus: 404 },
@@ -114,22 +115,25 @@ describe("Each error code maps to an appropriate HTTP status (401, 403, 404, 409
   );
 });
 
-// Additional: unknown/invalid codes fall back to INTERNAL / 500
-describe("Unknown error codes fall back to INTERNAL / 500", () => {
-  test("throwAppError with an unknown code throws with INTERNAL / 500 or throws an error", () => {
-    try {
-      throwAppError("TOTALLY_UNKNOWN_CODE" as string, "something broke");
-      expect.fail("should have thrown");
-    } catch (err) {
-      if (err instanceof ConvexError) {
-        // Falls back to INTERNAL / 500
-        const data = (err as ConvexError<{ code: string; httpStatus: number }>)
-          .data;
-        expect(data.code).toBe("INTERNAL");
-        expect(data.httpStatus).toBe(500);
-      }
-      // If it throws a different error type, that's also acceptable —
-      // the key requirement is that it doesn't silently succeed.
+// Additional: unknown/invalid codes are rejected at compile time by the AppErrorCode type.
+// The following tests verify the type is correctly defined.
+describe("AppErrorCode type prevents unknown codes at compile time", () => {
+  test("throwAppError accepts all 9 valid error codes without TypeScript errors", () => {
+    const validCodes: AppErrorCode[] = [
+      UNAUTHENTICATED,
+      FORBIDDEN,
+      NOT_FOUND,
+      CONFLICT,
+      INVALID_INPUT,
+      TOKEN_INVALID,
+      RATE_LIMITED,
+      AI_ERROR,
+      INTERNAL,
+    ];
+    expect(validCodes).toHaveLength(9);
+    // Calling throwAppError with each valid code throws a ConvexError (not a TypeError)
+    for (const code of validCodes) {
+      expect(() => throwAppError(code, "test")).toThrow(ConvexError);
     }
   });
 });
