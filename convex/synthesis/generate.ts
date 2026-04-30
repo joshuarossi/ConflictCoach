@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { internalAction, internalMutation, internalQuery } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { internalAction, internalMutation, internalQuery } from "../_generated/server";
+import { internal } from "../_generated/api";
 import { v } from "convex/values";
-import { assemblePrompt } from "./lib/prompts";
-import { checkPrivacyViolation, FALLBACK_TEXT } from "./lib/privacyFilter";
-import type { Message } from "./lib/prompts";
+import { assemblePrompt } from "../lib/prompts";
+import { checkPrivacyViolation, FALLBACK_TEXT } from "../lib/privacyFilter";
+import type { Message } from "../lib/prompts";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -98,7 +98,7 @@ export const _writeAuditLog = internalMutation({
 });
 
 // ---------------------------------------------------------------------------
-// generate — internal action scheduled by markComplete
+// generateSynthesis — internal action scheduled by markComplete
 // ---------------------------------------------------------------------------
 
 interface SynthesisResult {
@@ -106,7 +106,7 @@ interface SynthesisResult {
   forInvitee: string;
 }
 
-function parseSynthesisResponse(raw: string): SynthesisResult {
+export function parseSynthesisResponse(raw: string): SynthesisResult {
   // Strip markdown code fences if present
   let cleaned = raw.trim();
   if (cleaned.startsWith("```")) {
@@ -129,7 +129,7 @@ function parseSynthesisResponse(raw: string): SynthesisResult {
   return { forInitiator: parsed.forInitiator, forInvitee: parsed.forInvitee };
 }
 
-export const generate = internalAction({
+export const generateSynthesis = internalAction({
   args: {
     caseId: v.id("cases"),
   },
@@ -152,7 +152,7 @@ export const generate = internalAction({
     }
 
     const allPrivateMessages = await ctx.runQuery(
-      internal.synthesis._getAllPrivateMessages,
+      internal.synthesis.generate._getAllPrivateMessages,
       { caseId: args.caseId },
     );
 
@@ -272,7 +272,7 @@ export const generate = internalAction({
         }
 
         // 5. Write synthesis and advance case — single atomic mutation
-        await ctx.runMutation(internal.synthesis._writeSynthesisAndAdvance, {
+        await ctx.runMutation(internal.synthesis.generate._writeSynthesisAndAdvance, {
           caseId: args.caseId,
           initiatorPartyStateId: initiatorPS._id,
           inviteePartyStateId: inviteePS._id,
@@ -295,7 +295,7 @@ export const generate = internalAction({
     }
 
     // All attempts exhausted — use generic fallback and flag for review
-    await ctx.runMutation(internal.synthesis._writeAuditLog, {
+    await ctx.runMutation(internal.synthesis.generate._writeAuditLog, {
       caseId: args.caseId,
       initiatorUserId: initiatorPS.userId,
       metadata: {
@@ -304,7 +304,7 @@ export const generate = internalAction({
       },
     });
 
-    await ctx.runMutation(internal.synthesis._writeSynthesisAndAdvance, {
+    await ctx.runMutation(internal.synthesis.generate._writeSynthesisAndAdvance, {
       caseId: args.caseId,
       initiatorPartyStateId: initiatorPS._id,
       inviteePartyStateId: inviteePS._id,

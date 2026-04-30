@@ -254,13 +254,11 @@ export const markComplete = mutation({
 
     if (bothComplete) {
       // Schedule synthesis generation.
-      // Use internal reference if available, fall back to string for
-      // forward compatibility before the synthesis module exists.
-      const synthesisRef =
-        internal?.synthesis?.generate ?? "synthesis:generate";
-      await ctx.scheduler.runAfter(0, synthesisRef, {
-        caseId: args.caseId,
-      });
+      await ctx.scheduler.runAfter(
+        0,
+        internal.synthesis.generate.generateSynthesis,
+        { caseId: args.caseId },
+      );
     }
   },
 });
