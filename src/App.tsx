@@ -1,7 +1,16 @@
 import { Routes, Route, useInRouterContext } from "react-router-dom";
+import { PrivacyBanner } from "@/components/PrivacyBanner";
 
 function Home() {
-  return <h1 className="text-2xl font-bold text-gray-900">Conflict Coach</h1>;
+  return (
+    <div className="w-full">
+      <PrivacyBanner
+        text="This conversation is private to you."
+        otherPartyName="Partner"
+      />
+      <h1 className="text-2xl font-bold text-gray-900 p-4">Conflict Coach</h1>
+    </div>
+  );
 }
 
 export default function App() {
