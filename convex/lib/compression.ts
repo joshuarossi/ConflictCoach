@@ -131,7 +131,7 @@ export function shouldCompress(
 }
 
 // ---------------------------------------------------------------------------
-// Synchronous context compression for assemblePrompt integration
+// Synchronous context truncation (not AI-based) for assemblePrompt budget enforcement
 // ---------------------------------------------------------------------------
 
 export function compressContext(
@@ -140,12 +140,15 @@ export function compressContext(
   budget: number = GENERATION_BUDGET,
 ): Message[] {
   let result = [...messages];
+  let iterations = 0;
+  const maxIterations = 10;
 
   const totalTokens = () =>
     result.reduce((sum, m) => sum + estimateTokens(m.content), 0) +
     estimateTokens(systemPrompt);
 
-  while (totalTokens() > budget && result.length > 1) {
+  while (totalTokens() > budget && result.length > 1 && iterations < maxIterations) {
+    iterations++;
     const toCompress = selectMessagesForCompression(result);
     if (toCompress.length === 0) break;
 

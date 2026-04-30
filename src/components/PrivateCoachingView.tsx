@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
@@ -167,6 +167,34 @@ export function ConnectedPrivateCoachingView() {
   const sendMessage = useMutation(api.privateCoaching.sendUserMessage);
   const markComplete = useMutation(api.privateCoaching.markComplete);
 
+  // Error state for mutation failures
+  const [mutationError, setMutationError] = useState<string | null>(null);
+
+  const handleSendMessage = useCallback(
+    async (content: string) => {
+      setMutationError(null);
+      try {
+        await sendMessage({ caseId, content });
+      } catch (err) {
+        setMutationError(
+          err instanceof Error ? err.message : "Failed to send message",
+        );
+      }
+    },
+    [sendMessage, caseId],
+  );
+
+  const handleMarkComplete = useCallback(async () => {
+    setMutationError(null);
+    try {
+      await markComplete({ caseId });
+    } catch (err) {
+      setMutationError(
+        err instanceof Error ? err.message : "Failed to mark complete",
+      );
+    }
+  }, [markComplete, caseId]);
+
   // Derive state
   const isCompleted = partyData?.self?.privateCoachingCompletedAt != null;
   const otherPartyName =
@@ -227,14 +255,24 @@ export function ConnectedPrivateCoachingView() {
   }));
 
   return (
-    <PrivateCoachingView
-      caseId={caseId}
-      otherPartyName={otherPartyName}
-      messages={normalizedMessages}
-      isCompleted={isCompleted}
-      isStreaming={isStreaming}
-      onSendMessage={(content) => sendMessage({ caseId, content })}
-      onMarkComplete={() => markComplete({ caseId })}
-    />
+    <>
+      {mutationError && (
+        <div
+          role="alert"
+          className="fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-md bg-red-50 px-4 py-2 text-sm text-red-700 shadow"
+        >
+          {mutationError}
+        </div>
+      )}
+      <PrivateCoachingView
+        caseId={caseId}
+        otherPartyName={otherPartyName}
+        messages={normalizedMessages}
+        isCompleted={isCompleted}
+        isStreaming={isStreaming}
+        onSendMessage={handleSendMessage}
+        onMarkComplete={handleMarkComplete}
+      />
+    </>
   );
 }
