@@ -23,9 +23,8 @@ export default defineSchema({
     phoneVerificationTime: v.optional(v.number()),
     isAnonymous: v.optional(v.boolean()),
   })
-    .index("email", ["email"])
-    .index("phone", ["phone"])
-    .index("by_email", ["email"]),
+    .index("by_email", ["email"])
+    .index("phone", ["phone"]),
 
   // --- Cases ---
   // Invariant: cases.schemaVersion is present on every case for forward
