@@ -48,7 +48,7 @@ AI-powered conflict resolution coaching platform built with React, Convex, and C
    npm run dev
    ```
 
-   The app is served at [http://localhost:5173](http://localhost:5173).
+   The app is served at [http://localhost:5174](http://localhost:5174).
 
 ## Scripts
 
@@ -78,7 +78,8 @@ AI-powered conflict resolution coaching platform built with React, Convex, and C
 ├── convex/              # Convex backend (schema, queries, mutations, actions)
 ├── e2e/                 # Playwright end-to-end tests
 ├── src/
-│   ├── components/ui/   # shadcn/ui primitives
+│   ├── components/      # Shared app components (PrivacyBanner, etc.)
+│   │   └── ui/          # shadcn/ui primitives
 │   ├── lib/             # Shared utilities
 │   ├── App.tsx          # Root component with React Router
 │   ├── main.tsx         # Entry point
