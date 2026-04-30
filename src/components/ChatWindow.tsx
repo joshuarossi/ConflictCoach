@@ -16,9 +16,10 @@ export function ChatWindow({ messages, isStreaming = false }: ChatWindowProps) {
   const announcedRef = useRef(false);
 
   // Auto-scroll to bottom on new messages
+  const lastMessageContent = messages[messages.length - 1]?.content;
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [messages.length, messages[messages.length - 1]?.content]);
+  }, [messages.length, lastMessageContent]);
 
   // Announce streaming start once per streaming session
   useEffect(() => {

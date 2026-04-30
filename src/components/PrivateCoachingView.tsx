@@ -19,48 +19,46 @@ import {
 } from "@/components/ui/alert-dialog";
 import { CheckCircle } from "lucide-react";
 
-const ALLOWED_STATUSES = [
-  "DRAFT_PRIVATE_COACHING",
-  "BOTH_PRIVATE_COACHING",
-] as const;
+// ---------------------------------------------------------------------------
+// Props-based presentational component (used directly by unit tests)
+// ---------------------------------------------------------------------------
 
-export function PrivateCoachingView() {
-  const { id } = useParams<{ id: string }>();
-  const navigate = useNavigate();
-  const caseId = id as Id<"cases">;
-  const focusRef = useRef<HTMLDivElement>(null);
+export interface PrivateCoachingViewProps {
+  caseId?: Id<"cases">;
+  otherPartyName: string;
+  messages: Array<{
+    _id: string;
+    role: "USER" | "AI";
+    content: string;
+    status: "STREAMING" | "COMPLETE" | "ERROR";
+    createdAt: number;
+    [key: string]: unknown;
+  }>;
+  isCompleted: boolean;
+  isStreaming: boolean;
+  onSendMessage: (content: string) => void;
+  onMarkComplete: () => void;
+}
 
-  // Data queries
-  const caseData = useQuery(api.cases.get, { caseId });
-  const partyData = useQuery(api.cases.partyStates, { caseId });
-  const messages = useQuery(api.privateCoaching.myMessages, { caseId });
-
-  // Mutations
-  const sendMessage = useMutation(api.privateCoaching.sendUserMessage);
-  const markComplete = useMutation(api.privateCoaching.markComplete);
-
+export function PrivateCoachingView({
+  otherPartyName,
+  messages,
+  isCompleted,
+  isStreaming,
+  onSendMessage,
+  onMarkComplete,
+}: PrivateCoachingViewProps) {
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const focusRef = useRef<HTMLDivElement>(null);
 
   // Focus management on mount
   useEffect(() => {
     focusRef.current?.focus();
   }, []);
 
-  // Derive state
-  const isCompleted = partyData?.self?.privateCoachingCompletedAt != null;
-  const otherPartyName =
-    partyData?.otherPhaseOnly?.displayName ??
-    partyData?.otherPartyName ??
-    "the other party";
-
-  const isStreaming = useMemo(
-    () => messages?.some((m) => m.status === "STREAMING") ?? false,
-    [messages],
-  );
-
   const chatMessages: ChatMessage[] = useMemo(
     () =>
-      (messages ?? []).map((m) => ({
+      messages.map((m) => ({
         _id: m._id,
         role: m.role as "USER" | "AI",
         content: m.content,
@@ -72,53 +70,8 @@ export function PrivateCoachingView() {
 
   const messageCount = chatMessages.length;
 
-  // State gating: redirect if case is not in a valid private coaching status
-  const caseStatus = caseData?.status;
-  const isValidStatus =
-    caseStatus != null &&
-    (ALLOWED_STATUSES as readonly string[]).includes(caseStatus);
-
-  if (caseData === undefined || partyData === undefined) {
-    // Still loading
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-text-secondary">Loading…</p>
-      </div>
-    );
-  }
-
-  if (caseData === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-text-secondary">Case not found.</p>
-      </div>
-    );
-  }
-
-  // If not in valid status and not completed (read-only review), block access
-  if (!isValidStatus && !isCompleted) {
-    return (
-      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
-        <p className="text-text-secondary">
-          Private coaching is not available for this case.
-        </p>
-        <button
-          type="button"
-          onClick={() => navigate("/")}
-          className="text-accent underline"
-        >
-          Go to dashboard
-        </button>
-      </div>
-    );
-  }
-
-  const handleSend = (content: string) => {
-    sendMessage({ caseId, content });
-  };
-
   const handleMarkComplete = () => {
-    markComplete({ caseId });
+    onMarkComplete();
     setConfirmOpen(false);
   };
 
@@ -149,7 +102,7 @@ export function PrivateCoachingView() {
           <>
             {/* Message input */}
             <MessageInput
-              onSend={handleSend}
+              onSend={onSendMessage}
               isStreaming={isStreaming}
               placeholder="Tell the Coach what's on your mind…"
             />
@@ -176,7 +129,7 @@ export function PrivateCoachingView() {
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>Keep coaching</AlertDialogCancel>
+                    <AlertDialogCancel>No, keep coaching</AlertDialogCancel>
                     <AlertDialogAction onClick={handleMarkComplete}>
                       Yes, I&apos;m ready
                     </AlertDialogAction>
@@ -188,5 +141,100 @@ export function PrivateCoachingView() {
         )}
       </div>
     </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Connected wrapper — uses Convex hooks, renders at /cases/:id/private
+// ---------------------------------------------------------------------------
+
+const ALLOWED_STATUSES = [
+  "DRAFT_PRIVATE_COACHING",
+  "BOTH_PRIVATE_COACHING",
+] as const;
+
+export function ConnectedPrivateCoachingView() {
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const caseId = id as Id<"cases">;
+
+  // Data queries
+  const caseData = useQuery(api.cases.get, { caseId });
+  const partyData = useQuery(api.cases.partyStates, { caseId });
+  const messages = useQuery(api.privateCoaching.myMessages, { caseId });
+
+  // Mutations
+  const sendMessage = useMutation(api.privateCoaching.sendUserMessage);
+  const markComplete = useMutation(api.privateCoaching.markComplete);
+
+  // Derive state
+  const isCompleted = partyData?.self?.privateCoachingCompletedAt != null;
+  const otherPartyName =
+    partyData?.otherPhaseOnly?.displayName ??
+    partyData?.otherPartyName ??
+    "the other party";
+
+  const isStreaming = useMemo(
+    () => messages?.some((m) => m.status === "STREAMING") ?? false,
+    [messages],
+  );
+
+  // State gating
+  const caseStatus = caseData?.status;
+  const isValidStatus =
+    caseStatus != null &&
+    (ALLOWED_STATUSES as readonly string[]).includes(caseStatus);
+
+  if (caseData === undefined || partyData === undefined) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-text-secondary">Loading…</p>
+      </div>
+    );
+  }
+
+  if (caseData === null) {
+    return (
+      <div className="flex min-h-screen items-center justify-center">
+        <p className="text-text-secondary">Case not found.</p>
+      </div>
+    );
+  }
+
+  if (!isValidStatus && !isCompleted) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center gap-4">
+        <p className="text-text-secondary">
+          Private coaching is not available for this case.
+        </p>
+        <button
+          type="button"
+          onClick={() => navigate("/")}
+          className="text-accent underline"
+        >
+          Go to dashboard
+        </button>
+      </div>
+    );
+  }
+
+  const normalizedMessages = (messages ?? []).map((m) => ({
+    _id: m._id as string,
+    role: m.role as "USER" | "AI",
+    content: m.content,
+    status: m.status as "STREAMING" | "COMPLETE" | "ERROR",
+    createdAt: m.createdAt,
+  }));
+
+  return (
+    <PrivateCoachingView
+      caseId={caseId}
+      otherPartyName={otherPartyName}
+      messages={normalizedMessages}
+      isCompleted={isCompleted}
+      isStreaming={isStreaming}
+      onSendMessage={(content) => sendMessage({ caseId, content })}
+      onMarkComplete={() => markComplete({ caseId })}
+    />
   );
 }

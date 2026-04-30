@@ -66,7 +66,7 @@ export function MessageInput({
       <button
         type="button"
         onClick={handleSubmit}
-        disabled={!canSend}
+        disabled={isStreaming}
         className={cn(
           "inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-md transition-colors",
           canSend

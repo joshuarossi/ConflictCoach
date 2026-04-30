@@ -1,6 +1,6 @@
 import { Routes, Route, useInRouterContext } from "react-router-dom";
 import { PrivacyBanner } from "@/components/PrivacyBanner";
-import { PrivateCoachingView } from "@/components/PrivateCoachingView";
+import { ConnectedPrivateCoachingView } from "@/components/PrivateCoachingView";
 
 function Home() {
   return (
@@ -21,7 +21,7 @@ export default function App() {
       {inRouter ? (
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/cases/:id/private" element={<PrivateCoachingView />} />
+          <Route path="/cases/:id/private" element={<ConnectedPrivateCoachingView />} />
         </Routes>
       ) : (
         <Home />

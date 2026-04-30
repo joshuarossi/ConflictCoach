@@ -42,14 +42,19 @@ export function MessageBubble({
       >
         {isCoach && (
           <div className="mb-1 flex items-center gap-1.5">
-            <Sparkles size={14} className="text-coach-accent" />
+            <Sparkles size={14} className="text-coach-accent" data-testid="sparkles-icon" />
             <span className="text-meta font-medium text-coach-accent">
               Coach
             </span>
           </div>
         )}
 
-        <div className="text-chat whitespace-pre-wrap text-text-primary">
+        <div
+          className={cn(
+            "text-chat whitespace-pre-wrap text-text-primary",
+            !isCoach && "self-end",
+          )}
+        >
           {content}
           {isStreaming && (
             <span
