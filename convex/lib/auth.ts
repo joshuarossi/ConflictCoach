@@ -24,6 +24,7 @@ interface AuthContext {
   auth: { getUserIdentity: () => Promise<Identity | null> };
   db: {
     get: (id: string) => Promise<UserRecord | null>;
+    insert: (table: string, doc: Record<string, unknown>) => Promise<string>;
     query: (table: string) => {
       withIndex: (
         name: string,
@@ -34,14 +35,62 @@ interface AuthContext {
 }
 
 /**
- * Validates that the caller is authenticated and returns the user record.
- *
- * In Convex Auth, identity.subject holds the user's _id. We first try to
- * load the full user document from the DB. If the users table hasn't been
- * populated yet (e.g. upsert hasn't run), we trust the verified identity
- * and return a minimal record.
+ * Look up a user by email using the by_email index.
+ * Returns the user record or null if not found.
+ */
+export async function getUserByEmail(
+  ctx: Pick<AuthContext, "db">,
+  email: string,
+): Promise<UserRecord | null> {
+  return await ctx.db
+    .query("users")
+    .withIndex("by_email", (q) => q.eq("email", email))
+    .first();
+}
+
+/**
+ * Upsert a user record on login.
+ * - First login: creates a users row with email, role=USER, and createdAt.
+ * - Subsequent logins: returns the existing record without duplication.
+ */
+export async function upsertUser(
+  ctx: Pick<AuthContext, "auth" | "db">,
+): Promise<UserRecord> {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throwAppError("UNAUTHENTICATED", "Authentication required");
+  }
+
+  const email = identity.email;
+  if (!email) {
+    throwAppError("UNAUTHENTICATED", "Identity missing email");
+  }
+
+  const existing = await getUserByEmail(ctx, email);
+  if (existing) {
+    return existing;
+  }
+
+  const now = Date.now();
+  const id = await ctx.db.insert("users", {
+    email,
+    role: "USER",
+    createdAt: now,
+  });
+
+  return {
+    _id: id as Id<"users">,
+    email,
+    role: "USER",
+    createdAt: now,
+  };
+}
+
+/**
+ * Validates that the caller is authenticated and has a user record.
  *
  * Throws UNAUTHENTICATED if no identity is present.
+ * Throws USER_NOT_FOUND if the identity exists but no user record is found.
  */
 export async function requireAuth(ctx: AuthContext): Promise<UserRecord> {
   const identity = await ctx.auth.getUserIdentity();
@@ -49,24 +98,22 @@ export async function requireAuth(ctx: AuthContext): Promise<UserRecord> {
     throwAppError("UNAUTHENTICATED", "Authentication required");
   }
 
-  const subject = identity.subject;
-  if (!subject) {
-    throwAppError("UNAUTHENTICATED", "Identity missing subject");
+  const email = identity.email;
+  if (!email) {
+    throwAppError("UNAUTHENTICATED", "Identity missing email");
   }
 
-  // Try to load full user document
-  const user = await ctx.db.get(subject);
-  if (user) {
-    return user;
+  const user = await getUserByEmail(ctx, email);
+  if (!user) {
+    throwAppError("USER_NOT_FOUND", "User record not found");
   }
 
-  // Fallback: trust the verified identity and return a minimal record.
-  // This covers cases where the user upsert hasn't run yet or the users
-  // table isn't populated in the current context.
-  return {
-    _id: subject as Id<"users">,
-    email: identity.email ?? "",
-    role: "USER",
-    createdAt: 0,
-  };
+  return user;
+}
+
+/**
+ * Check whether a user has the ADMIN role.
+ */
+export function isAdmin(user: UserRecord): boolean {
+  return user.role === "ADMIN";
 }
