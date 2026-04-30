@@ -147,3 +147,16 @@ body {
   background-color: var(--bg-canvas);
   color: var(--text-primary);
 }
+
+/* Mono font: applied to code-like elements */
+code, kbd, pre, samp, .font-mono {
+  font-family: "JetBrains Mono", ui-monospace, monospace;
+}
+
+/* Force browser to download JetBrains Mono even if no element uses it yet */
+body::after {
+  font-family: "JetBrains Mono", monospace;
+  content: "\00a0";
+  position: absolute;
+  left: -10000px;
+}
