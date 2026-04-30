@@ -26,7 +26,7 @@ describe("AC: Typography scale matches StyleGuide §3.3", () => {
   test("tailwind config defines fontSize entries for the full typography scale", async () => {
     const config = await import("../../tailwind.config.ts");
     const fontSize =
-      config.default.theme?.extend?.fontSize ?? config.default.theme?.fontSize;
+      (config.default.theme as Record<string, any>)?.extend?.fontSize ?? (config.default.theme as Record<string, any>)?.fontSize;
 
     expect(fontSize, "Tailwind config must define custom fontSize entries").toBeDefined();
 
@@ -41,7 +41,7 @@ describe("AC: Typography scale matches StyleGuide §3.3", () => {
   test("body fontSize is 15px with line-height 1.6", async () => {
     const config = await import("../../tailwind.config.ts");
     const fontSize =
-      config.default.theme?.extend?.fontSize ?? config.default.theme?.fontSize;
+      (config.default.theme as Record<string, any>)?.extend?.fontSize ?? (config.default.theme as Record<string, any>)?.fontSize;
 
     const body = fontSize?.body;
     expect(body).toBeDefined();
@@ -54,7 +54,7 @@ describe("AC: Typography scale matches StyleGuide §3.3", () => {
   test("chat fontSize is 16px", async () => {
     const config = await import("../../tailwind.config.ts");
     const fontSize =
-      config.default.theme?.extend?.fontSize ?? config.default.theme?.fontSize;
+      (config.default.theme as Record<string, any>)?.extend?.fontSize ?? (config.default.theme as Record<string, any>)?.fontSize;
 
     const chat = fontSize?.chat;
     expect(chat).toBeDefined();
@@ -66,7 +66,7 @@ describe("AC: Typography scale matches StyleGuide §3.3", () => {
   test("timestamp fontSize is 12px", async () => {
     const config = await import("../../tailwind.config.ts");
     const fontSize =
-      config.default.theme?.extend?.fontSize ?? config.default.theme?.fontSize;
+      (config.default.theme as Record<string, any>)?.extend?.fontSize ?? (config.default.theme as Record<string, any>)?.fontSize;
 
     const timestamp = fontSize?.timestamp;
     expect(timestamp).toBeDefined();
