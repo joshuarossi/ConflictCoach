@@ -1,5 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { query, mutation, action, internalQuery } from "./_generated/server";
-import { internal, api } from "./_generated/api";
+import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { throwAppError } from "./lib/errors";
 import { requireAuth } from "./lib/auth";
@@ -17,7 +18,7 @@ import type { Message } from "./lib/prompts";
  * NOT_FOUND if case doesn't exist.
  */
 async function requireParty(
-  ctx: any,
+  ctx: { db: { get: (id: string) => Promise<any> } },
   caseId: string,
   userId: string,
 ): Promise<any> {
@@ -43,7 +44,7 @@ export const myMessages = query({
   args: {
     caseId: v.id("cases"),
   },
-  handler: async (ctx: any, args: any) => {
+  handler: async (ctx: any, args: { caseId: string }) => {
     const user = await requireAuth(ctx);
     await requireParty(ctx, args.caseId, user._id);
 
@@ -54,7 +55,11 @@ export const myMessages = query({
       )
       .collect();
 
-    return messages;
+    // Privacy enforcement: always filter by userId to guarantee isolation,
+    // even if the index already scoped the results.
+    return messages.filter(
+      (m: { userId: string }) => m.userId === user._id,
+    );
   },
 });
 
@@ -72,13 +77,13 @@ export const sendUserMessage = mutation({
     caseId: v.id("cases"),
     content: v.string(),
   },
-  handler: async (ctx: any, args: any) => {
+  handler: async (ctx: any, args: { caseId: string; content: string }) => {
     const user = await requireAuth(ctx);
     const caseDoc = await requireParty(ctx, args.caseId, user._id);
 
     // State validation: only allow sending during private coaching phases
     if (
-      !ALLOWED_SEND_STATUSES.includes(caseDoc.status as any)
+      !(ALLOWED_SEND_STATUSES as readonly string[]).includes(caseDoc.status)
     ) {
       throwAppError(
         "CONFLICT",
@@ -97,7 +102,7 @@ export const sendUserMessage = mutation({
     });
 
     // Schedule AI response generation
-    await ctx.scheduler.runAfter(0, api.privateCoaching.generateAIResponse, {
+    await ctx.scheduler.runAfter(0, generateAIResponse, {
       caseId: args.caseId,
       userId: user._id,
     });
@@ -115,12 +120,11 @@ export const generateAIResponse = action({
     caseId: v.id("cases"),
     userId: v.id("users"),
   },
-  handler: async (ctx: any, args: any) => {
+  handler: async (ctx: any, args: { caseId: string; userId: string }) => {
     // Fetch case, party state, and message history for prompt assembly
-    const caseDoc = await ctx.runQuery(
-      internal.privateCoaching._getCase,
-      { caseId: args.caseId },
-    );
+    const caseDoc = await ctx.runQuery(internal.privateCoaching._getCase, {
+      caseId: args.caseId,
+    });
     if (!caseDoc) {
       throw new Error("Case not found");
     }
@@ -136,30 +140,43 @@ export const generateAIResponse = action({
     );
 
     // Build recent history in Anthropic message format
-    const recentHistory: Message[] = privateMessages.map((m: any) => ({
-      role: m.role === "USER" ? ("user" as const) : ("assistant" as const),
-      content: m.content,
-    }));
+    const recentHistory: Message[] = privateMessages.map(
+      (m: { role: string; content: string }) => ({
+        role: m.role === "USER" ? ("user" as const) : ("assistant" as const),
+        content: m.content,
+      }),
+    );
 
     // Assemble the prompt with PRIVATE_COACH role
     const prompt = assemblePrompt({
       role: "PRIVATE_COACH",
-      caseId: args.caseId,
-      actingUserId: args.userId,
+      caseId: args.caseId as any,
+      actingUserId: args.userId as any,
       recentHistory,
-      partyStates: partyStates.map((ps: any) => ({
-        userId: ps.userId,
-        role: ps.role,
-        mainTopic: ps.mainTopic,
-        description: ps.description,
-        desiredOutcome: ps.desiredOutcome,
-        synthesisText: ps.synthesisText,
-      })),
-      privateMessages: privateMessages.map((m: any) => ({
-        userId: m.userId,
-        role: m.role,
-        content: m.content,
-      })),
+      partyStates: partyStates.map(
+        (ps: {
+          userId: string;
+          role: string;
+          mainTopic?: string;
+          description?: string;
+          desiredOutcome?: string;
+          synthesisText?: string;
+        }) => ({
+          userId: ps.userId,
+          role: ps.role,
+          mainTopic: ps.mainTopic,
+          description: ps.description,
+          desiredOutcome: ps.desiredOutcome,
+          synthesisText: ps.synthesisText,
+        }),
+      ),
+      privateMessages: privateMessages.map(
+        (m: { userId: string; role: string; content: string }) => ({
+          userId: m.userId,
+          role: m.role,
+          content: m.content,
+        }),
+      ),
     });
 
     // Stream the AI response
@@ -190,17 +207,21 @@ export const markComplete = mutation({
   args: {
     caseId: v.id("cases"),
   },
-  handler: async (ctx: any, args: any) => {
+  handler: async (ctx: any, args: { caseId: string }) => {
     const user = await requireAuth(ctx);
     await requireParty(ctx, args.caseId, user._id);
 
     // Find the caller's partyState
-    const partyState = await ctx.db
+    const partyStates = await ctx.db
       .query("partyStates")
       .withIndex("by_case_and_user", (q: any) =>
         q.eq("caseId", args.caseId).eq("userId", user._id),
       )
-      .first();
+      .collect();
+
+    const partyState = partyStates.find(
+      (ps: { userId: string }) => ps.userId === user._id,
+    );
 
     if (!partyState) {
       throwAppError("NOT_FOUND", "Party state not found");
@@ -222,16 +243,22 @@ export const markComplete = mutation({
       .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
       .collect();
 
-    const bothComplete = allPartyStates.length >= 2 && allPartyStates.every(
-      (ps: any) =>
-        ps._id === partyState._id // the one we just patched
-          ? true // we just set it
-          : ps.privateCoachingCompletedAt != null,
-    );
+    const bothComplete =
+      allPartyStates.length >= 2 &&
+      allPartyStates.every(
+        (ps: { _id: string; privateCoachingCompletedAt?: number | null }) =>
+          ps._id === partyState._id
+            ? true // the one we just patched
+            : ps.privateCoachingCompletedAt != null,
+      );
 
     if (bothComplete) {
-      // Schedule synthesis generation
-      await ctx.scheduler.runAfter(0, api.synthesis.generate, {
+      // Schedule synthesis generation.
+      // Use internal reference if available, fall back to string for
+      // forward compatibility before the synthesis module exists.
+      const synthesisRef =
+        internal?.synthesis?.generate ?? "synthesis:generate";
+      await ctx.scheduler.runAfter(0, synthesisRef, {
         caseId: args.caseId,
       });
     }
@@ -244,14 +271,14 @@ export const markComplete = mutation({
 
 export const _getCase = internalQuery({
   args: { caseId: v.id("cases") },
-  handler: async (ctx: any, args: any) => {
+  handler: async (ctx: any, args: { caseId: string }) => {
     return await ctx.db.get(args.caseId);
   },
 });
 
 export const _getPartyStates = internalQuery({
   args: { caseId: v.id("cases") },
-  handler: async (ctx: any, args: any) => {
+  handler: async (ctx: any, args: { caseId: string }) => {
     return await ctx.db
       .query("partyStates")
       .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
@@ -264,7 +291,10 @@ export const _getPrivateMessagesByCase = internalQuery({
     caseId: v.id("cases"),
     userId: v.id("users"),
   },
-  handler: async (ctx: any, args: any) => {
+  handler: async (
+    ctx: any,
+    args: { caseId: string; userId: string },
+  ) => {
     return await ctx.db
       .query("privateMessages")
       .withIndex("by_case_and_user", (q: any) =>
