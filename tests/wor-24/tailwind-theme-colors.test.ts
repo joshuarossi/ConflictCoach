@@ -17,7 +17,7 @@ describe("AC: Tailwind config extends theme with custom colors mapped to CSS var
     expect(resolved.theme).toBeDefined();
 
     const colors =
-      resolved.theme?.extend?.colors ?? resolved.theme?.colors;
+      (resolved.theme as Record<string, any>)?.extend?.colors ?? (resolved.theme as Record<string, any>)?.colors;
 
     expect(colors, "Tailwind config must define custom colors").toBeDefined();
 
@@ -43,7 +43,7 @@ describe("AC: Tailwind config extends theme with custom colors mapped to CSS var
   test("color values reference CSS custom properties via var()", async () => {
     const config = await import("../../tailwind.config.ts");
     const colors =
-      config.default.theme?.extend?.colors ?? config.default.theme?.colors;
+      (config.default.theme as Record<string, any>)?.extend?.colors ?? (config.default.theme as Record<string, any>)?.colors;
 
     // Collect all leaf values from the colors object
     const values = collectLeafValues(colors);

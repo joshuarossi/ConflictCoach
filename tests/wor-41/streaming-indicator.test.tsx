@@ -1,5 +1,6 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
+// @ts-expect-error — module not yet implemented (future task)
 import { StreamingIndicator } from "@/components/chat/StreamingIndicator";
 
 describe("StreamingIndicator renders a thin vertical bar cursor blinking at 500ms intervals", () => {

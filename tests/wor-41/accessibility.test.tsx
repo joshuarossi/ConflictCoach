@@ -1,6 +1,8 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
+// @ts-expect-error — module not yet implemented (future task)
 import { ChatWindow } from "@/components/chat/ChatWindow";
+// @ts-expect-error — module not yet implemented (future task)
 import { MessageBubble } from "@/components/chat/MessageBubble";
 
 describe("Chat messages container uses role='log' with aria-live='polite' for screen reader accessibility", () => {

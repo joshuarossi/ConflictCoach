@@ -45,7 +45,7 @@ test.describe("WOR-63: Abandoned case cleanup cron", () => {
         // React context. We try to access the underlying ConvexClient.
         // If the mutation is properly internal, the client won't even
         // have a reference to it — the function ID won't resolve.
-        const convex = (window as any).__CONVEX_CLIENT__;
+        const convex = (window as unknown as { __CONVEX_CLIENT__?: { mutation: (name: string, args: Record<string, unknown>) => Promise<unknown> } }).__CONVEX_CLIENT__;
         if (!convex) {
           // No global client exposed — that's fine. We'll verify via
           // dynamic import instead.
@@ -54,8 +54,8 @@ test.describe("WOR-63: Abandoned case cleanup cron", () => {
         // Try calling the cleanup mutation — should fail for internal mutations
         await convex.mutation("crons.cleanup:cleanupAbandonedCases", {});
         return { error: null, message: "Mutation succeeded unexpectedly" };
-      } catch (e: any) {
-        return { error: "BLOCKED", message: e.message || String(e) };
+      } catch (e: unknown) {
+        return { error: "BLOCKED", message: e instanceof Error ? e.message : String(e) };
       }
     });
 

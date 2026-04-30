@@ -14,6 +14,7 @@ describe("WOR-63: Cron definition", () => {
   test("Cron defined in convex/crons.ts using Convex's built-in scheduler", async () => {
     // AC1: convex/crons.ts must exist and export a default cron configuration
     // created via Convex's cronJobs() API.
+    // @ts-expect-error — module not yet implemented (future task)
     const cronModule = await import("../../convex/crons");
     expect(cronModule).toBeDefined();
     expect(cronModule.default).toBeDefined();
@@ -30,6 +31,7 @@ describe("WOR-63: Cron definition", () => {
     // We import the crons module and inspect its configuration.
     // cronJobs().daily() registers a daily schedule internally.
     // The crons object stores registered jobs — we verify at least one exists.
+    // @ts-expect-error — module not yet implemented (future task)
     const cronModule = await import("../../convex/crons");
     const crons = cronModule.default;
 

@@ -12,7 +12,6 @@ import {
   AI_ERROR,
   INTERNAL,
   type AppErrorCode,
-  type AppErrorData,
 } from "../../convex/lib/errors";
 
 describe("Error code mapping tests: each code maps to correct HTTP status", () => {
@@ -36,7 +35,7 @@ describe("Error code mapping tests: each code maps to correct HTTP status", () =
         expect.unreachable("throwAppError should throw");
       } catch (err) {
         expect(err).toBeInstanceOf(ConvexError);
-        const data = (err as ConvexError<AppErrorData>).data;
+        const data = (err as any).data;
         expect(data.code).toBe(code);
         expect(data.httpStatus).toBe(expectedStatus);
         expect(data.message).toBe(`Test message for ${code}`);

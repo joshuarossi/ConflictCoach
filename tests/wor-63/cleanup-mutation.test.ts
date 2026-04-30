@@ -16,6 +16,7 @@ import { describe, test, expect, vi, beforeEach } from "vitest";
 // These imports will fail until implementation exists — that is the intended
 // "red" state. The cleanup mutation is expected to be an internalMutation.
 // We import the handler directly for unit testing.
+// @ts-expect-error — module not yet implemented (future task)
 import { cleanupAbandonedCases } from "../../convex/crons.cleanup";
 import { validateTransition } from "../../convex/lib/stateMachine";
 
@@ -64,7 +65,7 @@ function makeFakeCtx(cases: ReturnType<typeof makeFakeCase>[]) {
     db: {
       query: (_table: string) => ({
         withIndex: (_indexName: string, _q: unknown) => ({
-          filter: (filterFn: (q: { eq: Function; lt: Function; field: Function }) => unknown) => ({
+          filter: (filterFn: (q: { eq: (...args: unknown[]) => unknown; lt: (...args: unknown[]) => unknown; field: (...args: unknown[]) => unknown }) => unknown) => ({
             collect: async () => {
               // Return cases that match the filter criteria.
               // The real implementation filters on status=JOINT_ACTIVE and
