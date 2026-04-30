@@ -135,16 +135,56 @@ export const MOCK_RESPONSES: Record<AIRole, string> = {
     "Consider rephrasing to focus on how the situation affected you rather than what the other person did wrong.",
 };
 
-/** Default per-word delay in mock streaming (ms). Overridable via CLAUDE_MOCK_DELAY_MS env var. */
+/** Returns the deterministic canned response for a given AI role. */
+export function getMockResponseForRole(role: AIRole): string {
+  return MOCK_RESPONSES[role];
+}
+
+// ---------------------------------------------------------------------------
+// Configurable mock delay
+// ---------------------------------------------------------------------------
+
+/** Configuration for mock streaming delays. */
+export interface MockStreamConfig {
+  /** Delay in milliseconds between each simulated token/word (default 20). */
+  delayPerTokenMs: number;
+  /** Interval in milliseconds between batch flushes to the DB (default 50). */
+  batchIntervalMs: number;
+}
+
 const DEFAULT_MOCK_WORD_DELAY_MS = 20;
 
+let mockDelayConfig: MockStreamConfig = {
+  delayPerTokenMs: DEFAULT_MOCK_WORD_DELAY_MS,
+  batchIntervalMs: BATCH_INTERVAL_MS,
+};
+
+/**
+ * Configure mock streaming delays programmatically.
+ * Useful for tests that need fast or slow streaming simulation.
+ */
+export function configureMockDelay(config: Partial<MockStreamConfig>): void {
+  if (config.delayPerTokenMs !== undefined) {
+    mockDelayConfig.delayPerTokenMs = config.delayPerTokenMs;
+  }
+  if (config.batchIntervalMs !== undefined) {
+    mockDelayConfig.batchIntervalMs = config.batchIntervalMs;
+  }
+}
+
+/** Returns the current mock delay configuration. */
+export function getMockDelayConfig(): MockStreamConfig {
+  return { ...mockDelayConfig };
+}
+
 function getMockWordDelay(): number {
+  // Environment variable takes precedence over programmatic config
   const envDelay = process.env.CLAUDE_MOCK_DELAY_MS;
   if (envDelay !== undefined) {
     const parsed = parseInt(envDelay, 10);
     if (!isNaN(parsed) && parsed >= 0) return parsed;
   }
-  return DEFAULT_MOCK_WORD_DELAY_MS;
+  return mockDelayConfig.delayPerTokenMs;
 }
 
 async function runMockStream(
@@ -154,6 +194,7 @@ async function runMockStream(
 ): Promise<void> {
   const mockResponse = MOCK_RESPONSES[aiRole];
   const wordDelay = getMockWordDelay();
+  const batchInterval = mockDelayConfig.batchIntervalMs;
   const words = mockResponse.split(" ");
   let buffer = "";
   let lastFlush = Date.now();
@@ -161,7 +202,7 @@ async function runMockStream(
   for (const word of words) {
     buffer += (buffer ? " " : "") + word;
     const now = Date.now();
-    if (now - lastFlush >= BATCH_INTERVAL_MS) {
+    if (now - lastFlush >= batchInterval) {
       await ctx.runMutation(updateRef, {
         messageId,
         content: buffer,
