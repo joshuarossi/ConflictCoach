@@ -52,9 +52,9 @@ test.describe("Session persists across browser reloads (30-day expiry)", () => {
     // - Seed auth tokens directly via Convex test helpers
     // For now, we check that the auth flow is wired by looking for
     // login UI elements that the implementation should provide.
-    const signInButton = page.locator(
-      'button:has-text(/sign in|log in|continue with/i), a:has-text(/sign in|log in/i)',
-    );
+    const signInButton = page
+      .getByRole("button", { name: /sign in|log in|continue with/i })
+      .or(page.getByRole("link", { name: /sign in|log in/i }));
     await expect(signInButton.first()).toBeVisible({ timeout: 10000 });
 
     // Step 3: If we can authenticate (magic link test mode or Google mock),
