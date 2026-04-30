@@ -24,6 +24,9 @@ export type MessageTable =
 
 export type MessageStatus = "STREAMING" | "COMPLETE" | "ERROR";
 
+/** AI role for selecting the appropriate mock response. */
+export type AIRole = "PRIVATE_COACH" | "SYNTHESIS" | "COACH" | "DRAFT_COACH";
+
 /** Single-object parameter for streamAIResponse. */
 export interface StreamAIResponseOptions {
   /** Convex action context — provides runMutation. */
@@ -50,6 +53,11 @@ export interface StreamAIResponseOptions {
   userMessages: Array<{ role: "user" | "assistant"; content: string }>;
   /** Max tokens for Claude response (default 4096). */
   maxTokens?: number;
+  /**
+   * AI role — used to select the appropriate canned response in mock mode.
+   * Optional for backwards compatibility; defaults to PRIVATE_COACH behaviour.
+   */
+  aiRole?: AIRole;
 }
 
 // ---------------------------------------------------------------------------
@@ -112,15 +120,41 @@ const CONTENT_FILTER_MESSAGE =
 // Mock streaming (CLAUDE_MOCK=true — TechSpec §10.4)
 // ---------------------------------------------------------------------------
 
-const MOCK_RESPONSE =
-  "I understand your concern. Let's work through this together. " +
-  "Could you tell me more about the specific situation and how it made you feel?";
+/** Deterministic canned responses keyed by AI role. */
+export const MOCK_RESPONSES: Record<AIRole, string> = {
+  PRIVATE_COACH:
+    "I understand your concern. Let's work through this together. " +
+    "Could you tell me more about the specific situation and how it made you feel?",
+  SYNTHESIS:
+    '{ "forInitiator": "You both value clear communication. The main disagreement centers on expectations around timelines. Consider approaching the joint session by focusing on shared goals first.", "forInvitee": "You both care about the outcome of this project. The core tension is around differing work styles. Try leading with curiosity about the other person\'s constraints." }',
+  COACH:
+    "Thank you both for being here. I can see you share a common goal — let's build on that. " +
+    "Could each of you share what a good outcome would look like from your perspective?",
+  DRAFT_COACH:
+    "That's a solid start. I notice the tone could come across as accusatory in the second sentence. " +
+    "Consider rephrasing to focus on how the situation affected you rather than what the other person did wrong.",
+};
+
+/** Default per-word delay in mock streaming (ms). Overridable via CLAUDE_MOCK_DELAY_MS env var. */
+const DEFAULT_MOCK_WORD_DELAY_MS = 20;
+
+function getMockWordDelay(): number {
+  const envDelay = process.env.CLAUDE_MOCK_DELAY_MS;
+  if (envDelay !== undefined) {
+    const parsed = parseInt(envDelay, 10);
+    if (!isNaN(parsed) && parsed >= 0) return parsed;
+  }
+  return DEFAULT_MOCK_WORD_DELAY_MS;
+}
 
 async function runMockStream(
   ctx: ActionCtx,
   messageId: string,
+  aiRole: AIRole = "PRIVATE_COACH",
 ): Promise<void> {
-  const words = MOCK_RESPONSE.split(" ");
+  const mockResponse = MOCK_RESPONSES[aiRole];
+  const wordDelay = getMockWordDelay();
+  const words = mockResponse.split(" ");
   let buffer = "";
   let lastFlush = Date.now();
 
@@ -135,13 +169,14 @@ async function runMockStream(
       });
       lastFlush = now;
     }
-    // Simulate small delay between words
-    await new Promise((r) => setTimeout(r, 20));
+    if (wordDelay > 0) {
+      await new Promise((r) => setTimeout(r, wordDelay));
+    }
   }
 
   await ctx.runMutation(updateRef, {
     messageId,
-    content: MOCK_RESPONSE,
+    content: mockResponse,
     status: "COMPLETE" as const,
     tokens: 42, // deterministic mock token count
   });
@@ -169,6 +204,7 @@ export async function streamAIResponse(
     systemPrompt,
     userMessages,
     maxTokens = 4096,
+    aiRole,
   } = options;
 
   // 1. Insert placeholder message with status=STREAMING and empty content
@@ -185,7 +221,7 @@ export async function streamAIResponse(
 
   // 2. Mock mode short-circuit
   if (process.env.CLAUDE_MOCK === "true") {
-    await runMockStream(ctx, messageId);
+    await runMockStream(ctx, messageId, aiRole);
     return messageId;
   }
 

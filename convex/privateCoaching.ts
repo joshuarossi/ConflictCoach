@@ -209,6 +209,7 @@ export const generateAIResponse = action({
         model: "claude-sonnet-4-5-20250514",
         systemPrompt: prompt.system,
         userMessages: prompt.messages,
+        aiRole: "PRIVATE_COACH",
       });
     } catch (err) {
       console.error("AI streaming failed for case", args.caseId, ":", err);
