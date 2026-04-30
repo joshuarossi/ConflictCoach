@@ -12,7 +12,6 @@ import {
   GENERATION_BUDGET,
   CLASSIFICATION_BUDGET,
   shouldCompress,
-  estimateTokens,
 } from "../../convex/lib/compression";
 
 import type { Message } from "../../convex/lib/prompts";

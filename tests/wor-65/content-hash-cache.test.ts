@@ -15,8 +15,6 @@ import {
 import type { Message } from "../../convex/lib/prompts";
 
 const CANNED_SUMMARY_A = "Summary A: discussed frustrations about communication.";
-const CANNED_SUMMARY_B = "Summary B: discussed timeline disagreements.";
-
 function createMockClient(response: string) {
   const createFn = vi.fn().mockResolvedValue({
     content: [{ type: "text", text: response }],
@@ -43,8 +41,8 @@ describe("Summary is cached by content hash for reuse", () => {
   test("calling compressMessages twice with the same messages only calls Haiku once", async () => {
     const mockClient = createMockClient(CANNED_SUMMARY_A);
 
-    const result1 = await compressMessages(messagesA, mockClient as any);
-    const result2 = await compressMessages(messagesA, mockClient as any);
+    const result1 = await compressMessages(messagesA, mockClient as unknown as import("@anthropic-ai/sdk").default);
+    const result2 = await compressMessages(messagesA, mockClient as unknown as import("@anthropic-ai/sdk").default);
 
     // Haiku should only be called once — second call uses cache
     expect(mockClient._createFn).toHaveBeenCalledTimes(1);
@@ -56,8 +54,8 @@ describe("Summary is cached by content hash for reuse", () => {
   test("calling compressMessages with different messages calls Haiku again", async () => {
     const mockClientA = createMockClient(CANNED_SUMMARY_A);
 
-    await compressMessages(messagesA, mockClientA as any);
-    await compressMessages(messagesB, mockClientA as any);
+    await compressMessages(messagesA, mockClientA as unknown as import("@anthropic-ai/sdk").default);
+    await compressMessages(messagesB, mockClientA as unknown as import("@anthropic-ai/sdk").default);
 
     // Haiku should be called twice — different content hashes
     expect(mockClientA._createFn).toHaveBeenCalledTimes(2);
@@ -67,14 +65,14 @@ describe("Summary is cached by content hash for reuse", () => {
     const mockClient = createMockClient(CANNED_SUMMARY_A);
 
     // Same content, same result
-    const result1 = await compressMessages(messagesA, mockClient as any);
+    const result1 = await compressMessages(messagesA, mockClient as unknown as import("@anthropic-ai/sdk").default);
 
     // Create identical messages (new array, same content)
     const messagesACopy: Message[] = [
       { role: "user", content: "I feel frustrated about the situation." },
       { role: "assistant", content: "Tell me more about that." },
     ];
-    const result2 = await compressMessages(messagesACopy, mockClient as any);
+    const result2 = await compressMessages(messagesACopy, mockClient as unknown as import("@anthropic-ai/sdk").default);
 
     expect(mockClient._createFn).toHaveBeenCalledTimes(1);
     expect(result1).toBe(result2);
