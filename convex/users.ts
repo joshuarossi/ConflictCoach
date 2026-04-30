@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { mutation, query } from "./_generated/server";
-import { upsertUser, getUserByEmail, requireAuth, isAdmin } from "./lib/auth";
+import { upsertUser, requireAuth } from "./lib/auth";
 
 /**
  * Upsert the current user on login.

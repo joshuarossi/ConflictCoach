@@ -52,18 +52,25 @@ export async function getUserByEmail(
  * Upsert a user record on login.
  * - First login: creates a users row with email, role=USER, and createdAt.
  * - Subsequent logins: returns the existing record without duplication.
+ *
+ * Accepts an optional { email } override; otherwise resolves the email from
+ * the authenticated identity.
  */
 export async function upsertUser(
   ctx: Pick<AuthContext, "auth" | "db">,
+  args?: { email?: string },
 ): Promise<UserRecord> {
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throwAppError("UNAUTHENTICATED", "Authentication required");
-  }
+  let email = args?.email;
 
-  const email = identity.email;
   if (!email) {
-    throwAppError("UNAUTHENTICATED", "Identity missing email");
+    const identity = await ctx.auth.getUserIdentity();
+    if (!identity) {
+      throwAppError("UNAUTHENTICATED", "Authentication required");
+    }
+    email = identity.email;
+    if (!email) {
+      throwAppError("UNAUTHENTICATED", "Identity missing email");
+    }
   }
 
   const existing = await getUserByEmail(ctx, email);
