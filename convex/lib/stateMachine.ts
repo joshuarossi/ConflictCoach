@@ -90,22 +90,20 @@ export function canProposeClosure(caseDoc: CaseDoc, userId: string): boolean {
  * from the proposer — unless solo mode, where same user can both propose
  * and confirm.
  */
-export function canConfirmClosure(caseDoc: CaseDoc, userId: string): boolean {
+export function canConfirmClosure(
+  caseDoc: CaseDoc,
+  userId: string,
+  proposerUserId: string,
+): boolean {
   if (caseDoc.status !== "JOINT_ACTIVE") return false;
 
   const isParty =
     caseDoc.initiatorUserId === userId || caseDoc.inviteeUserId === userId;
   if (!isParty) return false;
 
-  const partyStates = caseDoc.partyStates ?? [];
-
-  // Find who proposed
-  const proposer = partyStates.find((ps) => ps.closureProposed === true);
-  if (!proposer) return false;
-
   // In solo mode, same user can confirm their own proposal
   if (caseDoc.isSolo) return true;
 
   // Otherwise, confirmer must be a different party from the proposer
-  return proposer.userId !== userId;
+  return proposerUserId !== userId;
 }

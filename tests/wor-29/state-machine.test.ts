@@ -291,7 +291,7 @@ describe("AC6: Closure requires different proposer/confirmer (relaxed in solo mo
 
     test("returns false when user is not a party to the case", () => {
       const caseDoc = makeCase({ status: "JOINT_ACTIVE" });
-      const unknownUser = "user_unknown" as any;
+      const unknownUser = "user_unknown";
       expect(canProposeClosure(caseDoc, unknownUser)).toBe(false);
     });
 
@@ -323,6 +323,17 @@ describe("AC6: Closure requires different proposer/confirmer (relaxed in solo mo
     test("returns true when different users confirm in solo mode", () => {
       const caseDoc = makeCase({ isSolo: true });
       expect(canConfirmClosure(caseDoc, USER_B, USER_A)).toBe(true);
+    });
+
+    test("returns false when user is not a party to the case", () => {
+      const caseDoc = makeCase({ status: "JOINT_ACTIVE" });
+      const unknownUser = "user_unknown";
+      expect(canConfirmClosure(caseDoc, unknownUser, USER_A)).toBe(false);
+    });
+
+    test("returns false when case is not JOINT_ACTIVE", () => {
+      const caseDoc = makeCase({ status: "BOTH_PRIVATE_COACHING" });
+      expect(canConfirmClosure(caseDoc, USER_B, USER_A)).toBe(false);
     });
   });
 });
