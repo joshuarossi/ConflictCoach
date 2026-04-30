@@ -1,0 +1,62 @@
+# Error Handling
+
+Conflict Coach uses a standardized error shape across the Convex backend and React client. All errors thrown from Convex functions are wrapped in `ConvexError` with a consistent `{ code, message, httpStatus }` payload.
+
+## Error Codes
+
+| Code | HTTP Status | When to use |
+|---|---|---|
+| `UNAUTHENTICATED` | 401 | No valid session / identity |
+| `FORBIDDEN` | 403 | Authenticated but not authorized for the resource |
+| `NOT_FOUND` | 404 | Resource does not exist |
+| `CONFLICT` | 409 | State transition not allowed (e.g., acting on a closed case) |
+| `INVALID_INPUT` | 400 | Request validation failed |
+| `TOKEN_INVALID` | 400 | Invite token expired or inactive |
+| `RATE_LIMITED` | 429 | Upstream rate limit hit |
+| `AI_ERROR` | 502 | Upstream AI provider error |
+| `INTERNAL` | 500 | Unexpected server failure |
+
+## Server-side: `convex/lib/errors.ts`
+
+### `throwAppError(code, message)`
+
+Throws a `ConvexError` with the structured payload. Use this instead of `throw new Error(...)` in all Convex functions.
+
+```ts
+import { throwAppError } from "./lib/errors";
+
+// In a mutation or query:
+if (!identity) {
+  throwAppError("UNAUTHENTICATED", "You must be signed in");
+}
+```
+
+The error code constants are also exported for type-safe usage:
+
+```ts
+import { throwAppError, UNAUTHENTICATED } from "./lib/errors";
+
+throwAppError(UNAUTHENTICATED, "You must be signed in");
+```
+
+Unknown codes automatically fall back to `INTERNAL` / 500.
+
+## Client-side: `src/lib/errors.ts`
+
+### `parseConvexError(error)`
+
+Extracts `{ code, message }` from any caught error. Handles both `ConvexError` instances (returned by Convex) and plain `Error` objects gracefully.
+
+```ts
+import { parseConvexError } from "@/lib/errors";
+
+try {
+  await someConvexMutation(args);
+} catch (err) {
+  const { code, message } = parseConvexError(err);
+  // code: "NOT_FOUND", "UNAUTHENTICATED", etc.
+  // message: human-readable error message
+}
+```
+
+For non-`ConvexError` errors, the parser returns `{ code: "INTERNAL", message: <original message or fallback> }`.
