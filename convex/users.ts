@@ -1,10 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { mutation, query } from "./_generated/server";
-import { upsertUser as upsertUserImpl, requireAuth } from "./lib/auth";
-
-// Re-export helpers so they can be imported from convex/users
-export { upsertUser, getUserByEmail, requireAuth, isAdmin } from "./lib/auth";
+import {
+  upsertUser as upsertUserFn,
+  getUserByEmail as getUserByEmailFn,
+  requireAuth as requireAuthFn,
+  isAdmin as isAdminFn,
+} from "./lib/auth";
 export type { UserRecord } from "./lib/auth";
+
+// Re-export auth helpers as callable functions
+export const upsertUser = upsertUserFn;
+export const getUserByEmail = getUserByEmailFn;
+export const requireAuthHelper = requireAuthFn;
+export const isAdmin = isAdminFn;
 
 /**
  * Upsert the current user on login.
@@ -13,7 +21,7 @@ export type { UserRecord } from "./lib/auth";
 export const upsert = mutation({
   args: {},
   handler: async (ctx: any) => {
-    return await upsertUserImpl(ctx);
+    return await upsertUserFn(ctx);
   },
 });
 
@@ -23,6 +31,6 @@ export const upsert = mutation({
 export const me = query({
   args: {},
   handler: async (ctx: any) => {
-    return await requireAuth(ctx);
+    return await requireAuthFn(ctx);
   },
 });
