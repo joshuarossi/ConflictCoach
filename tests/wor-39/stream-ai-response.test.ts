@@ -447,6 +447,7 @@ describe("AI error handling matches TechSpec section 6.5: retry once on HTTP 429
           // Simulate a stream that never yields any tokens and times out
           async function* hangingStream() {
             // This simulates the helper's internal timeout detection
+            yield* ([] as never[]);
             await new Promise((_, reject) =>
               setTimeout(() => reject(new Error("Timeout")), 31000),
             );
@@ -642,7 +643,7 @@ describe("The helper accepts a model parameter for choosing between Sonnet and H
     });
 
     expect(streamFn).toHaveBeenCalled();
-    const callArgs = streamFn.mock.calls[0][0] as Record<string, unknown> | undefined;
+    const callArgs = (streamFn.mock.calls as unknown[][])[0][0] as Record<string, unknown> | undefined;
     expect(callArgs).toHaveProperty("model", "claude-haiku-4-5-20251001");
   });
 });

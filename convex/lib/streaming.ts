@@ -298,80 +298,74 @@ async function executeStream(
   // Use manual iterator for timeout support
   const iterator = (stream as AsyncIterable<any>)[Symbol.asyncIterator]();
 
-  try {
-    while (true) {
-      // Race the next event against a timeout
-      const remainingMs = TIMEOUT_MS - (Date.now() - lastTokenTime);
-      if (remainingMs <= 0) {
-        throw new Error("Network timeout: no tokens received for 30s");
-      }
-
-      const result = await Promise.race([
-        iterator.next(),
-        new Promise<never>((_, reject) =>
-          setTimeout(
-            () =>
-              reject(
-                new Error("Network timeout: no tokens received for 30s"),
-              ),
-            remainingMs,
-          ),
-        ),
-      ]);
-
-      if (result.done) break;
-
-      const event = result.value;
-
-      if (
-        event.type === "content_block_delta" &&
-        event.delta?.type === "text_delta"
-      ) {
-        buffer += event.delta.text;
-        lastTokenTime = Date.now();
-
-        // Batch flush at ~50ms intervals
-        const now = Date.now();
-        if (now - lastFlush >= BATCH_INTERVAL_MS) {
-          await ctx.runMutation(
-            updateRef,
-            {
-              messageId,
-              content: buffer,
-              status: "STREAMING" as const,
-            },
-          );
-          lastFlush = now;
-        }
-      } else if (event.type === "message_delta") {
-        // Capture usage from the final delta event
-        if (event.usage) {
-          if (event.usage.input_tokens !== undefined) {
-            inputTokens = event.usage.input_tokens;
-          }
-          if (event.usage.output_tokens !== undefined) {
-            outputTokens = event.usage.output_tokens;
-          }
-        }
-        if (event.delta?.stop_reason) {
-          stopReason = event.delta.stop_reason;
-        }
-        lastTokenTime = Date.now();
-      } else if (event.type === "message_start") {
-        if (event.message?.usage) {
-          inputTokens = event.message.usage.input_tokens ?? inputTokens;
-          outputTokens = event.message.usage.output_tokens ?? outputTokens;
-        }
-        lastTokenTime = Date.now();
-      } else {
-        // Any event resets the timeout
-        lastTokenTime = Date.now();
-      }
+  while (true) {
+    // Race the next event against a timeout
+    const remainingMs = TIMEOUT_MS - (Date.now() - lastTokenTime);
+    if (remainingMs <= 0) {
+      throw new Error("Network timeout: no tokens received for 30s");
     }
-  } catch (error) {
-    // If we caught something, check if it's timeout or something else
-    // Let it propagate — the caller handles it
-    throw error;
+
+    const result = await Promise.race([
+      iterator.next(),
+      new Promise<never>((_, reject) =>
+        setTimeout(
+          () =>
+            reject(
+              new Error("Network timeout: no tokens received for 30s"),
+            ),
+          remainingMs,
+        ),
+      ),
+    ]);
+
+    if (result.done) break;
+
+    const event = result.value;
+
+    if (
+      event.type === "content_block_delta" &&
+      event.delta?.type === "text_delta"
+    ) {
+      buffer += event.delta.text;
+      lastTokenTime = Date.now();
+
+      // Batch flush at ~50ms intervals
+      const now = Date.now();
+      if (now - lastFlush >= BATCH_INTERVAL_MS) {
+        await ctx.runMutation(
+          updateRef,
+          {
+            messageId,
+            content: buffer,
+            status: "STREAMING" as const,
+          },
+        );
+        lastFlush = now;
+      }
+    } else if (event.type === "message_delta") {
+      // Capture usage from the final delta event
+      if (event.usage) {
+        if (event.usage.input_tokens !== undefined) {
+          inputTokens = event.usage.input_tokens;
+        }
+        if (event.usage.output_tokens !== undefined) {
+          outputTokens = event.usage.output_tokens;
+        }
+      }
+      if (event.delta?.stop_reason) {
+        stopReason = event.delta.stop_reason;
+      }
+      lastTokenTime = Date.now();
+    } else if (event.type === "message_start") {
+      if (event.message?.usage) {
+        inputTokens = event.message.usage.input_tokens ?? inputTokens;
+        outputTokens = event.message.usage.output_tokens ?? outputTokens;
+      }
+      lastTokenTime = Date.now();
+    } else {
+      // Any event resets the timeout
+      lastTokenTime = Date.now();
+    }
   }
 
   // Check for content filter stop reason
