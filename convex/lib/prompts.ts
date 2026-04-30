@@ -1,4 +1,5 @@
 import { throwAppError, INVALID_INPUT } from "./errors";
+import { compressContext, GENERATION_BUDGET } from "./compression";
 
 /**
  * Branded Id type matching Convex's Id<TableName>.
@@ -330,18 +331,31 @@ function assembleDraftCoach(opts: AssemblePromptOpts): AssemblePromptResult {
 // ---------------------------------------------------------------------------
 
 export function assemblePrompt(opts: AssemblePromptOpts): AssemblePromptResult {
+  let result: AssemblePromptResult;
   switch (opts.role) {
     case "PRIVATE_COACH":
-      return assemblePrivateCoach(opts);
+      result = assemblePrivateCoach(opts);
+      break;
     case "SYNTHESIS":
-      return assembleSynthesis(opts);
+      result = assembleSynthesis(opts);
+      break;
     case "COACH":
-      return assembleCoach(opts);
+      result = assembleCoach(opts);
+      break;
     case "DRAFT_COACH":
-      return assembleDraftCoach(opts);
+      result = assembleDraftCoach(opts);
+      break;
     default: {
       const _exhaustive: never = opts.role;
       throwAppError(INVALID_INPUT, `Unknown AI role: ${_exhaustive}`);
     }
   }
+
+  result.messages = compressContext(
+    result.messages,
+    result.system,
+    GENERATION_BUDGET,
+  );
+
+  return result;
 }
