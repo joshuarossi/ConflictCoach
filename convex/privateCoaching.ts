@@ -102,7 +102,7 @@ export const sendUserMessage = mutation({
     });
 
     // Schedule AI response generation
-    await ctx.scheduler.runAfter(0, generateAIResponse, {
+    await ctx.scheduler.runAfter(0, internal.privateCoaching.generateAIResponse, {
       caseId: args.caseId,
       userId: user._id,
     });
@@ -253,14 +253,13 @@ export const markComplete = mutation({
       );
 
     if (bothComplete) {
-      // Schedule synthesis generation.
-      // Use internal reference if available, fall back to string for
-      // forward compatibility before the synthesis module exists.
-      const synthesisRef =
-        internal?.synthesis?.generate ?? "synthesis:generate";
-      await ctx.scheduler.runAfter(0, synthesisRef, {
-        caseId: args.caseId,
-      });
+      // Schedule synthesis generation if the module is available.
+      // The synthesis module may not exist yet — guard to avoid runtime errors.
+      if (internal?.synthesis?.generate) {
+        await ctx.scheduler.runAfter(0, internal.synthesis.generate, {
+          caseId: args.caseId,
+        });
+      }
     }
   },
 });
