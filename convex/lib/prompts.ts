@@ -176,6 +176,12 @@ function assemblePrivateCoach(opts: AssemblePromptOpts): AssemblePromptResult {
   };
 }
 
+/**
+ * Assembles the prompt for the SYNTHESIS role. Unlike other roles, synthesis
+ * intentionally receives BOTH parties' private coaching content so it can
+ * identify areas of agreement and disagreement. The anti-quotation instruction
+ * in the system prompt prevents raw private content from leaking into outputs.
+ */
 function assembleSynthesis(opts: AssemblePromptOpts): AssemblePromptResult {
   const { actingUserId, recentHistory, partyStates, privateMessages } = opts;
 

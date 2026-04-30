@@ -5,18 +5,36 @@ export function SignIn() {
   const { signIn } = useAuthActions();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [pending, setPending] = useState(false);
 
   async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault();
     if (!email) return;
-    await signIn("email", { email });
-    setSubmitted(true);
+    setError(null);
+    setPending(true);
+    try {
+      await signIn("email", { email });
+      setSubmitted(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to send magic link");
+    } finally {
+      setPending(false);
+    }
   }
 
   async function handleGoogle() {
-    const result = await signIn("google");
-    if (result.redirect) {
-      window.location.href = result.redirect.toString();
+    setError(null);
+    setPending(true);
+    try {
+      const result = await signIn("google");
+      if (result.redirect) {
+        window.location.href = result.redirect.toString();
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Google sign-in failed");
+    } finally {
+      setPending(false);
     }
   }
 
@@ -26,6 +44,12 @@ export function SignIn() {
         <h1 className="text-center text-2xl font-bold text-gray-900">
           Sign in to Conflict Coach
         </h1>
+
+        {error && (
+          <p role="alert" className="text-center text-sm text-red-600">
+            {error}
+          </p>
+        )}
 
         {submitted ? (
           <p className="text-center text-gray-600">
@@ -48,7 +72,8 @@ export function SignIn() {
               />
               <button
                 type="submit"
-                className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+                disabled={pending}
+                className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
                 Sign in with Magic Link
               </button>
@@ -66,7 +91,8 @@ export function SignIn() {
             <button
               type="button"
               onClick={handleGoogle}
-              className="w-full rounded-md border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50"
+              disabled={pending}
+              className="w-full rounded-md border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
             >
               Continue with Google
             </button>

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { query, mutation, action, internalQuery } from "./_generated/server";
+import { query, mutation, action, internalQuery, internalMutation } from "./_generated/server";
 import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { throwAppError } from "./lib/errors";
@@ -102,10 +102,23 @@ export const sendUserMessage = mutation({
     });
 
     // Schedule AI response generation
-    await ctx.scheduler.runAfter(0, internal.privateCoaching.generateAIResponse, {
-      caseId: args.caseId,
-      userId: user._id,
-    });
+    try {
+      await ctx.scheduler.runAfter(0, internal.privateCoaching.generateAIResponse, {
+        caseId: args.caseId,
+        userId: user._id,
+      });
+    } catch (err) {
+      console.error("Failed to schedule AI response:", err);
+      // Insert an error message so the user knows something went wrong
+      await ctx.db.insert("privateMessages", {
+        caseId: args.caseId,
+        userId: user._id,
+        role: "AI" as const,
+        content: "Sorry, I was unable to process your message. Please try again.",
+        status: "ERROR" as const,
+        createdAt: Date.now(),
+      });
+    }
 
     return messageId;
   },
@@ -183,19 +196,29 @@ export const generateAIResponse = action({
     const Anthropic = (await import("@anthropic-ai/sdk")).default;
     const anthropicClient = new Anthropic();
 
-    await streamAIResponse({
-      ctx,
-      anthropicClient,
-      table: "privateMessages",
-      messageFields: {
+    try {
+      await streamAIResponse({
+        ctx,
+        anthropicClient,
+        table: "privateMessages",
+        messageFields: {
+          caseId: args.caseId,
+          userId: args.userId,
+          role: "AI",
+        },
+        model: "claude-sonnet-4-5-20250514",
+        systemPrompt: prompt.system,
+        userMessages: prompt.messages,
+      });
+    } catch (err) {
+      console.error("AI streaming failed for case", args.caseId, ":", err);
+      // Insert an error message so the user sees feedback
+      await ctx.runMutation(internal.privateCoaching._insertErrorMessage, {
         caseId: args.caseId,
         userId: args.userId,
-        role: "AI",
-      },
-      model: "claude-sonnet-4-5-20250514",
-      systemPrompt: prompt.system,
-      userMessages: prompt.messages,
-    });
+        content: "Sorry, I encountered an error generating a response. Please try sending your message again.",
+      });
+    }
   },
 });
 
@@ -282,6 +305,24 @@ export const _getPartyStates = internalQuery({
       .query("partyStates")
       .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
       .collect();
+  },
+});
+
+export const _insertErrorMessage = internalMutation({
+  args: {
+    caseId: v.id("cases"),
+    userId: v.id("users"),
+    content: v.string(),
+  },
+  handler: async (ctx: any, args: { caseId: string; userId: string; content: string }) => {
+    await ctx.db.insert("privateMessages", {
+      caseId: args.caseId,
+      userId: args.userId,
+      role: "AI" as const,
+      content: args.content,
+      status: "ERROR" as const,
+      createdAt: Date.now(),
+    });
   },
 });
 
