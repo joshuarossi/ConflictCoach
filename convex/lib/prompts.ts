@@ -1,5 +1,11 @@
-import { Id } from "../_generated/dataModel";
 import { throwAppError, INVALID_INPUT } from "./errors";
+
+/**
+ * Branded Id type matching Convex's Id<TableName>.
+ * Uses a local definition to avoid depending on _generated/dataModel
+ * which may not exist until `npx convex dev` has run.
+ */
+type Id<T extends string> = string & { __tableName: T };
 
 // ---------------------------------------------------------------------------
 // Types
@@ -98,17 +104,6 @@ function getActingUserPartyState(
   return ps;
 }
 
-function getOtherPartyState(
-  partyStates: PartyState[],
-  actingUserId: Id<"users">,
-): PartyState {
-  const ps = partyStates.find((p) => p.userId !== actingUserId);
-  if (!ps) {
-    throwAppError(INVALID_INPUT, "Missing partyState for other party");
-  }
-  return ps;
-}
-
 function formatFormFields(ps: PartyState): string {
   const parts: string[] = [];
   if (ps.mainTopic) parts.push(`Main topic: ${ps.mainTopic}`);
@@ -140,7 +135,7 @@ function prependTemplateGuidance(
 function assemblePrivateCoach(opts: AssemblePromptOpts): AssemblePromptResult {
   const { actingUserId, recentHistory, partyStates, privateMessages } = opts;
 
-  let contextParts: string[] = [];
+  const contextParts: string[] = [];
 
   if (partyStates && partyStates.length > 0) {
     const actingPS = getActingUserPartyState(partyStates, actingUserId);

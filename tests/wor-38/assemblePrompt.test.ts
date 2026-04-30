@@ -15,9 +15,8 @@ import { assemblePrompt } from "../../convex/lib/prompts";
 // ---------------------------------------------------------------------------
 
 // Fake Convex IDs (strings that look like real IDs but are test-only)
-const CASE_ID = "cases:test_case_001" as any;
-const USER_A_ID = "users:test_user_a" as any;
-const USER_B_ID = "users:test_user_b" as any;
+const CASE_ID = "cases:test_case_001" as unknown as Parameters<typeof assemblePrompt>[0]["caseId"];
+const USER_A_ID = "users:test_user_a" as unknown as Parameters<typeof assemblePrompt>[0]["actingUserId"];
 
 /** Mock recent history in Anthropic SDK message format */
 const recentHistory = [
@@ -27,14 +26,6 @@ const recentHistory = [
     content: "I hear you. Can you tell me more about what happened?",
   },
 ];
-
-/** Party A's form fields (embedded in context for PRIVATE_COACH) */
-const partyAFormFields = {
-  mainTopic: "Disagreement over project direction",
-  description:
-    "We keep clashing about whether to pivot the product. I think we should stay the course.",
-  desiredOutcome: "Mutual understanding and a clear decision framework",
-};
 
 /** Party B's form fields */
 const partyBFormFields = {
@@ -66,8 +57,6 @@ const partyBPrivateMessages = [
 ];
 
 /** Mock synthesis texts (already privacy-scrubbed) */
-const partyASynthesis =
-  "Areas of agreement: both want the project to succeed. Disagreement: decision-making process. Approach: focus on process before content.";
 const partyBSynthesis =
   "Areas of agreement: shared commitment. Disagreement: feeling excluded from decisions. Approach: establish structured check-ins.";
 
@@ -82,8 +71,8 @@ const jointMessages = [
 
 /** Mock template version with all instruction fields */
 const mockTemplateVersion = {
-  _id: "templateVersions:tv_001" as any,
-  templateId: "templates:t_001" as any,
+  _id: "templateVersions:tv_001" as unknown as string,
+  templateId: "templates:t_001" as unknown as string,
   version: 1,
   globalGuidance:
     "Focus on workplace conflict resolution using interest-based negotiation.",
@@ -92,7 +81,7 @@ const mockTemplateVersion = {
   draftCoachInstructions:
     "Help the user frame their message using I-statements and specific examples.",
   publishedAt: Date.now(),
-  publishedByUserId: "users:admin_001" as any,
+  publishedByUserId: "users:admin_001" as unknown as string,
 };
 
 // ---------------------------------------------------------------------------
