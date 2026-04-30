@@ -21,9 +21,9 @@ describe('AC 4: Component accepts otherPartyName prop for personalized copy (e.g
     expect(screen.getByText(/Jordan/)).toBeInTheDocument();
     // Should indicate that Jordan can't see this content
     expect(
-      screen.getByText(/Jordan.*can't see/i) ||
-        screen.getByText(/Jordan.*will never see/i)
-    ).toBeTruthy();
+      screen.queryByText(/Jordan.*can't see/i) ??
+        screen.queryByText(/Jordan.*will never see/i)
+    ).toBeInTheDocument();
   });
 
   test("renders different names correctly", () => {

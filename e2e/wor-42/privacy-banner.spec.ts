@@ -3,7 +3,6 @@
  *
  * These tests verify PrivacyBanner renders correctly in a real browser.
  * They target any page that includes the PrivacyBanner component.
- * Since the component doesn't exist yet, these will fail until implementation.
  */
 import { test, expect } from "@playwright/test";
 
