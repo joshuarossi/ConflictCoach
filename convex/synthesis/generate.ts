@@ -36,8 +36,8 @@ export const _getAllPrivateMessages = internalQuery({
 export const _writeSynthesisAndAdvance = internalMutation({
   args: {
     caseId: v.id("cases"),
-    initiatorPartyStateId: v.string(),
-    inviteePartyStateId: v.string(),
+    initiatorPartyStateId: v.id("partyStates"),
+    inviteePartyStateId: v.id("partyStates"),
     forInitiator: v.string(),
     forInvitee: v.string(),
   },
@@ -78,7 +78,7 @@ export const _writeSynthesisAndAdvance = internalMutation({
 
 export const _writeAuditLog = internalMutation({
   args: {
-    caseId: v.string(),
+    caseId: v.id("cases"),
     initiatorUserId: v.string(),
     metadata: v.any(),
   },
@@ -288,9 +288,8 @@ export const generateSynthesis = internalAction({
           continue;
         }
 
-        // For privacy violations we already continue above; for other errors, record and retry
-        lastError = err;
-        continue;
+        // All other errors (auth failure, schema error, etc.) are non-retryable — fail fast
+        throw err;
       }
     }
 
