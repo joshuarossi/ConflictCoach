@@ -85,6 +85,7 @@ export default defineSchema({
     content: v.string(),
     status: v.union(v.literal("STREAMING"), v.literal("COMPLETE"), v.literal("ERROR")),
     // Metadata
+    tokens: v.optional(v.number()),
     isIntervention: v.optional(v.boolean()), // coach intervention on inflammatory content
     replyToId: v.optional(v.id("jointMessages")),
     createdAt: v.number(),
@@ -105,6 +106,7 @@ export default defineSchema({
     role: v.union(v.literal("USER"), v.literal("AI")),
     content: v.string(),
     status: v.union(v.literal("STREAMING"), v.literal("COMPLETE"), v.literal("ERROR")),
+    tokens: v.optional(v.number()),
     createdAt: v.number(),
   }).index("by_draft_session", ["draftSessionId"]),
 
