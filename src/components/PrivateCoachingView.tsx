@@ -203,7 +203,7 @@ export function ConnectedPrivateCoachingView() {
     "the other party";
 
   const isStreaming = useMemo(
-    () => messages?.some((m) => m.status === "STREAMING") ?? false,
+    () => messages?.some((m: { status?: string }) => m.status === "STREAMING") ?? false,
     [messages],
   );
 
@@ -246,7 +246,7 @@ export function ConnectedPrivateCoachingView() {
     );
   }
 
-  const normalizedMessages = (messages ?? []).map((m) => ({
+  const normalizedMessages = (messages ?? []).map((m: { _id: string; role?: string; content: string; status?: string; createdAt?: number }) => ({
     _id: m._id as string,
     role: m.role as "USER" | "AI",
     content: m.content,

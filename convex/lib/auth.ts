@@ -1,13 +1,7 @@
 import { throwAppError } from "./errors";
 
-/**
- * Branded Id type matching Convex's Id<TableName>.
- * Local definition to avoid depending on _generated/dataModel.
- */
-type Id<T extends string> = string & { __tableName: T };
-
 export interface UserRecord {
-  _id: Id<"users">;
+  _id: string;
   email: string;
   displayName?: string;
   role: "USER" | "ADMIN";
@@ -20,18 +14,28 @@ interface Identity {
   tokenIdentifier?: string;
 }
 
+interface DbRead {
+  get: (id: string) => Promise<UserRecord | null>;
+  query: (table: string) => {
+    withIndex: (
+      name: string,
+      predicate: (q: { eq: (field: string, value: string) => unknown }) => unknown,
+    ) => { first: () => Promise<UserRecord | null> };
+  };
+}
+
+interface DbWrite extends DbRead {
+  insert: (table: string, doc: Record<string, unknown>) => Promise<string>;
+}
+
 interface AuthContext {
   auth: { getUserIdentity: () => Promise<Identity | null> };
-  db: {
-    get: (id: string) => Promise<UserRecord | null>;
-    insert: (table: string, doc: Record<string, unknown>) => Promise<string>;
-    query: (table: string) => {
-      withIndex: (
-        name: string,
-        predicate: (q: { eq: (field: string, value: string) => unknown }) => unknown,
-      ) => { first: () => Promise<UserRecord | null> };
-    };
-  };
+  db: DbRead;
+}
+
+interface MutationAuthContext {
+  auth: { getUserIdentity: () => Promise<Identity | null> };
+  db: DbWrite;
 }
 
 /**
@@ -39,7 +43,7 @@ interface AuthContext {
  * Returns the user record or null if not found.
  */
 export async function getUserByEmail(
-  ctx: Pick<AuthContext, "db">,
+  ctx: { db: DbRead },
   email: string,
 ): Promise<UserRecord | null> {
   return await ctx.db
@@ -57,7 +61,7 @@ export async function getUserByEmail(
  * the authenticated identity.
  */
 export async function upsertUser(
-  ctx: Pick<AuthContext, "auth" | "db">,
+  ctx: MutationAuthContext,
   args?: { email?: string },
 ): Promise<UserRecord> {
   let email = args?.email;
@@ -86,7 +90,7 @@ export async function upsertUser(
   });
 
   return {
-    _id: id as Id<"users">,
+    _id: id,
     email,
     role: "USER",
     createdAt: now,

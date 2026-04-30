@@ -3,19 +3,26 @@ import { Sparkles, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface MessageBubbleProps {
-  role: "USER" | "AI";
+  role?: "USER" | "AI";
   content: string;
   status: "STREAMING" | "COMPLETE" | "ERROR";
   createdAt?: number;
+  authorType?: string;
+  authorName?: string;
+  authorColor?: string;
+  onCopy?: () => void;
+  onRetry?: () => void;
 }
 
 export function MessageBubble({
   role,
+  authorType,
   content,
   status,
 }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false);
-  const isCoach = role === "AI";
+  const resolvedRole = role ?? (authorType === "COACH" ? "AI" : authorType === "USER" ? "USER" : "USER");
+  const isCoach = resolvedRole === "AI";
   const isStreaming = status === "STREAMING";
   const isComplete = status === "COMPLETE";
 

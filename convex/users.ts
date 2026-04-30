@@ -2,6 +2,9 @@
 import { mutation, query } from "./_generated/server";
 import { upsertUser, requireAuth } from "./lib/auth";
 
+// Re-export helpers so they can be imported from convex/users
+export { upsertUser } from "./lib/auth";
+
 /**
  * Upsert the current user on login.
  * Creates a users row on first login; returns the existing one on subsequent logins.

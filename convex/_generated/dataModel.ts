@@ -1,0 +1,7 @@
+// Placeholder for Convex generated data model types.
+// This file will be replaced when `npx convex dev` runs.
+
+/* eslint-disable @typescript-eslint/no-explicit-any */
+export type Id<TableName extends string> = string & { __tableName: TableName };
+export type DataModel = any;
+export type Doc<TableName extends string> = any;
