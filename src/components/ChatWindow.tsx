@@ -6,9 +6,13 @@ export interface ChatMessage extends MessageBubbleProps {
   _id: string;
 }
 
-interface ChatWindowProps {
+export interface ChatWindowProps {
   messages: ChatMessage[];
   isStreaming?: boolean;
+  onSendMessage?: (content: string) => void;
+  isInputDisabled?: boolean;
+  showPrivacyBanner?: boolean;
+  authorColorMap?: Record<string, string>;
 }
 
 export function ChatWindow({ messages, isStreaming = false }: ChatWindowProps) {

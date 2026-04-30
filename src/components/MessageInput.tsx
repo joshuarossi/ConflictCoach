@@ -3,7 +3,8 @@ import { Send } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface MessageInputProps {
-  onSend: (content: string) => void;
+  onSend?: (content: string) => void;
+  onSendMessage?: (content: string) => void;
   isStreaming?: boolean;
   disabled?: boolean;
   placeholder?: string;
@@ -11,22 +12,24 @@ export interface MessageInputProps {
 
 export function MessageInput({
   onSend,
+  onSendMessage,
   isStreaming = false,
   disabled = false,
   placeholder = "Type a message…",
 }: MessageInputProps) {
   const [value, setValue] = useState("");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const sendFn = onSend ?? onSendMessage;
 
   const handleSubmit = useCallback(() => {
     const trimmed = value.trim();
     if (!trimmed || isStreaming) return;
-    onSend(trimmed);
+    sendFn?.(trimmed);
     setValue("");
     if (textareaRef.current) {
       textareaRef.current.style.height = "auto";
     }
-  }, [value, isStreaming, onSend]);
+  }, [value, isStreaming, sendFn]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {

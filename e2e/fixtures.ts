@@ -55,6 +55,7 @@ async function callConvexFunction(
 // ---------------------------------------------------------------------------
 
 export interface TestUser {
+  id: string;
   userId: string;
   email: string;
   displayName: string;
@@ -82,7 +83,7 @@ export async function createTestUser(options: {
     role: options.role ?? "USER",
   })) as string;
 
-  return { userId, email, displayName };
+  return { id: userId, userId, email, displayName };
 }
 
 // ---------------------------------------------------------------------------
@@ -137,6 +138,7 @@ export async function loginAsUser(
 // ---------------------------------------------------------------------------
 
 export interface TestCase {
+  id: string;
   caseId: string;
   initiatorUserId: string;
 }
@@ -156,7 +158,8 @@ export interface TestCase {
  * @returns The created case ID
  */
 export async function createTestCase(options: {
-  initiatorUserId: string;
+  initiatorUserId?: string;
+  userId?: string;
   category?: string;
   isSolo?: boolean;
   status?: string;
@@ -164,8 +167,9 @@ export async function createTestCase(options: {
   description?: string;
   desiredOutcome?: string;
 }): Promise<TestCase> {
+  const initiatorUserId = options.initiatorUserId ?? options.userId ?? "";
   const caseId = (await callConvexFunction("testSupport:createTestCase", {
-    initiatorUserId: options.initiatorUserId,
+    initiatorUserId,
     category: options.category,
     isSolo: options.isSolo,
     status: options.status,
@@ -174,5 +178,5 @@ export async function createTestCase(options: {
     desiredOutcome: options.desiredOutcome,
   })) as string;
 
-  return { caseId, initiatorUserId: options.initiatorUserId };
+  return { id: caseId, caseId, initiatorUserId };
 }

@@ -154,7 +154,7 @@ export interface MockStreamConfig {
 
 const DEFAULT_MOCK_WORD_DELAY_MS = 20;
 
-let mockDelayConfig: MockStreamConfig = {
+const mockDelayConfig: MockStreamConfig = {
   delayPerTokenMs: DEFAULT_MOCK_WORD_DELAY_MS,
   batchIntervalMs: BATCH_INTERVAL_MS,
 };
