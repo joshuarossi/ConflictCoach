@@ -21,7 +21,7 @@ export const CASE_STATUSES: readonly CaseStatus[] = [
 ] as const;
 
 // Valid transitions per TechSpec §5.1 state diagram
-const VALID_TRANSITIONS: Record<CaseStatus, readonly CaseStatus[]> = {
+export const VALID_TRANSITIONS: Record<CaseStatus, readonly CaseStatus[]> = {
   DRAFT_PRIVATE_COACHING: ["BOTH_PRIVATE_COACHING"],
   BOTH_PRIVATE_COACHING: ["READY_FOR_JOINT"],
   READY_FOR_JOINT: ["JOINT_ACTIVE"],
@@ -60,6 +60,7 @@ export interface CaseDoc {
   isSolo: boolean;
   initiatorUserId: string;
   inviteeUserId?: string | null;
+  partyStates?: PartyState[];
 }
 
 /**
@@ -89,16 +90,14 @@ export function canProposeClosure(caseDoc: CaseDoc, userId: string): boolean {
  * from the proposer — unless solo mode, where same user can both propose
  * and confirm.
  */
-export function canConfirmClosure(
-  caseDoc: CaseDoc,
-  userId: string,
-  partyStates: PartyState[],
-): boolean {
+export function canConfirmClosure(caseDoc: CaseDoc, userId: string): boolean {
   if (caseDoc.status !== "JOINT_ACTIVE") return false;
 
   const isParty =
     caseDoc.initiatorUserId === userId || caseDoc.inviteeUserId === userId;
   if (!isParty) return false;
+
+  const partyStates = caseDoc.partyStates ?? [];
 
   // Find who proposed
   const proposer = partyStates.find((ps) => ps.closureProposed === true);
