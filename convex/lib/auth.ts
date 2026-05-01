@@ -1,13 +1,7 @@
 import { throwAppError } from "./errors";
 
-/**
- * Branded Id type matching Convex's Id<TableName>.
- * Local definition to avoid depending on _generated/dataModel.
- */
-type Id<T extends string> = string & { __tableName: T };
-
 export interface UserRecord {
-  _id: Id<"users">;
+  _id: string;
   email: string;
   displayName?: string;
   role: "USER" | "ADMIN";
@@ -35,10 +29,10 @@ export interface AuthContext {
   db: ReadDbContext;
 }
 
-interface MutationAuthContext {
+export interface MutationAuthContext {
   auth: { getUserIdentity: () => Promise<Identity | null> };
   db: ReadDbContext & {
-    insert: (table: string, doc: Record<string, unknown>) => Promise<Id<"users">>;
+    insert: (table: string, doc: Record<string, unknown>) => Promise<string>;
   };
 }
 
