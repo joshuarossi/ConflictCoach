@@ -57,7 +57,9 @@ describe('AC 5: "Mark private coaching complete" is a footer CTA', () => {
     );
     // Either it's inside a semantic footer, or at minimum it's below the input
     const allButtons = Array.from(container.querySelectorAll("button"));
-    const markCompleteIndex = allButtons.indexOf(markCompleteButton);
+    const markCompleteIndex = allButtons.indexOf(
+      markCompleteButton as HTMLButtonElement,
+    );
     // Should be among the last buttons (footer position)
     expect(markCompleteIndex).toBeGreaterThan(0);
   });

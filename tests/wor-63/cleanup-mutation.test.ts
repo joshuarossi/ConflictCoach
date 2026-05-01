@@ -16,7 +16,6 @@ import { describe, test, expect, vi, beforeEach } from "vitest";
 // These imports will fail until implementation exists — that is the intended
 // "red" state. The cleanup mutation is expected to be an internalMutation.
 // We import the handler directly for unit testing.
-// @ts-expect-error — module not yet implemented (future task)
 import { cleanupAbandonedCases } from "../../convex/crons.cleanup";
 import { validateTransition } from "../../convex/lib/stateMachine";
 

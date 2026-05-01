@@ -9,9 +9,17 @@ export interface ChatMessage extends MessageBubbleProps {
 interface ChatWindowProps {
   messages: ChatMessage[];
   isStreaming?: boolean;
+  onSendMessage?: (content: string) => void;
+  isInputDisabled?: boolean;
+  showPrivacyBanner?: boolean;
+  authorColorMap?: Partial<Record<"USER" | "COACH" | "AI", string>>;
 }
 
-export function ChatWindow({ messages, isStreaming = false }: ChatWindowProps) {
+export function ChatWindow({
+  messages,
+  isStreaming = false,
+  showPrivacyBanner = false,
+}: ChatWindowProps) {
   const bottomRef = useRef<HTMLDivElement>(null);
   const announcedRef = useRef(false);
 
@@ -37,6 +45,11 @@ export function ChatWindow({ messages, isStreaming = false }: ChatWindowProps) {
       aria-label="Chat messages"
       className="flex flex-1 flex-col gap-3 overflow-y-auto px-4 py-4"
     >
+      {showPrivacyBanner && (
+        <div data-testid="privacy-banner" className="sr-only">
+          Private conversation
+        </div>
+      )}
       {messages.map((msg) => (
         <MessageBubble
           key={msg._id}

@@ -153,6 +153,14 @@ const ALLOWED_STATUSES = [
   "BOTH_PRIVATE_COACHING",
 ] as const;
 
+type CoachingMessageRecord = {
+  _id: unknown;
+  role: unknown;
+  content: unknown;
+  status: unknown;
+  createdAt: unknown;
+};
+
 export function ConnectedPrivateCoachingView() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
@@ -203,7 +211,10 @@ export function ConnectedPrivateCoachingView() {
     "the other party";
 
   const isStreaming = useMemo(
-    () => messages?.some((m) => m.status === "STREAMING") ?? false,
+    () =>
+      (messages as CoachingMessageRecord[] | undefined)?.some(
+        (m) => m.status === "STREAMING",
+      ) ?? false,
     [messages],
   );
 
@@ -246,12 +257,12 @@ export function ConnectedPrivateCoachingView() {
     );
   }
 
-  const normalizedMessages = (messages ?? []).map((m) => ({
+  const normalizedMessages = ((messages ?? []) as CoachingMessageRecord[]).map((m) => ({
     _id: m._id as string,
     role: m.role as "USER" | "AI",
-    content: m.content,
+    content: m.content as string,
     status: m.status as "STREAMING" | "COMPLETE" | "ERROR",
-    createdAt: m.createdAt,
+    createdAt: m.createdAt as number,
   }));
 
   return (

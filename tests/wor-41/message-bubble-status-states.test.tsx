@@ -1,6 +1,5 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
-// @ts-expect-error — module not yet implemented (future task)
 import { MessageBubble } from "@/components/chat/MessageBubble";
 
 describe("MessageBubble handles all three status states", () => {

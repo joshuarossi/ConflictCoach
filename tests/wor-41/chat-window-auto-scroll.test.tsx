@@ -1,6 +1,5 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import { render, act } from "@testing-library/react";
-// @ts-expect-error — module not yet implemented (future task)
 import { ChatWindow } from "@/components/chat/ChatWindow";
 
 // Minimal message fixture matching the expected shape

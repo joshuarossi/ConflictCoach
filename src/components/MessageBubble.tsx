@@ -3,24 +3,35 @@ import { Sparkles, Copy, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export interface MessageBubbleProps {
-  role: "USER" | "AI";
+  role?: "USER" | "AI";
+  authorType?: "USER" | "COACH" | string;
+  authorName?: string;
+  authorColor?: string;
   content: string;
   status: "STREAMING" | "COMPLETE" | "ERROR";
   createdAt?: number;
+  onCopy?: (content: string) => void;
+  onRetry?: () => void;
 }
 
 export function MessageBubble({
   role,
+  authorType,
+  authorName,
   content,
   status,
+  onCopy,
+  onRetry,
 }: MessageBubbleProps) {
   const [copied, setCopied] = useState(false);
-  const isCoach = role === "AI";
+  const normalizedRole = role ?? (authorType === "COACH" ? "AI" : "USER");
+  const isCoach = normalizedRole === "AI";
   const isStreaming = status === "STREAMING";
   const isComplete = status === "COMPLETE";
 
   const handleCopy = async () => {
     await navigator.clipboard.writeText(content);
+    onCopy?.(content);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
@@ -44,7 +55,7 @@ export function MessageBubble({
           <div className="mb-1 flex items-center gap-1.5">
             <Sparkles size={14} className="text-coach-accent" data-testid="sparkles-icon" />
             <span className="text-meta font-medium text-coach-accent">
-              Coach
+              {authorName ?? "Coach"}
             </span>
           </div>
         )}
@@ -76,6 +87,17 @@ export function MessageBubble({
             ) : (
               <Copy size={14} className="text-text-tertiary" />
             )}
+          </button>
+        )}
+
+        {isCoach && status === "ERROR" && onRetry && (
+          <button
+            type="button"
+            onClick={onRetry}
+            className="mt-2 text-meta text-text-tertiary underline decoration-dotted underline-offset-4"
+            aria-label="Retry message"
+          >
+            Retry
           </button>
         )}
       </div>
