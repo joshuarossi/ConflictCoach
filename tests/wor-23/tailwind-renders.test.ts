@@ -16,12 +16,15 @@ describe("AC: Tailwind utility classes render correctly in a test component", ()
     // The test proves Tailwind CSS classes are applied to rendered elements.
     const { createElement } = await import("react");
     const { render } = await import("@testing-library/react");
+    const { MemoryRouter } = await import("react-router-dom");
 
     // Import a test component that uses Tailwind classes.
     // The implementation should create src/App.tsx (or similar) with Tailwind classes.
     const { default: App } = await import("@/App");
 
-    const { container } = render(createElement(App));
+    const { container } = render(
+      createElement(MemoryRouter, { initialEntries: ["/"] }, createElement(App)),
+    );
 
     // At least one element should have a Tailwind utility class present in the DOM
     const tailwindElement = container.querySelector(
