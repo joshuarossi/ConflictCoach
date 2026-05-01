@@ -13,7 +13,6 @@ import {
   REGULAR_USER,
 } from "./helpers";
 
-// @ts-expect-error WOR-59 red-state import: implementation is created by task-implement.
 import { createTemplate, publishNewVersion, archiveTemplate, listAllTemplates, listTemplateVersions } from "../../convex/templates";
 
 // ---------------------------------------------------------------------------

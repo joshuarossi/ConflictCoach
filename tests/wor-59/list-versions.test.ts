@@ -6,7 +6,6 @@
 import { describe, test, expect } from "vitest";
 import { createMockContext, callHandler, ADMIN_USER } from "./helpers";
 
-// @ts-expect-error WOR-59 red-state import: implementation is created by task-implement.
 import { createTemplate, publishNewVersion, listTemplateVersions } from "../../convex/templates";
 
 describe("AC7: admin/templateVersions/list", () => {

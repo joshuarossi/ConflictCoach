@@ -12,7 +12,6 @@ import {
   type MockTemplate,
 } from "./helpers";
 
-// @ts-expect-error WOR-59 red-state import: implementation is created by task-implement.
 import { createTemplate, archiveTemplate, listAllTemplates } from "../../convex/templates";
 
 describe("AC5: admin/templates/archive", () => {

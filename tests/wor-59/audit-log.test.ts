@@ -11,7 +11,6 @@ import {
   type MockAuditLogEntry,
 } from "./helpers";
 
-// @ts-expect-error WOR-59 red-state import: implementation is created by task-implement.
 import { createTemplate, publishNewVersion, archiveTemplate } from "../../convex/templates";
 
 describe("AC8: Audit log entries", () => {
