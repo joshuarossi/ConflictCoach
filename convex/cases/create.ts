@@ -1,3 +1,4 @@
+"use node";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import crypto from "crypto";
 import { mutation } from "../_generated/server";
@@ -13,6 +14,7 @@ const VALID_CATEGORIES = [
   "other",
 ] as const;
 
+/** Create a new conflict-coaching case, optionally in solo mode. */
 export const create = mutation({
   args: {
     category: v.string(),
@@ -41,10 +43,12 @@ export const create = mutation({
     }
 
     // --- Template pinning ---
-    const template = await ctx.db
+    const templates = await ctx.db
       .query("templates")
       .withIndex("by_category", (q: any) => q.eq("category", args.category))
-      .first();
+      .collect();
+
+    const template = templates.find((t: any) => !t.archivedAt);
 
     if (!template || !template.currentVersionId) {
       throwAppError(
