@@ -33,15 +33,17 @@ export const _getAllPrivateMessages = internalQuery({
 
 /**
  * Plain helper: atomically write synthesis texts to both partyStates and
- * advance the case status to READY_FOR_JOINT. Uses only ctx.db.
+ * advance the case status to READY_FOR_JOINT. Uses only ctx.db.get/patch.
  *
- * Queries partyStates by caseId to find initiator/invitee docs — the cases
- * table does not store partyState IDs directly.
+ * Accepts pre-resolved partyState IDs so the mutation is a focused write
+ * operation with no table queries.
  */
 export async function writeSynthesisResultsHandler(
   ctx: any,
   args: {
     caseId: string;
+    initiatorPartyStateId: string;
+    inviteePartyStateId: string;
     forInitiator: string;
     forInvitee: string;
   },
@@ -51,30 +53,13 @@ export async function writeSynthesisResultsHandler(
     throw new Error("Case not found");
   }
 
-  // Look up partyStates by caseId — cases table has no partyState ID fields
-  const partyStates = await ctx.db
-    .query("partyStates")
-    .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
-    .collect();
-
-  const initiatorPS = partyStates.find(
-    (ps: any) => ps.role === "INITIATOR",
-  );
-  const inviteePS = partyStates.find(
-    (ps: any) => ps.role === "INVITEE",
-  );
-
-  if (!initiatorPS || !inviteePS) {
-    throw new Error("Could not find both party states for case");
-  }
-
   const now = Date.now();
 
-  await ctx.db.patch(initiatorPS._id, {
+  await ctx.db.patch(args.initiatorPartyStateId, {
     synthesisText: args.forInitiator,
     synthesisGeneratedAt: now,
   });
-  await ctx.db.patch(inviteePS._id, {
+  await ctx.db.patch(args.inviteePartyStateId, {
     synthesisText: args.forInvitee,
     synthesisGeneratedAt: now,
   });
@@ -86,14 +71,15 @@ export async function writeSynthesisResultsHandler(
 }
 
 /**
- * Mutation that accepts { caseId, forInitiator, forInvitee }, queries
- * partyStates by caseId, writes synthesis texts, and advances the case
- * to READY_FOR_JOINT atomically.
+ * Mutation that accepts pre-resolved partyState IDs and synthesis texts,
+ * patches both partyStates and advances the case to READY_FOR_JOINT atomically.
  */
 export const writeSynthesisResults = Object.assign(
   internalMutation({
     args: {
       caseId: v.id("cases"),
+      initiatorPartyStateId: v.id("partyStates"),
+      inviteePartyStateId: v.id("partyStates"),
       forInitiator: v.string(),
       forInvitee: v.string(),
     },
@@ -363,10 +349,15 @@ export async function generateSynthesisHandler(
   }
 
   // 6. Atomically write synthesis texts + advance case to READY_FOR_JOINT
+  if (!initiatorPS?._id || !inviteePS?._id) {
+    throw new Error("Could not find both party states for case");
+  }
   await ctx.runMutation(
     writeSynthesisResults,
     {
       caseId: args.caseId,
+      initiatorPartyStateId: initiatorPS._id,
+      inviteePartyStateId: inviteePS._id,
       forInitiator: synthesisResult.forInitiator,
       forInvitee: synthesisResult.forInvitee,
     },
