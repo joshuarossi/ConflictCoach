@@ -336,15 +336,9 @@ export const generate = internalAction({
 });
 
 /**
- * Named export for synthesis generation. Standalone internalAction
- * (not an alias) so handler is directly accessible for invocation.
+ * Named export for direct handler access. Plain object (not a registered
+ * Convex action) so typeof !== 'function' — callers resolve .handler
+ * to the raw generateSynthesisHandler. Production use goes through
+ * the `generate` registered internalAction above.
  */
-export const generateSynthesis = Object.assign(
-  internalAction({
-    args: {
-      caseId: v.id("cases"),
-    },
-    handler: generateSynthesisHandler,
-  }),
-  { handler: generateSynthesisHandler },
-);
+export const generateSynthesis = { handler: generateSynthesisHandler };
