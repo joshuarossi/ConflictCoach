@@ -31,8 +31,10 @@ AI-powered conflict resolution coaching platform built with React, Convex, and C
    | `VITE_CONVEX_URL` | Convex deployment URL (set automatically by `npx convex dev`) |
    | `CONVEX_DEPLOYMENT` | Convex deployment identifier |
    | `ANTHROPIC_API_KEY` | Anthropic API key for Claude |
-   | `GOOGLE_OAUTH_CLIENT_ID` | Google OAuth client ID |
-   | `GOOGLE_OAUTH_CLIENT_SECRET` | Google OAuth client secret |
+   | `AUTH_GOOGLE_ID` | Google OAuth client ID |
+   | `AUTH_GOOGLE_SECRET` | Google OAuth client secret |
+   | `AUTH_SECRET` | Convex Auth session secret (generate with `openssl rand -base64 32`) |
+   | `RESEND_API_KEY` | Resend API key used to send magic-link emails |
    | `MAGIC_LINK_EMAIL_FROM` | Sender address for magic-link emails |
    | `SITE_URL` | Public URL of the app |
 

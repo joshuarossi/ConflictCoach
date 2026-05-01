@@ -1,5 +1,11 @@
 node_modules/
 dist/
+
+# Env files: ignore everything except *.example
 .env
-.env.local
+.env.*
+!.env.example
+!.env.*.example
+
 *.log
+.claude/settings.local.json

@@ -1,4 +1,3 @@
-import { createHash } from "crypto";
 import type Anthropic from "@anthropic-ai/sdk";
 import type { Message } from "./prompts";
 
@@ -49,12 +48,21 @@ export function selectMessagesForCompression(messages: Message[]): Message[] {
 }
 
 // ---------------------------------------------------------------------------
-// Content hash for caching (SHA-256 of concatenated message contents)
+// Content hash for caching.
+// Keep this runtime-neutral: prompt assembly runs in Convex's default runtime,
+// where Node built-ins like `crypto` are unavailable.
 // ---------------------------------------------------------------------------
 
 function computeContentHash(messages: Message[]): string {
   const content = messages.map((m) => `${m.role}:${m.content}`).join("|");
-  return createHash("sha256").update(content).digest("hex");
+  let hash = 0x811c9dc5;
+
+  for (let i = 0; i < content.length; i++) {
+    hash ^= content.charCodeAt(i);
+    hash = Math.imul(hash, 0x01000193);
+  }
+
+  return hash.toString(16);
 }
 
 // ---------------------------------------------------------------------------

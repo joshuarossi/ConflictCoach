@@ -7,8 +7,10 @@ describe("AC: .env.example documents all required env vars", () => {
     "VITE_CONVEX_URL",
     "CONVEX_DEPLOYMENT",
     "ANTHROPIC_API_KEY",
-    "GOOGLE_OAUTH_CLIENT_ID",
-    "GOOGLE_OAUTH_CLIENT_SECRET",
+    "AUTH_GOOGLE_ID",
+    "AUTH_GOOGLE_SECRET",
+    "AUTH_SECRET",
+    "RESEND_API_KEY",
     "MAGIC_LINK_EMAIL_FROM",
     "SITE_URL",
   ];

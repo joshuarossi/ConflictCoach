@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { query, mutation, action, internalQuery, internalMutation } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { v } from "convex/values";
 import { throwAppError } from "./lib/errors";
 import { requireAuth } from "./lib/auth";
@@ -103,7 +103,7 @@ export const sendUserMessage = mutation({
 
     // Schedule AI response generation
     try {
-      await ctx.scheduler.runAfter(0, internal.privateCoaching.generateAIResponse, {
+      await ctx.scheduler.runAfter(0, api.privateCoaching.generateAIResponse, {
         caseId: args.caseId,
         userId: user._id,
       });
@@ -276,7 +276,6 @@ export const markComplete = mutation({
       );
 
     if (bothComplete) {
-      // Schedule synthesis generation.
       // Path: internal.synthesis.generate (module) .generate (export) →
       // internalAction at convex/synthesis/generate.ts
       const synthRef = (internal as any)?.synthesis?.generate?.generate;
