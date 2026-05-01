@@ -100,22 +100,34 @@ export async function runMockStreamWithDelay(
 
   const fullText = getMockResponse(role);
   const words = fullText.split(" ");
-  let buffer = "";
-  let lastFlush = Date.now();
 
-  for (const word of words) {
-    buffer += (buffer ? " " : "") + word;
-    const now = Date.now();
-    if (now - lastFlush >= flushIntervalMs) {
-      await ctx.runMutation(updateMutationRef, {
-        messageId,
-        content: buffer,
-        status: "STREAMING" as const,
-      });
-      lastFlush = now;
-    }
-    // Simulate delay between words
-    await new Promise((r) => setTimeout(r, wordDelayMs));
+  // Split words into chunks for batched streaming simulation.
+  // Each chunk gets one flush and one aggregated delay, making total time
+  // proportional to (numberOfChunks * chunkSize * wordDelayMs). Batching
+  // reduces timer jitter from many small setTimeout calls and prevents
+  // mutation overhead from dominating the configured delay.
+  const CHUNK_COUNT = 5;
+  const chunkSize = Math.max(1, Math.ceil(words.length / CHUNK_COUNT));
+
+  for (let i = 0; i < words.length; i += chunkSize) {
+    const end = Math.min(i + chunkSize, words.length);
+    const partialText = words.slice(0, end).join(" ");
+    const wordsInChunk = end - i;
+
+    // Flush partial content with STREAMING status
+    await ctx.runMutation(updateMutationRef, {
+      messageId,
+      content: partialText,
+      status: "STREAMING" as const,
+    });
+
+    // Aggregate delay: wordDelayMs * words in this chunk.
+    // A single larger sleep is far more reliable than many tiny ones.
+    const chunkDelay = Math.max(
+      flushIntervalMs,
+      wordDelayMs * wordsInChunk,
+    );
+    await new Promise((r) => setTimeout(r, chunkDelay));
   }
 
   // Final flush: mark COMPLETE with deterministic token count
