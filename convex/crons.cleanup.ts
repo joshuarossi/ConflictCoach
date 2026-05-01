@@ -3,7 +3,8 @@ import { validateTransition } from "./lib/stateMachine";
 
 const ABANDONED_CASE_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
-export async function cleanupAbandonedCases(ctx: MutationCtx, _args?: Record<string, never>) {
+export async function cleanupAbandonedCases(ctx: MutationCtx, _args: Record<string, never> = {} as Record<string, never>) {
+  void _args;
   const now = Date.now();
   const cutoff = now - ABANDONED_CASE_AGE_MS;
 
