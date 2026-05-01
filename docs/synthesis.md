@@ -6,7 +6,7 @@ When both parties mark private coaching as complete, the platform automatically 
 
 1. **Trigger** — The `markComplete` mutation in `convex/privateCoaching.ts` detects that both parties have finished. It schedules the synthesis action (`convex/synthesis/generate.ts`) via `ctx.scheduler.runAfter`.
 
-2. **Context assembly** — The action reads both parties' form fields (main topic, description, desired outcome) and their full private message histories. It passes all of this to `assemblePrompt()` with the `SYNTHESIS` role.
+2. **Context assembly** — The action reads both parties' form fields (main topic, description, desired outcome) and their full private message histories. It passes all of this to [`assemblePrompt()`](./components/prompt-assembly.md) with the `SYNTHESIS` role.
 
 3. **AI call** — Claude generates a single JSON response containing two fields: `forInitiator` and `forInvitee`. Each field holds tailored guidance covering:
    - Areas of likely agreement
@@ -37,4 +37,4 @@ The synthesis action follows the project's standard error-handling patterns (see
 | `convex/synthesis/generate.ts` | Synthesis action, internal queries, and mutations |
 | `convex/privateCoaching.ts` | Trigger point (`markComplete` schedules synthesis) |
 | `convex/lib/privacyFilter.ts` | Privacy-violation checker used by the synthesis action |
-| `convex/lib/prompts.ts` | `assemblePrompt()` builds the system + user prompt |
+| `convex/lib/prompts.ts` | [`assemblePrompt()`](./components/prompt-assembly.md) builds the system + user prompt |

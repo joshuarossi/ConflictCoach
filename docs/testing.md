@@ -13,7 +13,7 @@ npm run test:unit
 | Module | Location | What It Covers |
 |---|---|---|
 | State machine | `convex/lib/stateMachine.ts` | Case lifecycle transitions, `canEnterJointChat`, `canProposeClosure`, `canConfirmClosure` |
-| Prompt assembly | `convex/lib/prompts.ts` | System prompt generation for all 4 AI roles (PRIVATE_COACH, SYNTHESIS, COACH, DRAFT_COACH) with privacy isolation |
+| [Prompt assembly](./components/prompt-assembly.md) | `convex/lib/prompts.ts` | System prompt generation for all 4 AI roles (PRIVATE_COACH, SYNTHESIS, COACH, DRAFT_COACH) with privacy isolation |
 | Privacy filter | `convex/lib/privacyFilter.ts` | Verbatim token-matching (≥8 consecutive tokens) to prevent AI from leaking private content |
 | Compression | `convex/lib/compression.ts` | Token estimation, message selection, Haiku-based summarization, budget enforcement |
 | Error mapping | `convex/lib/errors.ts` | `throwAppError` and error-code-to-HTTP-status mapping |

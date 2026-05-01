@@ -2,90 +2,125 @@
  * Tests for WOR-38: AI prompt assembly module (convex/lib/prompts.ts)
  *
  * Each test maps to one acceptance criterion from the task spec.
- * All tests are expected to FAIL today (module does not exist yet)
- * and PASS once assemblePrompt is implemented.
+ * Tests exercise the actual context assembly logic using partyStates,
+ * privateMessages, and jointMessages parameters — not just recentHistory
+ * passthrough — to verify real privacy boundary enforcement.
  */
 import { describe, test, expect } from "vitest";
 
-// This import will fail until the module is implemented — correct red state.
-import { assemblePrompt } from "../../convex/lib/prompts";
+import {
+  assemblePrompt,
+  type PartyState,
+  type PrivateMessage,
+  type JointMessage,
+  type TemplateVersion,
+  type Message,
+  type AssemblePromptOpts,
+} from "../../convex/lib/prompts";
 
 // ---------------------------------------------------------------------------
 // Fixtures
 // ---------------------------------------------------------------------------
 
-// Fake Convex IDs (strings that look like real IDs but are test-only)
-const CASE_ID = "cases:test_case_001" as unknown as Parameters<typeof assemblePrompt>[0]["caseId"];
-const USER_A_ID = "users:test_user_a" as unknown as Parameters<typeof assemblePrompt>[0]["actingUserId"];
+// Branded Id helpers — cast strings to the branded types the function expects
+const CASE_ID = "cases:test_case_001" as AssemblePromptOpts["caseId"];
+const USER_A_ID = "users:test_user_a" as AssemblePromptOpts["actingUserId"];
+const USER_B_ID = "users:test_user_b" as AssemblePromptOpts["actingUserId"];
 
-/** Mock recent history in Anthropic SDK message format */
-const recentHistory = [
-  { role: "user" as const, content: "I feel frustrated about this situation." },
+/** Recent history in Anthropic SDK message format */
+const recentHistory: Message[] = [
+  { role: "user", content: "I feel frustrated about this situation." },
   {
-    role: "assistant" as const,
+    role: "assistant",
     content: "I hear you. Can you tell me more about what happened?",
   },
 ];
 
-/** Party B's form fields */
-const partyBFormFields = {
+/** Party A state with form fields and synthesis */
+const partyAState: PartyState = {
+  userId: USER_A_ID as PartyState["userId"],
+  role: "INITIATOR",
+  mainTopic: "Communication issues at work",
+  description: "I feel like my voice is not heard in meetings",
+  desiredOutcome: "Better collaboration and mutual respect",
+  synthesisText:
+    "Areas of agreement: commitment to team success. Tension: feeling excluded from decisions.",
+};
+
+/** Party B state with form fields and synthesis */
+const partyBState: PartyState = {
+  userId: USER_B_ID as PartyState["userId"],
+  role: "INVITEE",
   mainTopic: "Communication breakdown with co-founder",
   description:
     "My co-founder ignores my input on design decisions. It feels dismissive.",
   desiredOutcome: "A structured way to make joint decisions",
+  synthesisText:
+    "Areas of agreement: shared commitment. Disagreement: feeling excluded from decisions. Approach: establish structured check-ins.",
 };
 
-/** Mock private messages for party A */
-const partyAPrivateMessages = [
-  { role: "user" as const, content: "I feel like my voice is not heard." },
+const bothPartyStates: PartyState[] = [partyAState, partyBState];
+
+/** Private messages for party A */
+const partyAPrivateMessages: PrivateMessage[] = [
   {
-    role: "assistant" as const,
-    content: "That sounds really difficult. What specifically makes you feel unheard?",
+    userId: USER_A_ID as PrivateMessage["userId"],
+    role: "USER",
+    content: "I feel like my voice is not heard.",
+  },
+  {
+    userId: USER_A_ID as PrivateMessage["userId"],
+    role: "AI",
+    content:
+      "That sounds really difficult. What specifically makes you feel unheard?",
   },
 ];
 
-/** Mock private messages for party B */
-const partyBPrivateMessages = [
+/** Private messages for party B */
+const partyBPrivateMessages: PrivateMessage[] = [
   {
-    role: "user" as const,
+    userId: USER_B_ID as PrivateMessage["userId"],
+    role: "USER",
     content: "They keep overriding my design choices without discussion.",
   },
   {
-    role: "assistant" as const,
+    userId: USER_B_ID as PrivateMessage["userId"],
+    role: "AI",
     content: "That must be frustrating. Can you give me an example?",
   },
 ];
 
-/** Mock synthesis texts (already privacy-scrubbed) */
-const partyBSynthesis =
-  "Areas of agreement: shared commitment. Disagreement: feeling excluded from decisions. Approach: establish structured check-ins.";
+const allPrivateMessages: PrivateMessage[] = [
+  ...partyAPrivateMessages,
+  ...partyBPrivateMessages,
+];
 
-/** Mock joint chat messages */
-const jointMessages = [
-  { role: "user" as const, content: "I think we should talk about how we make decisions." },
+/** Joint chat messages */
+const jointMessages: JointMessage[] = [
   {
-    role: "assistant" as const,
-    content: "That's a great place to start. What does a good decision process look like to each of you?",
+    authorType: "USER",
+    authorUserId: USER_A_ID as JointMessage["authorUserId"],
+    content: "I think we should talk about how we make decisions.",
+  },
+  {
+    authorType: "COACH",
+    content:
+      "That's a great place to start. What does a good decision process look like to each of you?",
   },
 ];
 
-/** Mock template version with all instruction fields */
-const mockTemplateVersion = {
-  _id: "templateVersions:tv_001" as unknown as string,
-  templateId: "templates:t_001" as unknown as string,
-  version: 1,
+/** Template version with all instruction fields */
+const mockTemplateVersion: TemplateVersion = {
   globalGuidance:
     "Focus on workplace conflict resolution using interest-based negotiation.",
   coachInstructions:
     "When facilitating, highlight shared goals before addressing differences.",
   draftCoachInstructions:
     "Help the user frame their message using I-statements and specific examples.",
-  publishedAt: Date.now(),
-  publishedByUserId: "users:admin_001" as unknown as string,
 };
 
 // ---------------------------------------------------------------------------
-// Exact verbatim strings from TechSpec
+// Verbatim strings from TechSpec
 // ---------------------------------------------------------------------------
 
 const PRIVATE_COACH_SYSTEM_PROMPT =
@@ -95,16 +130,21 @@ const ANTI_QUOTATION_INSTRUCTION =
   "You have access to both parties' private content for context. In your outputs, NEVER quote, closely paraphrase, or otherwise surface the other party's raw words. Synthesize themes and positions in your own words only. If you cannot make a point without quoting, omit it.";
 
 // ---------------------------------------------------------------------------
+// Helper: serialize all output content for searching
+// ---------------------------------------------------------------------------
+
+function allOutputContent(result: { system: string; messages: Message[] }): string {
+  return (
+    result.system + " " + result.messages.map((m) => m.content).join(" ")
+  );
+}
+
+// ---------------------------------------------------------------------------
 // AC 1: assemblePrompt function accepts { role, caseId, actingUserId,
 //        recentHistory, templateVersion? } and returns { system, messages }
 // ---------------------------------------------------------------------------
 describe("AC 1: assemblePrompt function signature and return shape", () => {
-  const roles = [
-    "PRIVATE_COACH",
-    "SYNTHESIS",
-    "COACH",
-    "DRAFT_COACH",
-  ] as const;
+  const roles = ["PRIVATE_COACH", "SYNTHESIS", "COACH", "DRAFT_COACH"] as const;
 
   for (const role of roles) {
     test(`assemblePrompt with role=${role} returns { system: string, messages: Array<{role, content}> }`, () => {
@@ -115,14 +155,12 @@ describe("AC 1: assemblePrompt function signature and return shape", () => {
         recentHistory,
       });
 
-      // Return shape: { system, messages }
       expect(result).toHaveProperty("system");
       expect(result).toHaveProperty("messages");
       expect(typeof result.system).toBe("string");
       expect(result.system.length).toBeGreaterThan(0);
       expect(Array.isArray(result.messages)).toBe(true);
 
-      // Each message has { role, content }
       for (const msg of result.messages) {
         expect(msg).toHaveProperty("role");
         expect(msg).toHaveProperty("content");
@@ -133,7 +171,6 @@ describe("AC 1: assemblePrompt function signature and return shape", () => {
   }
 
   test("assemblePrompt accepts optional templateVersion parameter", () => {
-    // Should not throw when templateVersion is provided
     const result = assemblePrompt({
       role: "COACH",
       caseId: CASE_ID,
@@ -157,12 +194,27 @@ describe("AC 2: PRIVATE_COACH uses hardcoded system prompt and isolates party da
       role: "PRIVATE_COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: partyAPrivateMessages,
-      // Providing context data that the function would use internally.
-      // The function is a pure assembler — it receives the data it needs.
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
     });
 
     expect(result.system).toContain(PRIVATE_COACH_SYSTEM_PROMPT);
+  });
+
+  test("PRIVATE_COACH context contains acting user's form fields", () => {
+    const result = assemblePrompt({
+      role: "PRIVATE_COACH",
+      caseId: CASE_ID,
+      actingUserId: USER_A_ID,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+    });
+
+    const content = allOutputContent(result);
+    // Acting user's form fields should be present
+    expect(content).toContain(partyAState.mainTopic);
   });
 
   test("PRIVATE_COACH context contains acting user's private messages", () => {
@@ -170,31 +222,60 @@ describe("AC 2: PRIVATE_COACH uses hardcoded system prompt and isolates party da
       role: "PRIVATE_COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: partyAPrivateMessages,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
     });
 
-    // The messages array should contain the acting user's history
-    const allContent = result.messages.map((m) => m.content).join(" ");
-    expect(allContent).toContain("I feel like my voice is not heard");
+    const content = allOutputContent(result);
+    expect(content).toContain("I feel like my voice is not heard");
   });
 
-  test("PRIVATE_COACH context contains NO other party data", () => {
+  test("PRIVATE_COACH context contains NO other party's form fields", () => {
     const result = assemblePrompt({
       role: "PRIVATE_COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: partyAPrivateMessages,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
     });
 
-    const allContent =
-      result.system + " " + result.messages.map((m) => m.content).join(" ");
+    const content = allOutputContent(result);
+    // Must NOT contain party B's form fields
+    expect(content).not.toContain(partyBState.description);
+    expect(content).not.toContain(partyBState.desiredOutcome);
+  });
 
-    // Must NOT contain party B's private content
-    expect(allContent).not.toContain(
-      "They keep overriding my design choices without discussion"
+  test("PRIVATE_COACH context contains NO other party's private messages", () => {
+    const result = assemblePrompt({
+      role: "PRIVATE_COACH",
+      caseId: CASE_ID,
+      actingUserId: USER_A_ID,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+    });
+
+    const content = allOutputContent(result);
+    // Must NOT contain party B's private messages
+    expect(content).not.toContain(
+      "They keep overriding my design choices without discussion",
     );
-    expect(allContent).not.toContain(partyBFormFields.description);
-    expect(allContent).not.toContain(partyBSynthesis);
+  });
+
+  test("PRIVATE_COACH context contains NO synthesis data", () => {
+    const result = assemblePrompt({
+      role: "PRIVATE_COACH",
+      caseId: CASE_ID,
+      actingUserId: USER_A_ID,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+    });
+
+    const content = allOutputContent(result);
+    expect(content).not.toContain(partyBState.synthesisText);
   });
 });
 
@@ -209,41 +290,56 @@ describe("AC 3: SYNTHESIS anti-quotation rules and dual-party context", () => {
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
       recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
     });
 
     expect(result.system).toContain(ANTI_QUOTATION_INSTRUCTION);
   });
 
-  test("SYNTHESIS context includes both parties' private content", () => {
-    // The synthesis role is the ONE role that sees both parties' data.
-    // The assemblePrompt function should include both when role=SYNTHESIS.
-    const result = assemblePrompt({
-      role: "SYNTHESIS",
-      caseId: CASE_ID,
-      actingUserId: USER_A_ID,
-      recentHistory: [
-        ...partyAPrivateMessages,
-        ...partyBPrivateMessages,
-      ],
-    });
-
-    const allContent = result.messages.map((m) => m.content).join(" ");
-    // Should contain content from both parties
-    expect(allContent).toContain("I feel like my voice is not heard");
-    expect(allContent).toContain(
-      "They keep overriding my design choices without discussion"
-    );
-  });
-
-  test("SYNTHESIS system prompt instructs JSON output format", () => {
+  test("SYNTHESIS context includes both parties' private content via privateMessages", () => {
     const result = assemblePrompt({
       role: "SYNTHESIS",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
       recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
     });
 
-    // Per TechSpec §6.3.2, output format is strict JSON: { forInitiator, forInvitee }
+    const content = allOutputContent(result);
+    // Should contain content from both parties
+    expect(content).toContain("I feel like my voice is not heard");
+    expect(content).toContain(
+      "They keep overriding my design choices without discussion",
+    );
+  });
+
+  test("SYNTHESIS context includes both parties' form fields", () => {
+    const result = assemblePrompt({
+      role: "SYNTHESIS",
+      caseId: CASE_ID,
+      actingUserId: USER_A_ID,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+    });
+
+    const content = allOutputContent(result);
+    expect(content).toContain(partyAState.mainTopic);
+    expect(content).toContain(partyBState.mainTopic);
+  });
+
+  test("SYNTHESIS system prompt instructs JSON output format with forInitiator/forInvitee", () => {
+    const result = assemblePrompt({
+      role: "SYNTHESIS",
+      caseId: CASE_ID,
+      actingUserId: USER_A_ID,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+    });
+
     expect(result.system).toMatch(/json/i);
     expect(result.system).toMatch(/forInitiator/);
     expect(result.system).toMatch(/forInvitee/);
@@ -252,7 +348,7 @@ describe("AC 3: SYNTHESIS anti-quotation rules and dual-party context", () => {
 
 // ---------------------------------------------------------------------------
 // AC 4: COACH — context includes joint chat history + both synthesis texts;
-//        NO raw private messages; merges template instructions if available
+//        NO raw private messages
 // ---------------------------------------------------------------------------
 describe("AC 4: COACH includes synthesis and joint history, excludes raw privates", () => {
   test("COACH context includes joint chat history", () => {
@@ -260,13 +356,32 @@ describe("AC 4: COACH includes synthesis and joint history, excludes raw private
       role: "COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: jointMessages,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+      jointMessages,
     });
 
-    const allContent = result.messages.map((m) => m.content).join(" ");
-    expect(allContent).toContain(
-      "I think we should talk about how we make decisions"
+    const content = allOutputContent(result);
+    expect(content).toContain(
+      "I think we should talk about how we make decisions",
     );
+  });
+
+  test("COACH context includes both parties' synthesis texts", () => {
+    const result = assemblePrompt({
+      role: "COACH",
+      caseId: CASE_ID,
+      actingUserId: USER_A_ID,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+      jointMessages,
+    });
+
+    const content = allOutputContent(result);
+    expect(content).toContain(partyAState.synthesisText);
+    expect(content).toContain(partyBState.synthesisText);
   });
 
   test("COACH context does NOT include any raw private messages", () => {
@@ -274,35 +389,17 @@ describe("AC 4: COACH includes synthesis and joint history, excludes raw private
       role: "COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: jointMessages,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+      jointMessages,
     });
 
-    const allContent =
-      result.system + " " + result.messages.map((m) => m.content).join(" ");
-
+    const content = allOutputContent(result);
     // Must NOT contain either party's raw private messages
-    expect(allContent).not.toContain("I feel like my voice is not heard");
-    expect(allContent).not.toContain(
-      "They keep overriding my design choices without discussion"
-    );
-  });
-
-  test("COACH merges template instructions when templateVersion is provided", () => {
-    const result = assemblePrompt({
-      role: "COACH",
-      caseId: CASE_ID,
-      actingUserId: USER_A_ID,
-      recentHistory: jointMessages,
-      templateVersion: mockTemplateVersion,
-    });
-
-    // globalGuidance should appear in system prompt
-    expect(result.system).toContain(mockTemplateVersion.globalGuidance);
-    // coachInstructions should appear for COACH role
-    expect(result.system).toContain(mockTemplateVersion.coachInstructions);
-    // draftCoachInstructions should NOT appear for COACH role
-    expect(result.system).not.toContain(
-      mockTemplateVersion.draftCoachInstructions
+    expect(content).not.toContain("I feel like my voice is not heard");
+    expect(content).not.toContain(
+      "They keep overriding my design choices without discussion",
     );
   });
 });
@@ -317,13 +414,31 @@ describe("AC 5: DRAFT_COACH own-synthesis only, no other party data", () => {
       role: "DRAFT_COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: jointMessages,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+      jointMessages,
     });
 
-    const allContent = result.messages.map((m) => m.content).join(" ");
-    expect(allContent).toContain(
-      "I think we should talk about how we make decisions"
+    const content = allOutputContent(result);
+    expect(content).toContain(
+      "I think we should talk about how we make decisions",
     );
+  });
+
+  test("DRAFT_COACH context includes the acting user's own synthesis", () => {
+    const result = assemblePrompt({
+      role: "DRAFT_COACH",
+      caseId: CASE_ID,
+      actingUserId: USER_A_ID,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+      jointMessages,
+    });
+
+    const content = allOutputContent(result);
+    expect(content).toContain(partyAState.synthesisText);
   });
 
   test("DRAFT_COACH context does NOT include the other party's synthesis", () => {
@@ -331,18 +446,14 @@ describe("AC 5: DRAFT_COACH own-synthesis only, no other party data", () => {
       role: "DRAFT_COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: jointMessages,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+      jointMessages,
     });
 
-    const allContent =
-      result.system + " " + result.messages.map((m) => m.content).join(" ");
-
-    // Must NOT contain party B's synthesis
-    expect(allContent).not.toContain(partyBSynthesis);
-    // Must NOT contain party B's private messages
-    expect(allContent).not.toContain(
-      "They keep overriding my design choices without discussion"
-    );
+    const content = allOutputContent(result);
+    expect(content).not.toContain(partyBState.synthesisText);
   });
 
   test("DRAFT_COACH context does NOT include any raw private messages", () => {
@@ -350,16 +461,16 @@ describe("AC 5: DRAFT_COACH own-synthesis only, no other party data", () => {
       role: "DRAFT_COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: jointMessages,
+      recentHistory: [],
+      partyStates: bothPartyStates,
+      privateMessages: allPrivateMessages,
+      jointMessages,
     });
 
-    const allContent =
-      result.system + " " + result.messages.map((m) => m.content).join(" ");
-
-    // No private messages from either party
-    expect(allContent).not.toContain("I feel like my voice is not heard");
-    expect(allContent).not.toContain(
-      "They keep overriding my design choices without discussion"
+    const content = allOutputContent(result);
+    expect(content).not.toContain("I feel like my voice is not heard");
+    expect(content).not.toContain(
+      "They keep overriding my design choices without discussion",
     );
   });
 });
@@ -374,7 +485,7 @@ describe("AC 6: Template merging behavior across roles", () => {
       role: "COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: jointMessages,
+      recentHistory: [],
       templateVersion: mockTemplateVersion,
     });
 
@@ -382,22 +493,46 @@ describe("AC 6: Template merging behavior across roles", () => {
     expect(result.system).toContain(mockTemplateVersion.coachInstructions);
   });
 
+  test("COACH role: draftCoachInstructions do NOT appear in system prompt", () => {
+    const result = assemblePrompt({
+      role: "COACH",
+      caseId: CASE_ID,
+      actingUserId: USER_A_ID,
+      recentHistory: [],
+      templateVersion: mockTemplateVersion,
+    });
+
+    expect(result.system).not.toContain(
+      mockTemplateVersion.draftCoachInstructions,
+    );
+  });
+
   test("DRAFT_COACH role: globalGuidance and draftCoachInstructions appear in system prompt", () => {
     const result = assemblePrompt({
       role: "DRAFT_COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: jointMessages,
+      recentHistory: [],
       templateVersion: mockTemplateVersion,
     });
 
     expect(result.system).toContain(mockTemplateVersion.globalGuidance);
     expect(result.system).toContain(
-      mockTemplateVersion.draftCoachInstructions
+      mockTemplateVersion.draftCoachInstructions,
     );
-    // coachInstructions should NOT appear for DRAFT_COACH
+  });
+
+  test("DRAFT_COACH role: coachInstructions do NOT appear in system prompt", () => {
+    const result = assemblePrompt({
+      role: "DRAFT_COACH",
+      caseId: CASE_ID,
+      actingUserId: USER_A_ID,
+      recentHistory: [],
+      templateVersion: mockTemplateVersion,
+    });
+
     expect(result.system).not.toContain(
-      mockTemplateVersion.coachInstructions
+      mockTemplateVersion.coachInstructions,
     );
   });
 
@@ -406,23 +541,22 @@ describe("AC 6: Template merging behavior across roles", () => {
       role: "PRIVATE_COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: partyAPrivateMessages,
+      recentHistory: [],
       templateVersion: mockTemplateVersion,
     });
 
-    // Per TechSpec §6.3.1: "Template applied: NONE"
     expect(result.system).not.toContain(mockTemplateVersion.globalGuidance);
     expect(result.system).not.toContain(
-      mockTemplateVersion.coachInstructions
+      mockTemplateVersion.coachInstructions,
     );
     expect(result.system).not.toContain(
-      mockTemplateVersion.draftCoachInstructions
+      mockTemplateVersion.draftCoachInstructions,
     );
-    // But the hardcoded system prompt should still be there
+    // Hardcoded system prompt should still be present
     expect(result.system).toContain(PRIVATE_COACH_SYSTEM_PROMPT);
   });
 
-  test("SYNTHESIS role: template instructions are not applied (synthesis uses its own prompt)", () => {
+  test("SYNTHESIS role: template instructions are not applied", () => {
     const result = assemblePrompt({
       role: "SYNTHESIS",
       caseId: CASE_ID,
@@ -431,25 +565,22 @@ describe("AC 6: Template merging behavior across roles", () => {
       templateVersion: mockTemplateVersion,
     });
 
-    // Synthesis has its own system prompt; templates are for Coach/DraftCoach
-    // globalGuidance might or might not apply to SYNTHESIS — per TechSpec §6.3.2
-    // the synthesis prompt is self-contained. Assert anti-quotation is present.
+    // Synthesis has its own self-contained prompt; anti-quotation must be present
     expect(result.system).toContain(ANTI_QUOTATION_INSTRUCTION);
   });
 
-  test("When no templateVersion is provided, system prompt still works without template content", () => {
+  test("When no templateVersion is provided, system prompt works without template content", () => {
     const result = assemblePrompt({
       role: "COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: jointMessages,
-      // No templateVersion
+      recentHistory: [],
     });
 
     expect(result.system.length).toBeGreaterThan(0);
     expect(result.system).not.toContain(mockTemplateVersion.globalGuidance);
     expect(result.system).not.toContain(
-      mockTemplateVersion.coachInstructions
+      mockTemplateVersion.coachInstructions,
     );
   });
 });
