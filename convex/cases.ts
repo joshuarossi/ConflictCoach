@@ -5,6 +5,92 @@ import { requireAuth } from "./lib/auth";
 import { throwAppError } from "./lib/errors";
 
 // ---------------------------------------------------------------------------
+// list — return all cases where the authenticated user is a party
+// ---------------------------------------------------------------------------
+
+export const list = query({
+  args: {},
+  handler: async (ctx: any) => {
+    const user = await requireAuth(ctx);
+
+    // Query both indexes to find cases where user is initiator or invitee
+    const asInitiator = await ctx.db
+      .query("cases")
+      .withIndex("by_initiator", (q: any) =>
+        q.eq("initiatorUserId", user._id),
+      )
+      .collect();
+
+    const asInvitee = await ctx.db
+      .query("cases")
+      .withIndex("by_invitee", (q: any) =>
+        q.eq("inviteeUserId", user._id),
+      )
+      .collect();
+
+    // Merge and deduplicate (user could theoretically appear in both)
+    const caseMap = new Map<string, any>();
+    for (const c of asInitiator) {
+      caseMap.set(c._id.toString(), c);
+    }
+    for (const c of asInvitee) {
+      caseMap.set(c._id.toString(), c);
+    }
+
+    const allCases = Array.from(caseMap.values());
+
+    // Sort by updatedAt descending
+    allCases.sort((a: any, b: any) => b.updatedAt - a.updatedAt);
+
+    // Build response for each case
+    const results = await Promise.all(
+      allCases.map(async (caseDoc: any) => {
+        // Determine the other party's userId
+        const otherUserId =
+          caseDoc.initiatorUserId === user._id
+            ? caseDoc.inviteeUserId
+            : caseDoc.initiatorUserId;
+
+        // Look up other party's display name
+        let otherPartyDisplayName: string | null = null;
+        if (otherUserId) {
+          const otherUser = await ctx.db.get(otherUserId);
+          otherPartyDisplayName = otherUser?.displayName ?? null;
+        }
+
+        // Look up other party's phase-level status via partyStates
+        let hasCompletedPC = false;
+        if (otherUserId) {
+          const otherPartyState = await ctx.db
+            .query("partyStates")
+            .withIndex("by_case_and_user", (q: any) =>
+              q.eq("caseId", caseDoc._id).eq("userId", otherUserId),
+            )
+            .first();
+          if (otherPartyState) {
+            hasCompletedPC =
+              otherPartyState.privateCoachingCompletedAt != null;
+          }
+        }
+
+        return {
+          id: caseDoc._id,
+          status: caseDoc.status,
+          category: caseDoc.category,
+          createdAt: caseDoc.createdAt,
+          updatedAt: caseDoc.updatedAt,
+          isSolo: caseDoc.isSolo,
+          otherPartyDisplayName,
+          hasCompletedPC,
+        };
+      }),
+    );
+
+    return results;
+  },
+});
+
+// ---------------------------------------------------------------------------
 // get — fetch a single case by ID (party-gated)
 // ---------------------------------------------------------------------------
 
