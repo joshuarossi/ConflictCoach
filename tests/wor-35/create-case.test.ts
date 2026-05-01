@@ -130,6 +130,23 @@ function createMockContext(options?: { isSolo?: boolean }) {
                 .filter((i) => i.table === "partyStates")
                 .map((i) => ({ _id: i.id, ...i.doc }));
             }
+            if (table === "templates") {
+              // Mirror the .first() filter: capture the predicate's category and
+              // only return the template when categories match. The spec allows
+              // the implementation to pick either .first() or .collect().find().
+              let queriedCategory: string | undefined;
+              const probe = {
+                eq: (field: string, value: unknown) => {
+                  if (field === "category") queriedCategory = value as string;
+                  return probe;
+                },
+              };
+              try { pred(probe); } catch { /* predicate shape may vary */ }
+              if (queriedCategory !== undefined && queriedCategory !== mockTemplate.category) {
+                return [];
+              }
+              return [mockTemplate];
+            }
             return [];
           },
         }),
