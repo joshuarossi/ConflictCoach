@@ -71,10 +71,57 @@ export const _writeSynthesisAndAdvance = internalMutation({
   },
 });
 
+/**
+ * Public-facing mutation that accepts { caseId, forInitiator, forInvitee },
+ * looks up partyState IDs internally, writes synthesis texts, and advances
+ * the case to READY_FOR_JOINT atomically.
+ */
+export const writeSynthesisResults = internalMutation({
+  args: {
+    caseId: v.id("cases"),
+    forInitiator: v.string(),
+    forInvitee: v.string(),
+  },
+  handler: async (
+    ctx: any,
+    args: { caseId: string; forInitiator: string; forInvitee: string },
+  ) => {
+    // Look up party states for this case
+    const partyStates = await ctx.db
+      .query("partyStates")
+      .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
+      .collect();
+
+    const initiatorPS = partyStates.find(
+      (ps: any) => ps.role === "INITIATOR",
+    );
+    const inviteePS = partyStates.find((ps: any) => ps.role === "INVITEE");
+    if (!initiatorPS || !inviteePS) {
+      throw new Error("Missing initiator or invitee party state");
+    }
+
+    const now = Date.now();
+
+    await ctx.db.patch(initiatorPS._id, {
+      synthesisText: args.forInitiator,
+      synthesisGeneratedAt: now,
+    });
+    await ctx.db.patch(inviteePS._id, {
+      synthesisText: args.forInvitee,
+      synthesisGeneratedAt: now,
+    });
+
+    await ctx.db.patch(args.caseId, {
+      status: "READY_FOR_JOINT",
+      updatedAt: now,
+    });
+  },
+});
+
 /** Insert an audit log entry for privacy filter failure. */
 export const _insertAuditLog = internalMutation({
   args: {
-    caseId: v.string(),
+    caseId: v.id("cases"),
     actorUserId: v.id("users"),
     metadata: v.optional(v.any()),
   },
@@ -293,3 +340,6 @@ export const generate = internalAction({
     );
   },
 });
+
+/** Named alias so consumers can import `generateSynthesis` by name. */
+export const generateSynthesis = generate;
