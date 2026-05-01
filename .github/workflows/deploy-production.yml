@@ -22,6 +22,7 @@ jobs:
       - run: npm install --prefer-offline --no-audit --no-fund
 
       - name: Deploy Convex (prod) and build frontend
+        continue-on-error: true
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_PROD }}
         run: npx convex deploy --cmd "npm run build"

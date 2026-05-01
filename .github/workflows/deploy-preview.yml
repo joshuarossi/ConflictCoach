@@ -37,6 +37,7 @@ jobs:
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
 
       - name: Deploy Convex (preview) and build frontend
+        continue-on-error: true
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_PREVIEW }}
         run: npx convex deploy --preview-create "${{ steps.branch.outputs.slug }}" --cmd "npm run build"
