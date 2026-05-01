@@ -8,7 +8,6 @@
  */
 import { describe, test, expect, vi, beforeEach } from "vitest";
 
-// @ts-expect-error WOR-27 red-state import: upsertUser is created by task-implement.
 import { upsertUser } from "../../convex/lib/auth";
 
 // ---------------------------------------------------------------------------

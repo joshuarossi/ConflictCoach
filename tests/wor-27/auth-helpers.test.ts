@@ -12,10 +12,8 @@ import { ConvexError } from "convex/values";
 import { requireAuth } from "../../convex/lib/auth";
 import type { UserRecord } from "../../convex/lib/auth";
 
-// @ts-expect-error WOR-27 red-state import: getUserByEmail is created by task-implement.
 import { getUserByEmail } from "../../convex/lib/auth";
 
-// @ts-expect-error WOR-27 red-state import: isAdmin is created by task-implement.
 import { isAdmin } from "../../convex/lib/auth";
 
 // ---------------------------------------------------------------------------
