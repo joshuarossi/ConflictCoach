@@ -276,10 +276,11 @@ export const markComplete = mutation({
       );
 
     if (bothComplete) {
-      // Schedule synthesis generation if the module is available.
-      // The synthesis module may not exist yet — guard to avoid runtime errors.
-      if (internal?.synthesis?.generate) {
-        await ctx.scheduler.runAfter(0, internal.synthesis.generate, {
+      // Schedule synthesis generation. The reference resolves to the
+      // internalAction at convex/synthesis/generate.ts → export generate.
+      const synthRef = (internal as any)?.synthesis?.generate?.generate;
+      if (synthRef) {
+        await ctx.scheduler.runAfter(0, synthRef, {
           caseId: args.caseId,
         });
       }
