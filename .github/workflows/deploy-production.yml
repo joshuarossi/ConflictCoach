@@ -19,7 +19,7 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - run: npm install --prefer-offline --no-audit --no-fund
 
       - name: Deploy Convex (prod) and build frontend
         env:
