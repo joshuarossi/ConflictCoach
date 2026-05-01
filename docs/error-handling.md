@@ -9,6 +9,7 @@ Conflict Coach uses a standardized error shape across the Convex backend and Rea
 | `UNAUTHENTICATED` | 401 | No valid session / identity |
 | `FORBIDDEN` | 403 | Authenticated but not authorized for the resource |
 | `NOT_FOUND` | 404 | Resource does not exist |
+| `USER_NOT_FOUND` | 404 | Authenticated identity exists but no user record has been provisioned (see [Auth docs](auth.md)) |
 | `CONFLICT` | 409 | State transition not allowed (e.g., acting on a closed case) |
 | `INVALID_INPUT` | 400 | Request validation failed |
 | `TOKEN_INVALID` | 400 | Invite token expired or inactive |
