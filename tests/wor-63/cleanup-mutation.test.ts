@@ -11,12 +11,14 @@
  * helper from convex/lib/stateMachine.ts. Both modules do not exist yet, so
  * these tests will FAIL at import time until the implementation is written.
  */
-import { describe, test, expect, vi, beforeEach } from "vitest";
+import { describe, test, expect, vi } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 
 // These imports will fail until implementation exists — that is the intended
-// "red" state. The cleanup mutation is expected to be an internalMutation.
-// We import the handler directly for unit testing.
-import { cleanupAbandonedCases } from "../../convex/crons.cleanup";
+// "red" state. The cleanup mutation wraps the handler in internalMutation.
+// We import the raw handler function for direct unit testing.
+import { cleanupAbandonedCases as cleanupAbandonedCasesHandler } from "../../convex/crons.cleanup";
 import { validateTransition } from "../../convex/lib/stateMachine";
 
 // --- Helpers ---
@@ -60,35 +62,22 @@ function makeFakeCtx(cases: ReturnType<typeof makeFakeCase>[]) {
   const patchedDocs: Array<{ id: string; fields: Record<string, unknown> }> =
     [];
 
+  // The mock returns ALL seeded cases without pre-filtering.
+  // The implementation's handler must perform its own filtering logic
+  // (status === JOINT_ACTIVE && updatedAt < 30-day cutoff) to select
+  // which cases to transition. This prevents gaming where the
+  // implementation blindly patches everything the mock returns.
   const ctx = {
     db: {
       query: (_table: string) => ({
         withIndex: (_indexName: string, _q: unknown) => ({
-          filter: (filterFn: (q: { eq: (...args: unknown[]) => unknown; lt: (...args: unknown[]) => unknown; field: (...args: unknown[]) => unknown }) => unknown) => ({
-            collect: async () => {
-              // Return cases that match the filter criteria.
-              // The real implementation filters on status=JOINT_ACTIVE and
-              // updatedAt < cutoff. We apply the same logic here.
-              return cases.filter((c) => {
-                if (c.status !== "JOINT_ACTIVE") return false;
-                const cutoff = Date.now() - THIRTY_DAYS_MS;
-                return c.updatedAt < cutoff;
-              });
-            },
+          filter: (_filterFn: unknown) => ({
+            collect: async () => cases,
           }),
-          collect: async () => {
-            return cases.filter((c) => c.status === "JOINT_ACTIVE");
-          },
+          collect: async () => cases,
         }),
-        filter: (filterFn: unknown) => ({
-          collect: async () => {
-            // Fallback: return JOINT_ACTIVE cases with old updatedAt
-            return cases.filter((c) => {
-              if (c.status !== "JOINT_ACTIVE") return false;
-              const cutoff = Date.now() - THIRTY_DAYS_MS;
-              return c.updatedAt < cutoff;
-            });
-          },
+        filter: (_filterFn: unknown) => ({
+          collect: async () => cases,
         }),
         collect: async () => cases,
       }),
@@ -119,7 +108,7 @@ describe("WOR-63: Cleanup mutation — find and transition abandoned cases", () 
     });
     const { ctx, patchedDocs } = makeFakeCtx([staleCase, freshCase]);
 
-    await cleanupAbandonedCases(ctx as any, {});
+    await cleanupAbandonedCasesHandler(ctx as any, {});
 
     // Only the stale case should be patched
     const patchedIds = patchedDocs.map((p) => p.id);
@@ -138,7 +127,7 @@ describe("WOR-63: Cleanup mutation — find and transition abandoned cases", () 
     });
     const { ctx, patchedDocs } = makeFakeCtx([staleCase]);
 
-    await cleanupAbandonedCases(ctx as any, {});
+    await cleanupAbandonedCasesHandler(ctx as any, {});
 
     expect(patchedDocs.length).toBeGreaterThanOrEqual(1);
     const patch = patchedDocs.find((p) => p.id === "case_abandoned");
@@ -167,6 +156,18 @@ describe("WOR-63: Cleanup mutation — find and transition abandoned cases", () 
     ).toThrow();
   });
 
+  test("AC5: crons.cleanup.ts source imports and calls validateTransition", () => {
+    // AC5: Verify the cleanup mutation actually imports and invokes
+    // validateTransition rather than hard-coding the status change.
+    const source = readFileSync(
+      resolve(__dirname, "../../convex/crons.cleanup.ts"),
+      "utf-8",
+    );
+    expect(source).toContain("validateTransition");
+    // Ensure it's imported from the state machine module
+    expect(source).toMatch(/import.*validateTransition.*from/);
+  });
+
   test("No action taken on cases in other statuses", async () => {
     // AC6: Cases not in JOINT_ACTIVE status must not be touched, even if
     // their updatedAt is older than 30 days.
@@ -190,7 +191,7 @@ describe("WOR-63: Cleanup mutation — find and transition abandoned cases", () 
     );
 
     const { ctx, patchedDocs } = makeFakeCtx(cases);
-    await cleanupAbandonedCases(ctx as any, {});
+    await cleanupAbandonedCasesHandler(ctx as any, {});
 
     // None of these cases should be patched
     expect(patchedDocs).toHaveLength(0);
@@ -217,12 +218,32 @@ describe("WOR-63: Cleanup mutation — find and transition abandoned cases", () 
     ];
     const { ctx, patchedDocs } = makeFakeCtx(cases);
 
-    await cleanupAbandonedCases(ctx as any, {});
+    await cleanupAbandonedCasesHandler(ctx as any, {});
 
     const patchedIds = patchedDocs.map((p) => p.id);
     expect(patchedIds).toContain("case_a");
     expect(patchedIds).toContain("case_b");
     expect(patchedIds).toContain("case_c");
     expect(patchedDocs.every((p) => p.fields.status === "CLOSED_ABANDONED")).toBe(true);
+  });
+
+  test("Cleanup mutation uses internalMutation (not client-callable)", () => {
+    // The cron mutation must be an internalMutation so only the scheduler
+    // can invoke it. Verify via source-code inspection.
+    const source = readFileSync(
+      resolve(__dirname, "../../convex/crons.cleanup.ts"),
+      "utf-8",
+    );
+
+    // Must import internalMutation from the generated server module
+    expect(source).toMatch(/import\s.*internalMutation.*from/);
+
+    // Must NOT use plain `mutation` (which would be client-callable).
+    // Check that `mutation` only appears as part of `internalMutation`.
+    const lines = source.split("\n");
+    const mutationLines = lines.filter(
+      (line) => /\bmutation\b/.test(line) && !/internalMutation/.test(line),
+    );
+    expect(mutationLines).toHaveLength(0);
   });
 });
