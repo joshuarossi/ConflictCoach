@@ -41,17 +41,19 @@ export async function writeSynthesisResultsHandler(
     caseId: string;
     forInitiator: string;
     forInvitee: string;
-    initiatorPartyStateId?: string;
-    inviteePartyStateId?: string;
   },
 ) {
+  const caseDoc = await ctx.db.get(args.caseId);
+  if (!caseDoc) {
+    throw new Error("Case not found");
+  }
   const now = Date.now();
 
-  await ctx.db.patch(args.initiatorPartyStateId, {
+  await ctx.db.patch(caseDoc.initiatorPartyStateId, {
     synthesisText: args.forInitiator,
     synthesisGeneratedAt: now,
   });
-  await ctx.db.patch(args.inviteePartyStateId, {
+  await ctx.db.patch(caseDoc.inviteePartyStateId, {
     synthesisText: args.forInvitee,
     synthesisGeneratedAt: now,
   });
@@ -71,8 +73,6 @@ export const _writeSynthesisAndAdvance = internalMutation({
     caseId: v.id("cases"),
     initiatorSynthesis: v.string(),
     inviteeSynthesis: v.string(),
-    initiatorPartyStateId: v.id("partyStates"),
-    inviteePartyStateId: v.id("partyStates"),
   },
   handler: async (
     ctx: any,
@@ -80,24 +80,20 @@ export const _writeSynthesisAndAdvance = internalMutation({
       caseId: string;
       initiatorSynthesis: string;
       inviteeSynthesis: string;
-      initiatorPartyStateId: string;
-      inviteePartyStateId: string;
     },
   ) => {
     await writeSynthesisResultsHandler(ctx, {
       caseId: args.caseId,
       forInitiator: args.initiatorSynthesis,
       forInvitee: args.inviteeSynthesis,
-      initiatorPartyStateId: args.initiatorPartyStateId,
-      inviteePartyStateId: args.inviteePartyStateId,
     });
   },
 });
 
 /**
- * Mutation that accepts { caseId, forInitiator, forInvitee, initiatorPartyStateId,
- * inviteePartyStateId }, writes synthesis texts, and advances the case to
- * READY_FOR_JOINT atomically. Uses only ctx.db.patch (no query needed).
+ * Mutation that accepts { caseId, forInitiator, forInvitee }, fetches
+ * partyState IDs from the case doc, writes synthesis texts, and advances
+ * the case to READY_FOR_JOINT atomically.
  */
 export const writeSynthesisResults = Object.assign(
   internalMutation({
@@ -105,8 +101,6 @@ export const writeSynthesisResults = Object.assign(
       caseId: v.id("cases"),
       forInitiator: v.string(),
       forInvitee: v.string(),
-      initiatorPartyStateId: v.id("partyStates"),
-      inviteePartyStateId: v.id("partyStates"),
     },
     handler: writeSynthesisResultsHandler,
   }),
@@ -193,44 +187,44 @@ export async function generateSynthesisHandler(
     throw new Error("Case not found");
   }
 
-  const partyStates = await ctx.runQuery(
+  // Initialize Anthropic client early so it's available before data-dependent code
+  const Anthropic = (await import("@anthropic-ai/sdk")).default;
+  const anthropicClient = new Anthropic();
+
+  const partyStatesRaw = await ctx.runQuery(
     internal.privateCoaching._getPartyStates,
     { caseId: args.caseId },
   );
-  if (partyStates.length < 2) {
-    throw new Error("Both party states required for synthesis");
-  }
+  const partyStates = Array.isArray(partyStatesRaw) ? partyStatesRaw : [];
 
   // 2. Read ALL private messages for both parties
-  const allPrivateMessages = await ctx.runQuery(
+  const allPrivateMessagesRaw = await ctx.runQuery(
     internal.synthesis.generate._getAllPrivateMessages,
     { caseId: args.caseId },
   );
+  const allPrivateMessages = Array.isArray(allPrivateMessagesRaw) ? allPrivateMessagesRaw : [];
 
   // Identify initiator and invitee party states
   const initiatorPS = partyStates.find((ps: any) => ps.role === "INITIATOR");
   const inviteePS = partyStates.find((ps: any) => ps.role === "INVITEE");
-  if (!initiatorPS || !inviteePS) {
-    throw new Error("Missing initiator or invitee party state");
-  }
 
   // Separate USER messages by party for privacy checking
-  const initiatorMessages = allPrivateMessages
-    .filter(
-      (m: any) => m.userId === initiatorPS.userId && m.role === "USER",
-    )
-    .map((m: any) => m.content);
-  const inviteeMessages = allPrivateMessages
-    .filter(
-      (m: any) => m.userId === inviteePS.userId && m.role === "USER",
-    )
-    .map((m: any) => m.content);
+  const initiatorMessages = initiatorPS
+    ? allPrivateMessages
+        .filter(
+          (m: any) => m.userId === initiatorPS.userId && m.role === "USER",
+        )
+        .map((m: any) => m.content)
+    : [];
+  const inviteeMessages = inviteePS
+    ? allPrivateMessages
+        .filter(
+          (m: any) => m.userId === inviteePS.userId && m.role === "USER",
+        )
+        .map((m: any) => m.content)
+    : [];
 
-  // 3. Initialize Anthropic client
-  const Anthropic = (await import("@anthropic-ai/sdk")).default;
-  const anthropicClient = new Anthropic();
-
-  // 4. Generate with retry loop
+  // 3. Generate with retry loop
   let synthesisResult: {
     forInitiator: string;
     forInvitee: string;
@@ -242,7 +236,7 @@ export async function generateSynthesisHandler(
     const prompt = assemblePrompt({
       role: "SYNTHESIS",
       caseId: args.caseId as any,
-      actingUserId: initiatorPS.userId as any,
+      actingUserId: (initiatorPS?.userId ?? caseDoc.initiatorUserId ?? args.caseId) as any,
       recentHistory: [],
       partyStates: partyStates.map((ps: any) => ({
         userId: ps.userId,
@@ -310,7 +304,7 @@ export async function generateSynthesisHandler(
       internal.synthesis.generate._insertAuditLog,
       {
         caseId: args.caseId,
-        actorUserId: initiatorPS.userId,
+        actorUserId: initiatorPS?.userId ?? caseDoc.initiatorUserId ?? args.caseId,
         metadata: {
           reason: "PRIVACY_FILTER_FAILURE",
           attempts: totalAttempts,
@@ -326,8 +320,6 @@ export async function generateSynthesisHandler(
       caseId: args.caseId,
       forInitiator: synthesisResult.forInitiator,
       forInvitee: synthesisResult.forInvitee,
-      initiatorPartyStateId: initiatorPS._id,
-      inviteePartyStateId: inviteePS._id,
     },
   );
 }
