@@ -36,7 +36,7 @@ export const _getAllPrivateMessages = internalQuery({
  * advance the case status to READY_FOR_JOINT. Uses only ctx.db.get/patch.
  *
  * Accepts pre-resolved partyState IDs so the mutation is a focused write
- * operation with no table queries.
+ * operation with no index scans or collection queries.
  */
 export async function writeSynthesisResultsHandler(
   ctx: any,
@@ -167,18 +167,21 @@ async function callClaudeWithRetry(
   const TIMEOUT_MS = 30_000;
 
   for (let attempt = 0; attempt < 2; attempt++) {
+    let timeoutHandle: ReturnType<typeof setTimeout> | undefined;
     try {
       const response = await Promise.race([
         anthropicClient.messages.create(requestParams),
-        new Promise((_, reject) =>
-          setTimeout(
+        new Promise((_, reject) => {
+          timeoutHandle = setTimeout(
             () => reject(new Error("AI_TIMEOUT")),
             TIMEOUT_MS,
-          ),
-        ),
+          );
+        }),
       ]);
+      clearTimeout(timeoutHandle);
       return response;
     } catch (err: any) {
+      clearTimeout(timeoutHandle);
       // Rate limit: retry once with 2s backoff
       if (err?.status === 429 && attempt === 0) {
         await new Promise((resolve) => setTimeout(resolve, 2000));
@@ -187,6 +190,7 @@ async function callClaudeWithRetry(
       throw err;
     }
   }
+  throw new Error("callClaudeWithRetry: exhausted all retry attempts");
 }
 
 // ---------------------------------------------------------------------------
@@ -232,6 +236,10 @@ export async function generateSynthesisHandler(
   const initiatorPS = partyStates.find((ps: any) => ps.role === "INITIATOR");
   const inviteePS = partyStates.find((ps: any) => ps.role === "INVITEE");
 
+  if (!initiatorPS?.userId || !inviteePS?.userId) {
+    throw new Error("Could not resolve userId for both party states");
+  }
+
   // Separate USER messages by party for privacy checking
   const initiatorMessages = initiatorPS
     ? allPrivateMessages
@@ -256,35 +264,36 @@ export async function generateSynthesisHandler(
         )
     : [];
 
-  // 3. Generate with retry loop
+  // 3. Assemble prompt — synthesis sees BOTH parties' content
+  const prompt = promptsLib.assemblePrompt({
+    role: "SYNTHESIS",
+    caseId: args.caseId as any,
+    actingUserId: initiatorPS.userId as any,
+    recentHistory: [],
+    partyStates: partyStates.map((ps: any) => ({
+      userId: ps.userId,
+      role: ps.role,
+      mainTopic: ps.mainTopic,
+      description: ps.description,
+      desiredOutcome: ps.desiredOutcome,
+      synthesisText: ps.synthesisText,
+    })),
+    privateMessages: allPrivateMessages.map((m: any) => ({
+      userId: m.userId,
+      role: m.role,
+      content: m.content,
+    })),
+  });
+
+  // 4. Generate with retry loop
   let synthesisResult: {
     forInitiator: string;
     forInvitee: string;
   } | null = null;
   const totalAttempts = 1 + MAX_RETRIES;
+  let lastFailureReason: string = "PRIVACY_FILTER_FAILURE";
 
   for (let attempt = 0; attempt < totalAttempts; attempt++) {
-    // Assemble prompt — synthesis sees BOTH parties' content
-    const prompt = promptsLib.assemblePrompt({
-      role: "SYNTHESIS",
-      caseId: args.caseId as any,
-      actingUserId: (initiatorPS?.userId ?? caseDoc.initiatorUserId ?? args.caseId) as any,
-      recentHistory: [],
-      partyStates: partyStates.map((ps: any) => ({
-        userId: ps.userId,
-        role: ps.role,
-        mainTopic: ps.mainTopic,
-        description: ps.description,
-        desiredOutcome: ps.desiredOutcome,
-        synthesisText: ps.synthesisText,
-      })),
-      privateMessages: allPrivateMessages.map((m: any) => ({
-        userId: m.userId,
-        role: m.role,
-        content: m.content,
-      })),
-    });
-
     // Call Claude Sonnet — non-streaming (one-shot) with 429/timeout handling
     let response: any;
     try {
@@ -303,20 +312,38 @@ export async function generateSynthesisHandler(
       throw err;
     }
 
+    // Guard against unexpected response shape
+    if (!response?.content) {
+      console.error(
+        `Synthesis attempt ${attempt + 1}/${totalAttempts} for case ${args.caseId}: unexpected response shape (no content)`,
+      );
+      lastFailureReason = "UNEXPECTED_RESPONSE";
+      continue;
+    }
+
     // Extract text content
     const textBlock = response.content.find(
       (b: any) => b.type === "text",
     );
     if (!textBlock || textBlock.type !== "text") {
-      continue; // No text — retry
+      console.error(
+        `Synthesis attempt ${attempt + 1}/${totalAttempts} for case ${args.caseId}: no text block in response. stop_reason=${response.stop_reason}`,
+      );
+      lastFailureReason = "NO_TEXT_CONTENT";
+      continue;
     }
 
     // Parse JSON response
     let parsed: { forInitiator: string; forInvitee: string };
     try {
       parsed = parseSynthesisResponse(textBlock.text);
-    } catch {
-      continue; // Malformed JSON — retry
+    } catch (parseErr: any) {
+      console.error(
+        `Synthesis JSON parse failed for case ${args.caseId}, attempt ${attempt + 1}/${totalAttempts}:`,
+        parseErr?.message,
+      );
+      lastFailureReason = "JSON_PARSE_FAILURE";
+      continue;
     }
 
     // Privacy filter: check each synthesis against the OTHER party's messages
@@ -346,10 +373,9 @@ export async function generateSynthesisHandler(
       _insertAuditLog,
       {
         caseId: args.caseId,
-        actorUserId:
-          initiatorPS?.userId ?? caseDoc.initiatorUserId ?? args.caseId,
+        actorUserId: initiatorPS.userId,
         metadata: {
-          reason: "PRIVACY_FILTER_FAILURE",
+          reason: lastFailureReason,
           attempts: totalAttempts,
         },
       },

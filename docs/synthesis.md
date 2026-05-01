@@ -27,7 +27,8 @@ The synthesis action follows the project's standard error-handling patterns (see
 
 - **429 / rate-limit** — Retried automatically.
 - **Timeout (>30 s)** — The case is marked with an error state.
-- **Content-filter refusal** — Treated as an AI error; the generic fallback text is used.
+- **Content-filter refusal** — No dedicated handler; a refused response will fail JSON
+  parsing and consume a retry attempt. After all attempts exhaust, fallback text is used.
 
 ## Key Files
 
