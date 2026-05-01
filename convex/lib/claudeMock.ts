@@ -95,7 +95,7 @@ export async function runMockStreamWithDelay(
   const {
     role = "PRIVATE_COACH",
     wordDelayMs = 20,
-    flushIntervalMs = 50,
+    flushIntervalMs = 0,
   } = options;
 
   const fullText = getMockResponse(role);
