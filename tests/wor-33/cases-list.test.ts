@@ -10,7 +10,6 @@
 import { describe, test, expect, vi } from "vitest";
 import { ConvexError } from "convex/values";
 
-// @ts-expect-error WOR-33 red-state import: list query is created by task-implement.
 import { list } from "../../convex/cases";
 
 // ---------------------------------------------------------------------------
