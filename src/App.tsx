@@ -15,7 +15,7 @@ import { TemplatesListPage } from "@/pages/admin/TemplatesListPage";
 import { TemplateEditPage } from "@/pages/admin/TemplateEditPage";
 import { AuditLogPage } from "@/pages/admin/AuditLogPage";
 
-function App() {
+export function App() {
   return (
     <Routes>
       {/* Public routes */}

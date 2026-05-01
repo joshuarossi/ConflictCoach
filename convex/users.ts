@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { query } from "./_generated/server";
 import { requireAuth } from "./lib/auth";
 
@@ -7,7 +6,7 @@ import { requireAuth } from "./lib/auth";
  */
 export const me = query({
   args: {},
-  handler: async (ctx: any) => {
+  handler: async (ctx) => {
     return await requireAuth(ctx);
   },
 });
