@@ -7,7 +7,6 @@ import { describe, test, expect, vi, afterEach } from "vitest";
  * simulate the STREAMING → COMPLETE lifecycle with intermediate flushes.
  */
 
-// @ts-expect-error WOR-71 red-state import: implementation is created by task-implement.
 import { runMockStreamWithDelay } from "../../convex/lib/claudeMock";
 
 /** Minimal mock for a Convex action context's runMutation capability. */

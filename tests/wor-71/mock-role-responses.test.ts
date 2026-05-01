@@ -8,7 +8,6 @@ import { describe, test, expect, vi, afterEach } from "vitest";
  * This module does not exist yet — it is part of the WOR-71 implementation.
  */
 
-// @ts-expect-error WOR-71 red-state import: implementation is created by task-implement.
 import { getMockResponse, MOCK_RESPONSES } from "../../convex/lib/claudeMock";
 
 describe("AC: Stub returns deterministic canned responses for each AI role", () => {
