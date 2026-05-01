@@ -16,9 +16,9 @@ assemblePrompt(opts: AssemblePromptOpts): { system: string; messages: Message[] 
 | `caseId` | `Id<"cases">` | The case being worked on |
 | `actingUserId` | `Id<"users">` | The user making the request |
 | `recentHistory` | `Message[]` | Recent conversation messages (Anthropic SDK format) |
-| `partyStates` | `PartyState[]` | Both parties' form fields and synthesis texts |
-| `privateMessages` | `PrivateMessage[]` | Private coaching messages (filtered per role) |
-| `jointMessages` | `JointMessage[]` | Joint session chat messages |
+| `partyStates` | `PartyState[]?` | Both parties' form fields and synthesis texts |
+| `privateMessages` | `PrivateMessage[]?` | All private coaching messages (filtered internally per role) |
+| `jointMessages` | `JointMessage[]?` | Joint session chat messages |
 | `templateVersion?` | `TemplateVersion` | Optional template with guidance and instructions |
 
 ### Return Value
@@ -57,9 +57,10 @@ Context includes joint chat history and only the acting user's own synthesis. Th
 
 When a `templateVersion` is supplied:
 
-- **`globalGuidance`** is prepended to the system prompt for COACH and DRAFT_COACH roles.
-- **`coachInstructions`** is appended for the COACH role only.
-- **`draftCoachInstructions`** is appended for the DRAFT_COACH role only.
+- **`globalGuidance`** is placed first in the system prompt for COACH and DRAFT_COACH roles.
+- **`coachInstructions`** follows globalGuidance for the COACH role only.
+- **`draftCoachInstructions`** follows globalGuidance for the DRAFT_COACH role only.
+- The role's base system prompt appears last.
 - PRIVATE_COACH and SYNTHESIS roles ignore template content entirely.
 
 When no `templateVersion` is provided, the system prompt still functions correctly without template content.
