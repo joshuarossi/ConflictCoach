@@ -8,7 +8,6 @@
  */
 import { describe, test, expect } from "vitest";
 import { ConvexError } from "convex/values";
-// @ts-expect-error WOR-47 red-state import: implementation is created by task-implement.
 import { messages } from "../../convex/jointChat";
 import {
   createMockCtx,
