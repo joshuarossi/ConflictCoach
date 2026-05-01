@@ -1,5 +1,5 @@
 import { useConvexAuth } from "@convex-dev/auth/react";
-import { Routes, Route, useInRouterContext } from "react-router-dom";
+import { Routes, Route, useInRouterContext, useLocation } from "react-router-dom";
 import { PrivacyBanner } from "@/components/PrivacyBanner";
 import { ConnectedPrivateCoachingView } from "@/components/PrivateCoachingView";
 import { SignIn } from "@/components/SignIn";
@@ -19,6 +19,12 @@ function Home() {
 export default function App() {
   const { isLoading, isAuthenticated } = useConvexAuth();
   const inRouter = useInRouterContext();
+  const location = useLocation();
+
+  // Render sign-in form immediately at /login without waiting for auth to resolve
+  if (location.pathname === "/login") {
+    return <SignIn />;
+  }
 
   if (isLoading) {
     return (
