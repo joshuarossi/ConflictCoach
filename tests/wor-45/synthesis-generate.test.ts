@@ -205,16 +205,38 @@ describe("AC8: Synthesis is one-shot, non-streaming", () => {
     // Reset the module-level mock so we can inspect calls from this test
     mockCreate.mockClear();
 
-    // Build a minimal action context for the generate action
+    // Build a minimal action context for the generate action.
+    // The handler issues three runQuery calls in order: _getCase,
+    // _getPartyStates, _getAllPrivateMessages. A single canned mockResolvedValue
+    // returns the case-shaped object for every call and the partyStates branch
+    // (which expects an array) collapses to [], causing the handler to throw
+    // before ever reaching the SDK. Differentiate per-call so the handler
+    // reaches messages.create.
     const mockRunMutation = vi.fn();
-    const mockActionCtx = {
-      runMutation: mockRunMutation,
-      runQuery: vi.fn().mockResolvedValue({
+    const mockRunQuery = vi
+      .fn()
+      .mockResolvedValueOnce({
         _id: "cases:abc123",
         status: "BOTH_PRIVATE_COACHING_COMPLETE",
         initiatorPartyStateId: "partyStates:initPS",
         inviteePartyStateId: "partyStates:invPS",
-      }),
+      })
+      .mockResolvedValueOnce([
+        {
+          _id: "partyStates:initPS",
+          role: "INITIATOR",
+          userId: "users:initUser",
+        },
+        {
+          _id: "partyStates:invPS",
+          role: "INVITEE",
+          userId: "users:invUser",
+        },
+      ])
+      .mockResolvedValueOnce([]);
+    const mockActionCtx = {
+      runMutation: mockRunMutation,
+      runQuery: mockRunQuery,
     };
 
     // generateSynthesis is the action that calls the Anthropic SDK.
