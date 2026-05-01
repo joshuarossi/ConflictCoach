@@ -9,3 +9,7 @@ dist/
 
 *.log
 .claude/settings.local.json
+
+# Playwright artifacts
+test-results/
+playwright-report/

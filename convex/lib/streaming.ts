@@ -3,6 +3,7 @@ import { internalMutation } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { v } from "convex/values";
 import type { GenericActionCtx, GenericDataModel } from "convex/server";
+import { runMockStreamWithDelay } from "./claudeMock";
 
 // Resolve mutation references with optional chaining so the module is safe to
 // import in test environments where `internal` is a stub/empty object.
@@ -110,42 +111,8 @@ const CONTENT_FILTER_MESSAGE =
 
 // ---------------------------------------------------------------------------
 // Mock streaming (CLAUDE_MOCK=true — TechSpec §10.4)
+// Delegated to convex/lib/claudeMock.ts for role-specific canned responses.
 // ---------------------------------------------------------------------------
-
-const MOCK_RESPONSE =
-  "I understand your concern. Let's work through this together. " +
-  "Could you tell me more about the specific situation and how it made you feel?";
-
-async function runMockStream(
-  ctx: ActionCtx,
-  messageId: string,
-): Promise<void> {
-  const words = MOCK_RESPONSE.split(" ");
-  let buffer = "";
-  let lastFlush = Date.now();
-
-  for (const word of words) {
-    buffer += (buffer ? " " : "") + word;
-    const now = Date.now();
-    if (now - lastFlush >= BATCH_INTERVAL_MS) {
-      await ctx.runMutation(updateRef, {
-        messageId,
-        content: buffer,
-        status: "STREAMING" as const,
-      });
-      lastFlush = now;
-    }
-    // Simulate small delay between words
-    await new Promise((r) => setTimeout(r, 20));
-  }
-
-  await ctx.runMutation(updateRef, {
-    messageId,
-    content: MOCK_RESPONSE,
-    status: "COMPLETE" as const,
-    tokens: 42, // deterministic mock token count
-  });
-}
 
 // ---------------------------------------------------------------------------
 // Core streaming helper
@@ -183,9 +150,16 @@ export async function streamAIResponse(
     },
   );
 
-  // 2. Mock mode short-circuit
+  // 2. Mock mode short-circuit (role-specific canned responses via claudeMock)
   if (process.env.CLAUDE_MOCK === "true") {
-    await runMockStream(ctx, messageId);
+    // Infer AI role from messageFields if available, default to PRIVATE_COACH
+    const role = (messageFields as Record<string, unknown>).aiRole as
+      | "PRIVATE_COACH"
+      | "SYNTHESIS"
+      | "COACH"
+      | "DRAFT_COACH"
+      | undefined;
+    await runMockStreamWithDelay(ctx, messageId, updateRef, { role });
     return messageId;
   }
 

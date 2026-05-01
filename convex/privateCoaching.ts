@@ -205,6 +205,7 @@ export const generateAIResponse = action({
           caseId: args.caseId,
           userId: args.userId,
           role: "AI",
+          aiRole: "PRIVATE_COACH",
         },
         model: "claude-sonnet-4-5-20250514",
         systemPrompt: prompt.system,

@@ -8,6 +8,7 @@ import { v } from "convex/values";
 import { _getCase, _getPartyStates } from "../privateCoaching";
 import * as promptsLib from "../lib/prompts";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "../lib/privacyFilter";
+import { getMockResponse } from "../lib/claudeMock";
 
 // Maximum privacy-violation retries (total attempts = 1 + MAX_RETRIES)
 const MAX_RETRIES = 2;
@@ -285,7 +286,24 @@ export async function generateSynthesisHandler(
     })),
   });
 
-  // 4. Generate with retry loop
+  // 4. Mock mode short-circuit (CLAUDE_MOCK=true — TechSpec §10.4)
+  if (process.env.CLAUDE_MOCK === "true") {
+    const mockText = getMockResponse("SYNTHESIS");
+    const parsed = parseSynthesisResponse(mockText);
+    if (!initiatorPS?._id || !inviteePS?._id) {
+      throw new Error("Could not find both party states for case");
+    }
+    await ctx.runMutation(writeSynthesisResults, {
+      caseId: args.caseId,
+      initiatorPartyStateId: initiatorPS._id,
+      inviteePartyStateId: inviteePS._id,
+      forInitiator: parsed.forInitiator,
+      forInvitee: parsed.forInvitee,
+    });
+    return;
+  }
+
+  // 5. Generate with retry loop
   let synthesisResult: {
     forInitiator: string;
     forInvitee: string;
@@ -362,7 +380,7 @@ export async function generateSynthesisHandler(
     }
   }
 
-  // 5. Handle final failure — use generic fallback + audit log
+  // 6. Handle final failure — use generic fallback + audit log
   if (!synthesisResult) {
     synthesisResult = {
       forInitiator: FALLBACK_TEXT,
@@ -382,7 +400,7 @@ export async function generateSynthesisHandler(
     );
   }
 
-  // 6. Atomically write synthesis texts + advance case to READY_FOR_JOINT
+  // 7. Atomically write synthesis texts + advance case to READY_FOR_JOINT
   if (!initiatorPS?._id || !inviteePS?._id) {
     throw new Error("Could not find both party states for case");
   }
