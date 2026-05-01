@@ -33,7 +33,10 @@ export const _getAllPrivateMessages = internalQuery({
 
 /**
  * Plain helper: atomically write synthesis texts to both partyStates and
- * advance the case status to READY_FOR_JOINT. Uses only ctx.db.patch.
+ * advance the case status to READY_FOR_JOINT. Uses only ctx.db.
+ *
+ * Queries partyStates by caseId to find initiator/invitee docs — the cases
+ * table does not store partyState IDs directly.
  */
 export async function writeSynthesisResultsHandler(
   ctx: any,
@@ -47,13 +50,31 @@ export async function writeSynthesisResultsHandler(
   if (!caseDoc) {
     throw new Error("Case not found");
   }
+
+  // Look up partyStates by caseId — cases table has no partyState ID fields
+  const partyStates = await ctx.db
+    .query("partyStates")
+    .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
+    .collect();
+
+  const initiatorPS = partyStates.find(
+    (ps: any) => ps.role === "INITIATOR",
+  );
+  const inviteePS = partyStates.find(
+    (ps: any) => ps.role === "INVITEE",
+  );
+
+  if (!initiatorPS || !inviteePS) {
+    throw new Error("Could not find both party states for case");
+  }
+
   const now = Date.now();
 
-  await ctx.db.patch(caseDoc.initiatorPartyStateId, {
+  await ctx.db.patch(initiatorPS._id, {
     synthesisText: args.forInitiator,
     synthesisGeneratedAt: now,
   });
-  await ctx.db.patch(caseDoc.inviteePartyStateId, {
+  await ctx.db.patch(inviteePS._id, {
     synthesisText: args.forInvitee,
     synthesisGeneratedAt: now,
   });
@@ -65,35 +86,9 @@ export async function writeSynthesisResultsHandler(
 }
 
 /**
- * Atomically write synthesis texts to both partyStates and advance
- * the case status to READY_FOR_JOINT.
- */
-export const _writeSynthesisAndAdvance = internalMutation({
-  args: {
-    caseId: v.id("cases"),
-    initiatorSynthesis: v.string(),
-    inviteeSynthesis: v.string(),
-  },
-  handler: async (
-    ctx: any,
-    args: {
-      caseId: string;
-      initiatorSynthesis: string;
-      inviteeSynthesis: string;
-    },
-  ) => {
-    await writeSynthesisResultsHandler(ctx, {
-      caseId: args.caseId,
-      forInitiator: args.initiatorSynthesis,
-      forInvitee: args.inviteeSynthesis,
-    });
-  },
-});
-
-/**
- * Mutation that accepts { caseId, forInitiator, forInvitee }, fetches
- * partyState IDs from the case doc, writes synthesis texts, and advances
- * the case to READY_FOR_JOINT atomically.
+ * Mutation that accepts { caseId, forInitiator, forInvitee }, queries
+ * partyStates by caseId, writes synthesis texts, and advances the case
+ * to READY_FOR_JOINT atomically.
  */
 export const writeSynthesisResults = Object.assign(
   internalMutation({
@@ -165,6 +160,39 @@ export function parseSynthesisResponse(text: string): {
   }
 
   return { forInitiator: parsed.forInitiator, forInvitee: parsed.forInvitee };
+}
+
+/**
+ * Call Claude with retry on 429 rate limit (TechSpec §6.5).
+ * Retries once with 2s backoff on 429. Throws on timeout >30s or other errors.
+ */
+async function callClaudeWithRetry(
+  anthropicClient: any,
+  requestParams: any,
+): Promise<any> {
+  const TIMEOUT_MS = 30_000;
+
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const response = await Promise.race([
+        anthropicClient.messages.create(requestParams),
+        new Promise((_, reject) =>
+          setTimeout(
+            () => reject(new Error("AI_TIMEOUT")),
+            TIMEOUT_MS,
+          ),
+        ),
+      ]);
+      return response;
+    } catch (err: any) {
+      // Rate limit: retry once with 2s backoff
+      if (err?.status === 429 && attempt === 0) {
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        continue;
+      }
+      throw err;
+    }
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -263,13 +291,23 @@ export async function generateSynthesisHandler(
       })),
     });
 
-    // Call Claude Sonnet — non-streaming (one-shot)
-    const response = await anthropicClient.messages.create({
-      model: "claude-sonnet-4-5-20250514",
-      max_tokens: 4096,
-      system: prompt.system,
-      messages: prompt.messages,
-    });
+    // Call Claude Sonnet — non-streaming (one-shot) with 429/timeout handling
+    let response: any;
+    try {
+      response = await callClaudeWithRetry(anthropicClient, {
+        model: "claude-sonnet-4-5-20250514",
+        max_tokens: 4096,
+        system: prompt.system,
+        messages: prompt.messages,
+      });
+    } catch (err: any) {
+      if (err?.message === "AI_TIMEOUT") {
+        const timeoutErr = new Error("Synthesis generation timed out after 30s");
+        (timeoutErr as any).cause = err;
+        throw timeoutErr;
+      }
+      throw err;
+    }
 
     // Extract text content
     const textBlock = response.content.find(
@@ -348,8 +386,7 @@ export const generate = internalAction({
 
 /**
  * Named export for direct handler access. Plain object (not a registered
- * Convex action) so typeof !== 'function' — callers resolve .handler
- * to the raw generateSynthesisHandler. Production use goes through
- * the `generate` registered internalAction above.
+ * Convex action) — callers resolve .handler to the raw generateSynthesisHandler.
+ * Production use goes through the `generate` registered internalAction above.
  */
 export const generateSynthesis = { handler: generateSynthesisHandler };
