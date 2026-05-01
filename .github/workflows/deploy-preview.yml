@@ -1,0 +1,77 @@
+name: Deploy preview
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+concurrency:
+  group: deploy-preview-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - run: npm ci
+
+      - name: Compute preview branch name
+        id: branch
+        env:
+          HEAD_REF: ${{ github.head_ref }}
+        run: |
+          # Cloudflare Pages branch names: lowercase, alphanumeric + hyphens, max 28 chars
+          slug=$(printf '%s' "$HEAD_REF" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | cut -c1-28 | sed 's/-$//')
+          echo "slug=$slug" >> "$GITHUB_OUTPUT"
+
+      - name: Deploy Convex (preview) and build frontend
+        env:
+          CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_PREVIEW }}
+        run: npx convex deploy --preview-create "${{ steps.branch.outputs.slug }}" --cmd "npm run build"
+
+      - name: Deploy to Cloudflare Pages (preview)
+        id: cf
+        uses: cloudflare/wrangler-action@v3
+        with:
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=${{ steps.branch.outputs.slug }}
+
+      - name: Comment preview URL on PR
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const url = `${{ steps.cf.outputs.deployment-url }}`;
+            const marker = '<!-- preview-deploy-comment -->';
+            const body = `${marker}\nPreview deployed: ${url}`;
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            const existing = comments.find(c => c.body && c.body.includes(marker));
+            if (existing) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: existing.id,
+                body,
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body,
+              });
+            }
