@@ -9,7 +9,6 @@
  */
 import { describe, test, expect } from "vitest";
 import { ConvexError } from "convex/values";
-// @ts-expect-error WOR-52 red-state import: implementation is created by task-implement.
 import { unilateralClose } from "../../convex/caseClosure";
 import {
   createMockCtx,
