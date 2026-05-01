@@ -90,3 +90,66 @@ export const createCase = mutation({
     return caseId;
   },
 });
+
+// ---------------------------------------------------------------------------
+// createCaseForEmail — fixture-friendly variant that resolves email → userId
+// before delegating to the same insert path. Lets browser fixtures avoid
+// shipping the user's _id around (they only ever know the email).
+// ---------------------------------------------------------------------------
+
+export const createCaseForEmail = mutation({
+  args: {
+    email: v.string(),
+    category: v.optional(v.string()),
+    isSolo: v.optional(v.boolean()),
+  },
+  handler: async (
+    ctx: any,
+    args: { email: string; category?: string; isSolo?: boolean },
+  ) => {
+    assertTestMode();
+
+    const user = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q: any) => q.eq("email", args.email))
+      .first();
+    if (!user) {
+      throw new Error(`Test fixture user not found for email: ${args.email}`);
+    }
+
+    const category = args.category ?? "workplace";
+    const templateId = await ctx.db.insert("templates", {
+      category,
+      name: "Test Template",
+      createdAt: Date.now(),
+      createdByUserId: user._id,
+    });
+    const templateVersionId = await ctx.db.insert("templateVersions", {
+      templateId,
+      version: 1,
+      globalGuidance: "Test guidance for conflict coaching.",
+      publishedAt: Date.now(),
+      publishedByUserId: user._id,
+    });
+    await ctx.db.patch(templateId, { currentVersionId: templateVersionId });
+
+    const now = Date.now();
+    const caseId = await ctx.db.insert("cases", {
+      schemaVersion: 1 as const,
+      status: "DRAFT_PRIVATE_COACHING" as const,
+      isSolo: args.isSolo ?? true,
+      category,
+      templateVersionId,
+      initiatorUserId: user._id,
+      createdAt: now,
+      updatedAt: now,
+    });
+    await ctx.db.insert("partyStates", {
+      caseId,
+      userId: user._id,
+      role: "INITIATOR" as const,
+    });
+
+    return caseId;
+  },
+});

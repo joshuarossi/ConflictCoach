@@ -92,11 +92,12 @@ export async function runMockStreamWithDelay(
   updateMutationRef: any,
   options: MockStreamOptions = {},
 ): Promise<void> {
-  const {
-    role = "PRIVATE_COACH",
-    wordDelayMs = 20,
-    flushIntervalMs = 0,
-  } = options;
+  // Defensive extraction via nullish coalescing — avoids edge cases where
+  // destructuring defaults might not apply (e.g., explicit undefined values
+  // from partial option spreads in different JS runtimes).
+  const role = options.role ?? "PRIVATE_COACH";
+  const wordDelayMs = options.wordDelayMs ?? 20;
+  const flushIntervalMs = options.flushIntervalMs ?? 0;
 
   const fullText = getMockResponse(role);
   const words = fullText.split(" ");

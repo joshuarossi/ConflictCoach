@@ -7,7 +7,6 @@ import { describe, test, expect } from "vitest";
  * This module does not exist yet — it is part of the WOR-71 implementation.
  */
 
-// @ts-expect-error WOR-71 red-state import: implementation is created by task-implement.
 import { createTestUser, loginAsUser, createTestCase } from "../../e2e/fixtures";
 
 describe("AC: Test fixtures — createTestUser, loginAsUser, createTestCase helpers", () => {

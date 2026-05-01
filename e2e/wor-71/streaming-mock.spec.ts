@@ -12,7 +12,6 @@ import { test, expect } from "@playwright/test";
  * an authenticated user, and an active case in private coaching phase.
  */
 
-// @ts-expect-error WOR-71 red-state import: implementation is created by task-implement.
 import { createTestUser, loginAsUser, createTestCase } from "../fixtures";
 
 test.describe("AC: Mock streaming simulation in E2E", () => {

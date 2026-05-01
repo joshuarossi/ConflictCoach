@@ -8,7 +8,6 @@ import { test, expect } from "@playwright/test";
  * and verify the dashboard shows the created case.
  */
 
-// @ts-expect-error WOR-71 red-state import: implementation is created by task-implement.
 import { createTestUser, loginAsUser, createTestCase } from "../fixtures";
 
 test.describe("AC: Test fixtures work end-to-end", () => {

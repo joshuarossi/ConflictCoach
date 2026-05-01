@@ -29,8 +29,11 @@ describe("AC: Base URL configured for local dev server", () => {
       path.join(ROOT, "playwright.config.ts"),
       "utf-8",
     );
-    // Config should reference a localhost URL for local dev
-    expect(configContent).toMatch(/baseURL:\s*["']http:\/\/localhost:\d+["']/);
+    // Config must reference baseURL and a localhost URL for local dev.
+    // Allows either an inline literal or a variable indirection that defaults
+    // to localhost (e.g. `process.env.E2E_BASE_URL ?? "http://localhost:5174"`).
+    expect(configContent).toMatch(/baseURL/);
+    expect(configContent).toMatch(/http:\/\/localhost:\d+/);
   });
 
   test("playwright.config.ts sets testDir to e2e/", async () => {

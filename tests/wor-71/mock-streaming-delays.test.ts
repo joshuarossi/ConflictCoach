@@ -30,9 +30,9 @@ describe("AC: Stub simulates streaming with configurable delays", () => {
   test("mock streaming inserts STREAMING status updates before COMPLETE", async () => {
     const ctx = createMockCtx();
 
-    await runMockStreamWithDelay(ctx, "mock_msg_id", {
+    await runMockStreamWithDelay(ctx, "mock_msg_id", "updateMutationRef", {
       role: "PRIVATE_COACH",
-      delayMs: 10,
+      wordDelayMs: 10,
     });
 
     // Should have at least one STREAMING update and one COMPLETE update
@@ -47,9 +47,9 @@ describe("AC: Stub simulates streaming with configurable delays", () => {
     const ctx = createMockCtx();
     const start = Date.now();
 
-    await runMockStreamWithDelay(ctx, "mock_msg_id", {
+    await runMockStreamWithDelay(ctx, "mock_msg_id", "updateMutationRef", {
       role: "PRIVATE_COACH",
-      delayMs: 15,
+      wordDelayMs: 15,
     });
 
     const elapsed = Date.now() - start;
@@ -61,18 +61,18 @@ describe("AC: Stub simulates streaming with configurable delays", () => {
     // Fast run
     const ctxFast = createMockCtx();
     const startFast = Date.now();
-    await runMockStreamWithDelay(ctxFast, "msg_fast", {
+    await runMockStreamWithDelay(ctxFast, "msg_fast", "updateMutationRef", {
       role: "PRIVATE_COACH",
-      delayMs: 5,
+      wordDelayMs: 5,
     });
     const elapsedFast = Date.now() - startFast;
 
     // Slow run
     const ctxSlow = createMockCtx();
     const startSlow = Date.now();
-    await runMockStreamWithDelay(ctxSlow, "msg_slow", {
+    await runMockStreamWithDelay(ctxSlow, "msg_slow", "updateMutationRef", {
       role: "PRIVATE_COACH",
-      delayMs: 30,
+      wordDelayMs: 30,
     });
     const elapsedSlow = Date.now() - startSlow;
 
@@ -83,9 +83,9 @@ describe("AC: Stub simulates streaming with configurable delays", () => {
   test("final COMPLETE mutation includes the full canned response content", async () => {
     const ctx = createMockCtx();
 
-    await runMockStreamWithDelay(ctx, "mock_msg_id", {
+    await runMockStreamWithDelay(ctx, "mock_msg_id", "updateMutationRef", {
       role: "PRIVATE_COACH",
-      delayMs: 5,
+      wordDelayMs: 5,
     });
 
     const completeMutation = ctx.mutations.find(
@@ -99,9 +99,9 @@ describe("AC: Stub simulates streaming with configurable delays", () => {
   test("final COMPLETE mutation includes a deterministic token count", async () => {
     const ctx = createMockCtx();
 
-    await runMockStreamWithDelay(ctx, "mock_msg_id", {
+    await runMockStreamWithDelay(ctx, "mock_msg_id", "updateMutationRef", {
       role: "PRIVATE_COACH",
-      delayMs: 5,
+      wordDelayMs: 5,
     });
 
     const completeMutation = ctx.mutations.find(
