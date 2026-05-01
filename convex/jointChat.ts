@@ -25,13 +25,13 @@ async function requireCaseParty(
   ctx: { db: any },
   caseId: string,
   userId: string,
-): Promise<any> {
+): Promise<{ caseDoc: any; partyState: any }> {
   const caseDoc = await ctx.db.get(caseId);
   if (!caseDoc) {
     throwAppError("NOT_FOUND", "Case not found");
   }
 
-  // Authorise via partyStates table (per AC: "via partyStates lookup")
+  // Authorise via partyStates table
   const partyState = await ctx.db
     .query("partyStates")
     .withIndex("by_case_and_user", (q: any) =>
@@ -43,7 +43,7 @@ async function requireCaseParty(
     throwAppError("FORBIDDEN", "You are not a party to this case");
   }
 
-  return caseDoc;
+  return { caseDoc, partyState };
 }
 
 // ---------------------------------------------------------------------------
@@ -56,7 +56,7 @@ export const messages = query({
   },
   handler: async (ctx: any, args: { caseId: string }) => {
     const user = await requireAuth(ctx);
-    const caseDoc = await requireCaseParty(ctx, args.caseId, user._id);
+    const { caseDoc } = await requireCaseParty(ctx, args.caseId, user._id);
 
     // State validation: only JOINT_ACTIVE or CLOSED_* statuses are readable
     if (!(READABLE_STATUSES as readonly string[]).includes(caseDoc.status)) {
@@ -71,7 +71,6 @@ export const messages = query({
       .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
       .collect();
 
-    // Sort by createdAt ascending
     return msgs.sort(
       (a: { createdAt: number }, b: { createdAt: number }) =>
         a.createdAt - b.createdAt,
@@ -90,7 +89,7 @@ export const sendUserMessage = mutation({
   },
   handler: async (ctx: any, args: { caseId: string; content: string }) => {
     const user = await requireAuth(ctx);
-    const caseDoc = await requireCaseParty(ctx, args.caseId, user._id);
+    const { caseDoc } = await requireCaseParty(ctx, args.caseId, user._id);
 
     // State validation: only allow sending during JOINT_ACTIVE
     if (caseDoc.status !== "JOINT_ACTIVE") {
@@ -110,16 +109,30 @@ export const sendUserMessage = mutation({
       createdAt: Date.now(),
     });
 
-    // Schedule Coach AI response generation (T26 — action may not exist yet)
-    try {
-      const generateRef = (internal as any)?.jointChat?.generateCoachResponse;
-      if (generateRef) {
+    // Schedule Coach AI response generation (defensive — action ref may be
+    // unavailable if the handler module hasn't been deployed yet)
+    const generateRef = (internal as any)?.jointChat?.generateCoachResponse;
+    if (generateRef) {
+      try {
         await ctx.scheduler.runAfter(0, generateRef, {
           caseId: args.caseId,
+          messageId,
+        });
+      } catch (err) {
+        console.error("Failed to schedule coach response:", err);
+        await ctx.db.insert("jointMessages", {
+          caseId: args.caseId,
+          authorType: "COACH" as const,
+          content:
+            "Sorry, I was unable to process your message. Please try again.",
+          status: "ERROR" as const,
+          createdAt: Date.now(),
         });
       }
-    } catch (err) {
-      console.error("Failed to schedule coach response:", err);
+    } else {
+      console.warn(
+        "generateCoachResponse action not found — not yet deployed",
+      );
     }
 
     return messageId;
@@ -136,18 +149,7 @@ export const mySynthesis = query({
   },
   handler: async (ctx: any, args: { caseId: string }) => {
     const user = await requireAuth(ctx);
-    await requireCaseParty(ctx, args.caseId, user._id);
-
-    const partyState = await ctx.db
-      .query("partyStates")
-      .withIndex("by_case_and_user", (q: any) =>
-        q.eq("caseId", args.caseId).eq("userId", user._id),
-      )
-      .first();
-
-    if (!partyState) {
-      throwAppError("NOT_FOUND", "Party state not found");
-    }
+    const { partyState } = await requireCaseParty(ctx, args.caseId, user._id);
 
     return {
       synthesisText: partyState.synthesisText ?? null,
