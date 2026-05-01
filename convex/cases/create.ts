@@ -92,7 +92,7 @@ export const create = mutation({
         desiredOutcome: args.desiredOutcome,
       });
 
-      return { caseId, inviteUrl: null };
+      return { caseId };
     }
 
     // --- Normal mode: generate invite token ---
