@@ -276,12 +276,19 @@ export const markComplete = mutation({
       );
 
     if (bothComplete) {
-      // Schedule synthesis generation if the module is available.
-      // The synthesis module may not exist yet — guard to avoid runtime errors.
-      if (internal?.synthesis?.generate) {
-        await ctx.scheduler.runAfter(0, internal.synthesis.generate, {
+      // Schedule synthesis generation.
+      // Path: internal.synthesis.generate (module) .generate (export) →
+      // internalAction at convex/synthesis/generate.ts
+      const synthRef = (internal as any)?.synthesis?.generate?.generate;
+      if (synthRef) {
+        await ctx.scheduler.runAfter(0, synthRef, {
           caseId: args.caseId,
         });
+      } else {
+        console.warn(
+          `Synthesis module reference not found for case ${args.caseId}. ` +
+          `Case will not advance to READY_FOR_JOINT automatically.`,
+        );
       }
     }
   },
