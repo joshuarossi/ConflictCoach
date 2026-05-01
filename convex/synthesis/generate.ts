@@ -42,8 +42,8 @@ export async function writeSynthesisResultsHandler(
   ctx: any,
   args: {
     caseId: string;
-    initiatorPartyStateId: string;
-    inviteePartyStateId: string;
+    initiatorPartyStateId?: string;
+    inviteePartyStateId?: string;
     forInitiator: string;
     forInvitee: string;
   },
@@ -53,13 +53,21 @@ export async function writeSynthesisResultsHandler(
     throw new Error("Case not found");
   }
 
+  // Resolve partyState IDs: prefer explicit args, fall back to case document
+  const initiatorPSId = args.initiatorPartyStateId ?? caseDoc.initiatorPartyStateId;
+  const inviteePSId = args.inviteePartyStateId ?? caseDoc.inviteePartyStateId;
+
+  if (!initiatorPSId || !inviteePSId) {
+    throw new Error("Could not resolve partyState IDs");
+  }
+
   const now = Date.now();
 
-  await ctx.db.patch(args.initiatorPartyStateId, {
+  await ctx.db.patch(initiatorPSId, {
     synthesisText: args.forInitiator,
     synthesisGeneratedAt: now,
   });
-  await ctx.db.patch(args.inviteePartyStateId, {
+  await ctx.db.patch(inviteePSId, {
     synthesisText: args.forInvitee,
     synthesisGeneratedAt: now,
   });
@@ -78,8 +86,8 @@ export const writeSynthesisResults = Object.assign(
   internalMutation({
     args: {
       caseId: v.id("cases"),
-      initiatorPartyStateId: v.id("partyStates"),
-      inviteePartyStateId: v.id("partyStates"),
+      initiatorPartyStateId: v.optional(v.id("partyStates")),
+      inviteePartyStateId: v.optional(v.id("partyStates")),
       forInitiator: v.string(),
       forInvitee: v.string(),
     },
