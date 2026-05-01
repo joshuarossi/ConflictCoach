@@ -1,4 +1,14 @@
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, vi } from "vitest";
+
+vi.mock("@convex-dev/auth/react", () => ({
+  useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
+  useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
+}));
+
+vi.mock("convex/react", () => ({
+  useQuery: () => undefined,
+  useMutation: () => vi.fn(),
+}));
 
 describe("AC: React Router v6 is configured with a placeholder route at /", () => {
   test("navigating to / renders the placeholder component", async () => {
@@ -6,8 +16,6 @@ describe("AC: React Router v6 is configured with a placeholder route at /", () =
     const { render } = await import("@testing-library/react");
     const { MemoryRouter } = await import("react-router-dom");
 
-    // Import the app's router configuration. The implementation should
-    // export routes or an App component that includes React Router.
     const { default: App } = await import("@/App");
 
     const { container } = render(

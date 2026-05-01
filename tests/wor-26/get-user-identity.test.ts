@@ -52,7 +52,10 @@ describe("AC: ctx.auth.getUserIdentity() returns identity for authenticated user
     expect(result.role).toBe("USER");
   });
 
-  test("requireAuth returns a minimal record when user is not yet in DB (fallback)", async () => {
+  test("requireAuth throws USER_NOT_FOUND when identity is present but no user record exists", async () => {
+    // Per WOR-27 AC: requireAuth must throw USER_NOT_FOUND if no user row.
+    // The user-row creation is owned by the upsertUser mutation that runs on
+    // first login (also WOR-27); requireAuth itself does not create rows.
     const ctx = {
       auth: {
         getUserIdentity: async () => ({
@@ -69,10 +72,7 @@ describe("AC: ctx.auth.getUserIdentity() returns identity for authenticated user
       },
     };
 
-    const result = await requireAuth(ctx);
-    expect(result._id).toBe("newuser456");
-    expect(result.email).toBe("bob@example.com");
-    expect(result.role).toBe("USER");
+    await expect(requireAuth(ctx)).rejects.toThrow();
   });
 
   test("requireAuth throws UNAUTHENTICATED when no identity is present", async () => {

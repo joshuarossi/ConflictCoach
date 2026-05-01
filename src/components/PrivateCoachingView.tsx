@@ -125,7 +125,6 @@ export function PrivateCoachingView({
                     </AlertDialogTitle>
                     <AlertDialogDescription>
                       You&apos;ve had {messageCount} messages with the Coach.
-                      Ready to move on?
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>

@@ -114,24 +114,69 @@ function createMockQueryCtx(options: {
 }) {
   const { authenticatedUserId = null, dbData = {} } = options;
 
+  // Auto-seed a users row that matches the authenticated identity so that
+  // requireAuth (WOR-27) can resolve identity → user record via by_email.
+  // Test fixtures use the userId string as both _id and the email-key suffix.
+  const email = authenticatedUserId ? `${authenticatedUserId}@test.local` : null;
+  const seededUsers = [...(dbData.users ?? [])];
+  if (authenticatedUserId && !seededUsers.some((u) => u._id === authenticatedUserId)) {
+    seededUsers.push({
+      _id: authenticatedUserId,
+      email,
+      role: "USER" as const,
+      createdAt: 0,
+    });
+  }
+  const effectiveDb: Record<string, any[]> = { ...dbData, users: seededUsers };
+
+  // Capture the eq() filters passed to withIndex so mock can resolve lookups
+  // by field value (e.g. by_email finding the user matching the identity).
+  function buildIndexedQuery(rows: any[]) {
+    return (_indexName: string, predicate?: (q: any) => unknown) => {
+      const filters: Array<{ field: string; value: any }> = [];
+      if (typeof predicate === "function") {
+        const eqFn = (field: string, value: any) => {
+          filters.push({ field, value });
+          return { eq: eqFn };
+        };
+        try {
+          predicate({ eq: eqFn });
+        } catch {
+          /* test-side predicates may throw — ignore */
+        }
+      }
+      const matched = filters.length
+        ? rows.filter((r) =>
+            filters.every((f) => r[f.field] === f.value),
+          )
+        : rows;
+      return {
+        collect: vi.fn(async () => matched),
+        first: vi.fn(async () => matched[0] ?? null),
+        filter: vi.fn(() => ({
+          collect: vi.fn(async () => matched),
+        })),
+      };
+    };
+  }
+
   return {
     auth: {
       getUserIdentity: vi.fn(async () =>
         authenticatedUserId
-          ? { subject: authenticatedUserId, tokenIdentifier: `token:${authenticatedUserId}` }
+          ? {
+              subject: authenticatedUserId,
+              email,
+              tokenIdentifier: `token:${authenticatedUserId}`,
+            }
           : null,
       ),
     },
     db: {
       query: vi.fn((table: string) => {
-        const rows = dbData[table] ?? [];
+        const rows = effectiveDb[table] ?? [];
         return {
-          withIndex: vi.fn((_indexName: string, _q?: any) => ({
-            collect: vi.fn(async () => rows),
-            filter: vi.fn(() => ({
-              collect: vi.fn(async () => rows),
-            })),
-          })),
+          withIndex: vi.fn(buildIndexedQuery(rows)),
           collect: vi.fn(async () => rows),
           filter: vi.fn(() => ({
             collect: vi.fn(async () => rows),
@@ -139,7 +184,7 @@ function createMockQueryCtx(options: {
         };
       }),
       get: vi.fn(async (id: string) => {
-        for (const rows of Object.values(dbData)) {
+        for (const rows of Object.values(effectiveDb)) {
           const found = (rows as any[]).find((r: any) => r._id === id);
           if (found) return found;
         }

@@ -1,4 +1,14 @@
-import { describe, test, expect } from "vitest";
+import { describe, test, expect, vi } from "vitest";
+
+vi.mock("@convex-dev/auth/react", () => ({
+  useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
+  useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
+}));
+
+vi.mock("convex/react", () => ({
+  useQuery: () => undefined,
+  useMutation: () => vi.fn(),
+}));
 
 describe("AC: Tailwind utility classes render correctly in a test component", () => {
   test("a component with Tailwind classes has those classes in the DOM", async () => {
