@@ -7,7 +7,6 @@
 import { describe, test, expect, beforeEach } from "vitest";
 import { ConvexError } from "convex/values";
 
-// @ts-expect-error WOR-35 red-state import: implementation is created by task-implement.
 import { create as createMutation } from "../../convex/cases/create";
 
 // Convex mutation() returns a wrapper object whose `.handler` holds the actual
