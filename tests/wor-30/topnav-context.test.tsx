@@ -9,6 +9,7 @@ import { MemoryRouter } from "react-router-dom";
 
 vi.mock("@convex-dev/auth/react", () => ({
   useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
+  useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
 }));
 
 // Module-level mutable ref to control useQuery return value per test
@@ -21,7 +22,6 @@ vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),
 }));
 
-// @ts-expect-error WOR-30 red-state import: AppRoutes is created by task-implement.
 import { AppRoutes } from "@/App";
 
 describe("AC: TopNav renders context-appropriate header", () => {
@@ -60,15 +60,13 @@ describe("AC: TopNav renders context-appropriate header", () => {
       );
       const nav = document.querySelector("nav");
       expect(nav).toBeInTheDocument();
-      // Should display the other party's name
-      expect(screen.getByText(/Jordan/)).toBeInTheDocument();
-      // Should display a phase indicator (one of the valid phases)
-      const phaseIndicator =
-        screen.queryByText(/Private Coaching/i) ||
-        screen.queryByText(/Ready for Joint/i) ||
-        screen.queryByText(/Joint Chat/i) ||
-        screen.queryByText(/Closed/i);
-      expect(phaseIndicator).toBeInTheDocument();
+      // Should display the other party's name somewhere within the nav
+      expect(nav).toHaveTextContent(/Jordan/);
+      // Should display a phase indicator within the nav (the page body may
+      // also contain placeholder phase labels — assert it's in the nav).
+      expect(nav).toHaveTextContent(
+        /Private Coaching|Ready for Joint|Joint Chat|Closed/,
+      );
     });
   });
 });

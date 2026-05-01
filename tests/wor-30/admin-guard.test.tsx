@@ -16,7 +16,6 @@ vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),
 }));
 
-// @ts-expect-error WOR-30 red-state import: AppRoutes is created by task-implement.
 import { AppRoutes } from "@/App";
 
 const ADMIN_ROUTES = [

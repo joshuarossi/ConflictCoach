@@ -9,6 +9,7 @@ import { MemoryRouter } from "react-router-dom";
 // Mock Convex auth to provide unauthenticated state for route resolution
 vi.mock("@convex-dev/auth/react", () => ({
   useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
+  useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
 }));
 
 // Mock Convex hooks used by guards/pages
@@ -17,7 +18,6 @@ vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),
 }));
 
-// @ts-expect-error WOR-30 red-state import: AppRoutes is created by task-implement.
 import { AppRoutes } from "@/App";
 
 const REQUIRED_ROUTES = [

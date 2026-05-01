@@ -9,6 +9,7 @@ import { MemoryRouter } from "react-router-dom";
 // Mock Convex auth to simulate unauthenticated state
 vi.mock("@convex-dev/auth/react", () => ({
   useConvexAuth: () => ({ isLoading: false, isAuthenticated: false }),
+  useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
 }));
 
 vi.mock("convex/react", () => ({
@@ -16,7 +17,6 @@ vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),
 }));
 
-// @ts-expect-error WOR-30 red-state import: AppRoutes is created by task-implement.
 import { AppRoutes } from "@/App";
 
 const AUTHENTICATED_ROUTES = [
@@ -40,14 +40,10 @@ describe("AC: Authenticated routes redirect to /login when not logged in", () =>
           <AppRoutes />
         </MemoryRouter>
       );
-      // Should render the login page content or a redirect indicator
-      // The Sign In / Login page should be visible
-      const loginIndicator =
-        screen.queryByText(/sign in/i) ||
-        screen.queryByText(/log in/i) ||
-        screen.queryByRole("button", { name: /sign in/i }) ||
-        screen.queryByRole("button", { name: /log in/i });
-      expect(loginIndicator).toBeInTheDocument();
+      // After redirect, the login page should render. Use queryAllByText
+      // because "sign in" appears in both the heading and the submit button.
+      const signInMatches = screen.queryAllByText(/sign in|log in/i);
+      expect(signInMatches.length).toBeGreaterThan(0);
     }
   );
 });

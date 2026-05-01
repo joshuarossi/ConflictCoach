@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Link, useParams, useLocation } from "react-router-dom";
 import type { ReactNode } from "react";
+import { useQuery } from "convex/react";
+import { api } from "../../../convex/_generated/api";
 
 /** Maps route segments to human-readable phase labels. */
 function getPhaseLabel(segment: string | undefined): string | null {
@@ -15,26 +18,58 @@ function getPhaseLabel(segment: string | undefined): string | null {
   }
 }
 
+/** Maps a case status to a human-readable phase label, fallback for routes
+ * where the URL alone doesn't determine the phase (e.g. /cases/:caseId). */
+function getStatusPhaseLabel(status: string | undefined): string | null {
+  switch (status) {
+    case "DRAFT_PRIVATE_COACHING":
+    case "BOTH_PRIVATE_COACHING":
+      return "Private Coaching";
+    case "READY_FOR_JOINT":
+      return "Ready for Joint";
+    case "JOINT_ACTIVE":
+      return "Joint Chat";
+    case "CLOSED_RESOLVED":
+    case "CLOSED_UNRESOLVED":
+    case "CLOSED_ABANDONED":
+      return "Closed";
+    default:
+      return null;
+  }
+}
+
 export interface TopNavProps {
   /** Optional slot for PartyToggle or other controls */
   children?: ReactNode;
-  /** Case name for inside-case mode (e.g. "Case with Jordan") */
-  caseName?: string;
 }
 
-export function TopNav({ children, caseName }: TopNavProps) {
+export function TopNav({ children }: TopNavProps) {
   const params = useParams<{ caseId: string }>();
   const location = useLocation();
 
   const isCaseRoute = !!params.caseId;
 
-  // Determine phase from the URL segment after /cases/:caseId/
+  // Fetch case context for inside-case mode. The query result shape is
+  // intentionally permissive — TopNav only reads `otherPartyName` and
+  // `status`, so any API that returns those works.
+  const caseContext = useQuery(
+    (api as any).cases?.get,
+    isCaseRoute ? { caseId: params.caseId } : "skip",
+  ) as { otherPartyName?: string; status?: string } | null | undefined;
+
+  // Determine phase from the URL segment after /cases/:caseId/, falling back
+  // to the case status when the URL doesn't say (e.g. /cases/:id).
   const pathSegments = location.pathname.split("/");
   const caseIdIndex = pathSegments.indexOf(params.caseId ?? "");
   const phaseSegment = caseIdIndex >= 0 ? pathSegments[caseIdIndex + 1] : undefined;
-  const phaseLabel = getPhaseLabel(phaseSegment);
+  const phaseLabel =
+    getPhaseLabel(phaseSegment) ?? getStatusPhaseLabel(caseContext?.status);
 
   if (isCaseRoute) {
+    const otherPartyName = caseContext?.otherPartyName;
+    const caseLabel = otherPartyName
+      ? `Case with ${otherPartyName}`
+      : `Case ${params.caseId}`;
     return (
       <nav className="border-b bg-white px-4 py-3">
         <div className="flex items-center gap-3">
@@ -46,7 +81,7 @@ export function TopNav({ children, caseName }: TopNavProps) {
           </Link>
           <span className="text-gray-300">|</span>
           <span className="text-sm font-medium text-gray-900">
-            {caseName ?? `Case ${params.caseId}`}
+            {caseLabel}
             {phaseLabel && (
               <>
                 <span className="text-gray-400"> · </span>
