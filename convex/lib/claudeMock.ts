@@ -121,12 +121,10 @@ export async function runMockStreamWithDelay(
       status: "STREAMING" as const,
     });
 
-    // Aggregate delay: wordDelayMs * words in this chunk.
-    // A single larger sleep is far more reliable than many tiny ones.
-    const chunkDelay = Math.max(
-      flushIntervalMs,
-      wordDelayMs * wordsInChunk,
-    );
+    // Aggregate delay: wordDelayMs * words in this chunk, plus the flush
+    // interval. Adding (rather than clamping) ensures different wordDelayMs
+    // values always produce distinguishable total elapsed times.
+    const chunkDelay = flushIntervalMs + wordDelayMs * wordsInChunk;
     await new Promise((r) => setTimeout(r, chunkDelay));
   }
 
