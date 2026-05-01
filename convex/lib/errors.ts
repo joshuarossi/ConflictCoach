@@ -4,6 +4,7 @@ import { ConvexError } from "convex/values";
 export const UNAUTHENTICATED = "UNAUTHENTICATED" as const;
 export const FORBIDDEN = "FORBIDDEN" as const;
 export const NOT_FOUND = "NOT_FOUND" as const;
+export const USER_NOT_FOUND = "USER_NOT_FOUND" as const;
 export const CONFLICT = "CONFLICT" as const;
 export const INVALID_INPUT = "INVALID_INPUT" as const;
 export const TOKEN_INVALID = "TOKEN_INVALID" as const;
@@ -15,6 +16,7 @@ export type AppErrorCode =
   | typeof UNAUTHENTICATED
   | typeof FORBIDDEN
   | typeof NOT_FOUND
+  | typeof USER_NOT_FOUND
   | typeof CONFLICT
   | typeof INVALID_INPUT
   | typeof TOKEN_INVALID
@@ -26,6 +28,7 @@ const HTTP_STATUS: Record<AppErrorCode, number> = {
   [UNAUTHENTICATED]: 401,
   [FORBIDDEN]: 403,
   [NOT_FOUND]: 404,
+  [USER_NOT_FOUND]: 404,
   [CONFLICT]: 409,
   [INVALID_INPUT]: 400,
   [TOKEN_INVALID]: 400,
