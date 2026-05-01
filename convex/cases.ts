@@ -52,10 +52,10 @@ export const list = query({
             : caseDoc.initiatorUserId;
 
         // Look up other party's display name
-        let otherPartyDisplayName: string | null = null;
+        let displayName: string | null = null;
         if (otherUserId) {
           const otherUser = await ctx.db.get(otherUserId);
-          otherPartyDisplayName = otherUser?.displayName ?? null;
+          displayName = otherUser?.displayName ?? null;
         }
 
         // Look up other party's phase-level status via partyStates
@@ -80,7 +80,7 @@ export const list = query({
           createdAt: caseDoc.createdAt,
           updatedAt: caseDoc.updatedAt,
           isSolo: caseDoc.isSolo,
-          otherPartyDisplayName,
+          displayName,
           hasCompletedPC,
         };
       }),
