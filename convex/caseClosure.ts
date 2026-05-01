@@ -17,24 +17,26 @@ async function requireCaseParty(
   ctx: { db: any },
   caseId: string,
   userId: string,
-): Promise<{ caseDoc: any; partyState: any }> {
+): Promise<{ caseDoc: any; partyState: any; allPartyStates: any[] }> {
   const caseDoc = await ctx.db.get(caseId);
   if (!caseDoc) {
     throwAppError("NOT_FOUND", "Case not found");
   }
 
-  const partyState = await ctx.db
+  const allPartyStates = await ctx.db
     .query("partyStates")
-    .withIndex("by_case_and_user", (q: any) =>
-      q.eq("caseId", caseId).eq("userId", userId),
-    )
-    .first();
+    .withIndex("by_case", (q: any) => q.eq("caseId", caseId))
+    .collect();
+
+  const partyState = allPartyStates.find(
+    (ps: any) => ps.userId === userId,
+  );
 
   if (!partyState) {
     throwAppError("FORBIDDEN", "You are not a party to this case");
   }
 
-  return { caseDoc, partyState };
+  return { caseDoc, partyState, allPartyStates };
 }
 
 /**
@@ -96,19 +98,13 @@ export const confirmClosure = mutation({
   },
   handler: async (ctx: any, args: { caseId: string }) => {
     const user = await requireAuth(ctx);
-    const { caseDoc, partyState } = await requireCaseParty(
+    const { caseDoc, partyState, allPartyStates } = await requireCaseParty(
       ctx,
       args.caseId,
       user._id,
     );
 
     requireJointActive(caseDoc);
-
-    // Find all party states for this case
-    const allPartyStates = await ctx.db
-      .query("partyStates")
-      .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
-      .collect();
 
     // Find the proposer (a party state with closureProposed=true)
     const proposer = allPartyStates.find(
@@ -182,15 +178,13 @@ export const rejectClosure = mutation({
   },
   handler: async (ctx: any, args: { caseId: string }) => {
     const user = await requireAuth(ctx);
-    const { caseDoc } = await requireCaseParty(ctx, args.caseId, user._id);
+    const { caseDoc, allPartyStates } = await requireCaseParty(
+      ctx,
+      args.caseId,
+      user._id,
+    );
 
     requireJointActive(caseDoc);
-
-    // Find all party states for this case
-    const allPartyStates = await ctx.db
-      .query("partyStates")
-      .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
-      .collect();
 
     // Find the proposer
     const proposer = allPartyStates.find(
