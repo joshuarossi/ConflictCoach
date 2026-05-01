@@ -4,9 +4,9 @@ import {
   internalMutation,
   internalQuery,
 } from "../_generated/server";
-import { internal } from "../_generated/api";
 import { v } from "convex/values";
-import { assemblePrompt } from "../lib/prompts";
+import { _getCase, _getPartyStates } from "../privateCoaching";
+import * as promptsLib from "../lib/prompts";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "../lib/privacyFilter";
 
 // Maximum privacy-violation retries (total attempts = 1 + MAX_RETRIES)
@@ -180,7 +180,7 @@ export async function generateSynthesisHandler(
   args: { caseId: string },
 ) {
   // 1. Read case and party states
-  const caseDoc = await ctx.runQuery(internal.privateCoaching._getCase, {
+  const caseDoc = await ctx.runQuery(_getCase, {
     caseId: args.caseId,
   });
   if (!caseDoc) {
@@ -192,17 +192,19 @@ export async function generateSynthesisHandler(
   const anthropicClient = new Anthropic();
 
   const partyStatesRaw = await ctx.runQuery(
-    internal.privateCoaching._getPartyStates,
+    _getPartyStates,
     { caseId: args.caseId },
   );
   const partyStates = Array.isArray(partyStatesRaw) ? partyStatesRaw : [];
 
   // 2. Read ALL private messages for both parties
   const allPrivateMessagesRaw = await ctx.runQuery(
-    internal.synthesis.generate._getAllPrivateMessages,
+    _getAllPrivateMessages,
     { caseId: args.caseId },
   );
-  const allPrivateMessages = Array.isArray(allPrivateMessagesRaw) ? allPrivateMessagesRaw : [];
+  const allPrivateMessages = Array.isArray(allPrivateMessagesRaw)
+    ? allPrivateMessagesRaw
+    : [];
 
   // Identify initiator and invitee party states
   const initiatorPS = partyStates.find((ps: any) => ps.role === "INITIATOR");
@@ -215,6 +217,10 @@ export async function generateSynthesisHandler(
           (m: any) => m.userId === initiatorPS.userId && m.role === "USER",
         )
         .map((m: any) => m.content)
+        .filter(
+          (content: unknown): content is string =>
+            typeof content === "string" && content.length > 0,
+        )
     : [];
   const inviteeMessages = inviteePS
     ? allPrivateMessages
@@ -222,6 +228,10 @@ export async function generateSynthesisHandler(
           (m: any) => m.userId === inviteePS.userId && m.role === "USER",
         )
         .map((m: any) => m.content)
+        .filter(
+          (content: unknown): content is string =>
+            typeof content === "string" && content.length > 0,
+        )
     : [];
 
   // 3. Generate with retry loop
@@ -233,7 +243,7 @@ export async function generateSynthesisHandler(
 
   for (let attempt = 0; attempt < totalAttempts; attempt++) {
     // Assemble prompt — synthesis sees BOTH parties' content
-    const prompt = assemblePrompt({
+    const prompt = promptsLib.assemblePrompt({
       role: "SYNTHESIS",
       caseId: args.caseId as any,
       actingUserId: (initiatorPS?.userId ?? caseDoc.initiatorUserId ?? args.caseId) as any,
@@ -301,10 +311,11 @@ export async function generateSynthesisHandler(
     };
 
     await ctx.runMutation(
-      internal.synthesis.generate._insertAuditLog,
+      _insertAuditLog,
       {
         caseId: args.caseId,
-        actorUserId: initiatorPS?.userId ?? caseDoc.initiatorUserId ?? args.caseId,
+        actorUserId:
+          initiatorPS?.userId ?? caseDoc.initiatorUserId ?? args.caseId,
         metadata: {
           reason: "PRIVACY_FILTER_FAILURE",
           attempts: totalAttempts,
@@ -315,7 +326,7 @@ export async function generateSynthesisHandler(
 
   // 6. Atomically write synthesis texts + advance case to READY_FOR_JOINT
   await ctx.runMutation(
-    internal.synthesis.generate.writeSynthesisResults,
+    writeSynthesisResults,
     {
       caseId: args.caseId,
       forInitiator: synthesisResult.forInitiator,
