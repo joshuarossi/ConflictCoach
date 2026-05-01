@@ -14,7 +14,6 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-// @ts-expect-error WOR-45 red-state import: implementation is created by task-implement.
 import { parseSynthesisResponse, writeSynthesisResults, generateSynthesis } from "../../convex/synthesis/generate";
 
 // Mock the Anthropic SDK at module level so AC8 can verify non-streaming usage
