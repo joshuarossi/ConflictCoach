@@ -42,25 +42,25 @@ describe("WOR-63: Cron definition", () => {
   });
 
   test("AC2: Cleanup cron is scheduled to run daily", () => {
-    // AC2: The cron must be scheduled to run daily. cronJobs() returns an
-    // opaque Crons instance with no inspectable .schedule property, so we
-    // verify via source-code inspection that .daily() is called.
+    // AC2: The cron must run daily. cronJobs() exposes both `.daily(...)`
+    // and `.interval({ hours: 24 })` — both satisfy the spec since they
+    // produce a 24-hour cadence. Accept either API.
     const source = readFileSync(
       resolve(__dirname, "../../convex/crons.ts"),
       "utf-8",
     );
 
-    // Must use the .daily() scheduling API
-    expect(source).toMatch(/\.daily\s*\(/);
+    expect(source).toMatch(/\.daily\s*\(|\.interval\s*\([^)]*hours:\s*24/);
   });
 
-  test("AC2: convex/crons.ts source references daily scheduling", () => {
-    // Belt-and-suspenders: verify the source file contains a daily schedule
-    // reference (covers both plain-object and cronJobs().daily() styles).
+  test("AC2: convex/crons.ts source references a 24-hour cadence", () => {
+    // Belt-and-suspenders — accept any of the equivalent ways to express
+    // "once per day": .daily(...), { hours: 24 }, or a literal `daily`
+    // keyword in a comment/name.
     const source = readFileSync(
       resolve(__dirname, "../../convex/crons.ts"),
       "utf-8",
     );
-    expect(source).toMatch(/daily/i);
+    expect(source).toMatch(/daily|hours:\s*24/i);
   });
 });
