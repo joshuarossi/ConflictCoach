@@ -21,6 +21,13 @@ const auditListQuery: FunctionReference<"query"> = (() => {
   return ref;
 })();
 
+function formatActionLabel(action: string): string {
+  return action
+    .split("_")
+    .map((w) => w.charAt(0) + w.slice(1).toLowerCase())
+    .join(" ");
+}
+
 interface AuditEntry {
   _id: string;
   actorUserId: Id<"users">;
@@ -121,7 +128,7 @@ function AuditLogPageContent() {
               <option value="">All actions</option>
               {actions.map((action) => (
                 <option key={action} value={action}>
-                  {action}
+                  {formatActionLabel(action)}
                 </option>
               ))}
             </select>
