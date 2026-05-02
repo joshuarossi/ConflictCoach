@@ -58,19 +58,19 @@ export const list = query({
           displayName = otherUser?.displayName ?? "";
         }
 
-        // Look up current user's phase-level status via partyStates
-        // hasCompletedPC = true means the current user finished private coaching
-        // (and is now waiting on the other party during BOTH_PRIVATE_COACHING)
+        // Look up other party's phase-level status via partyStates
         let hasCompletedPC = false;
-        const selfPartyState = await ctx.db
-          .query("partyStates")
-          .withIndex("by_case_and_user", (q: any) =>
-            q.eq("caseId", caseDoc._id).eq("userId", user._id),
-          )
-          .first();
-        if (selfPartyState) {
-          hasCompletedPC =
-            selfPartyState.privateCoachingCompletedAt != null;
+        if (otherUserId) {
+          const otherPartyState = await ctx.db
+            .query("partyStates")
+            .withIndex("by_case_and_user", (q: any) =>
+              q.eq("caseId", caseDoc._id).eq("userId", otherUserId),
+            )
+            .first();
+          if (otherPartyState) {
+            hasCompletedPC =
+              otherPartyState.privateCoachingCompletedAt != null;
+          }
         }
 
         return {

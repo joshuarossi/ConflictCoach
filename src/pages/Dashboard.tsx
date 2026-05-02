@@ -36,12 +36,13 @@ function statusIndicator(
     case "DRAFT_PRIVATE_COACHING":
       return { glyph: "●", colorClass: "text-success", label: "Your turn" };
     case "BOTH_PRIVATE_COACHING":
-      // If the current user has completed private coaching, they are waiting
-      // on the other party; otherwise it's their turn.
+      // hasCompletedPC = other party has completed private coaching.
+      // If they are done, it is now your turn to finish.
       if (hasCompletedPC) {
-        return { glyph: "○", colorClass: "text-text-tertiary", label: "Waiting" };
+        return { glyph: "●", colorClass: "text-success", label: "Your turn" };
       }
-      return { glyph: "●", colorClass: "text-success", label: "Your turn" };
+      // Other party still working — you are waiting on them.
+      return { glyph: "○", colorClass: "text-text-tertiary", label: "Waiting" };
     case "JOINT_ACTIVE":
       return { glyph: "●", colorClass: "text-success", label: "Your turn" };
     case "READY_FOR_JOINT":
@@ -215,11 +216,13 @@ export function Dashboard() {
             <span className="text-label">{closedExpanded ? "▼" : "▶"}</span>
             Closed ({closedCases.length})
           </button>
-          <div className="flex flex-col gap-2" hidden={!closedExpanded}>
-            {closedCases.map((c: CaseRow) => (
-              <CaseRowItem key={c.id} caseItem={c} />
-            ))}
-          </div>
+          {closedExpanded && (
+            <div className="flex flex-col gap-2">
+              {closedCases.map((c: CaseRow) => (
+                <CaseRowItem key={c.id} caseItem={c} />
+              ))}
+            </div>
+          )}
         </section>
       )}
     </div>
