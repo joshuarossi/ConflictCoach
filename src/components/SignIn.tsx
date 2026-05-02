@@ -3,7 +3,7 @@ import { useConvexAuth } from "@convex-dev/auth/react";
 import { useState, useEffect } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 
-const INVITE_TOKEN_KEY = "conflict_coach_invite_token";
+const INVITE_TOKEN_KEY = "inviteToken";
 
 export function SignIn() {
   const { signIn } = useAuthActions();

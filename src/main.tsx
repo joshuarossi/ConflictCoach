@@ -14,7 +14,9 @@ const convex = new ConvexReactClient(
 // E2E test hook (WOR-71): mounted only when the build was started with
 // VITE_E2E_TEST_MODE=true. Production builds tree-shake the import out
 // because the dynamic import is behind a static-false branch.
-const isE2ETestMode = import.meta.env.VITE_E2E_TEST_MODE === "true";
+const isE2ETestMode =
+  import.meta.env.VITE_E2E_TEST_MODE === "true" ||
+  import.meta.env.VITE_CLAUDE_MOCK === "true";
 
 const TestHooksMount = isE2ETestMode
   ? lazy(() =>
