@@ -39,7 +39,23 @@ export async function listAuditLogsHandler(ctx: any, args: any) {
   // Sort by createdAt descending (newest first)
   entries.sort((a: any, b: any) => b.createdAt - a.createdAt);
 
-  return entries;
+  // Enrich entries with actor display names
+  const actorIdSet = new Set<string>();
+  for (const e of entries) {
+    actorIdSet.add(String((e as any).actorUserId));
+  }
+  const actorMap: Record<string, string> = {};
+  for (const actorId of actorIdSet) {
+    const actor: any = await ctx.db.get(actorId as any);
+    if (actor) {
+      actorMap[actorId] = actor.displayName ?? actor.email ?? "Unknown";
+    }
+  }
+
+  return entries.map((entry: any) => ({
+    ...entry,
+    actorDisplayName: actorMap[String(entry.actorUserId)] ?? "Unknown",
+  }));
 }
 
 export const list = query({
