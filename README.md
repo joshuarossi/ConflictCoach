@@ -74,6 +74,12 @@ AI-powered conflict resolution coaching platform built with React, Convex, and C
 - **Testing:** Vitest (unit), Playwright (e2e)
 - **Lint/Format:** ESLint, Prettier
 
+## Continuous Integration
+
+A GitHub Actions workflow runs on every push to `main` and on PRs targeting `main`. It executes **lint**, **typecheck**, and **unit** jobs in parallel, followed by an **e2e** job (Playwright with `CLAUDE_MOCK=true`) that is gated on the first three passing. See [docs/testing.md](docs/testing.md#continuous-integration) for full details.
+
+The workflow requires two repository secrets: `CONVEX_DEPLOY_KEY` and `ANTHROPIC_API_KEY`.
+
 ## Project Structure
 
 ```

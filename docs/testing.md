@@ -31,3 +31,34 @@ End-to-end tests live in `e2e/` and run against a live Convex dev server:
 ```bash
 npm run test:e2e
 ```
+
+## Continuous Integration
+
+The GitHub Actions workflow at `.github/workflows/ci.yml` runs automatically on pushes to `main` and on pull requests targeting `main`.
+
+### Job structure
+
+| Job | What it runs | Depends on |
+|---|---|---|
+| `lint` | ESLint + Prettier check | — |
+| `typecheck` | `tsc --noEmit` | — |
+| `unit` | Vitest (`npm run test:unit`) | — |
+| `e2e` | Playwright against a Convex dev deployment | `lint`, `typecheck`, `unit` |
+
+The `lint`, `typecheck`, and `unit` jobs run in parallel. The `e2e` job is gated behind all three.
+
+### E2E in CI
+
+The E2E job:
+
+- Deploys the Convex schema using `npx convex deploy`.
+- Sets `CLAUDE_MOCK=true` so all AI calls use the deterministic stub responder (no real API calls).
+- Caches Playwright browsers across runs for faster builds.
+- On failure, uploads the Playwright HTML report and screenshots as build artifacts for debugging.
+
+### Required secrets
+
+| Secret | Purpose |
+|---|---|
+| `CONVEX_DEPLOY_KEY` | Deploys the Convex schema in the E2E job |
+| `ANTHROPIC_API_KEY` | Must be present as an env var (not used when `CLAUDE_MOCK=true`) |
