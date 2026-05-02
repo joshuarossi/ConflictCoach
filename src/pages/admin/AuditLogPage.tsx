@@ -75,13 +75,16 @@ function AuditLogPageContent() {
   const allEntries = useQuery(auditListQuery, {}) as AuditEntry[] | undefined;
   const actors = useMemo(() => {
     if (!allEntries) return [];
-    const seen = new Map<string, string>();
+    const counts = new Map<string, { name: string; count: number }>();
     for (const entry of allEntries) {
-      if (!seen.has(entry.actorUserId)) {
-        seen.set(entry.actorUserId, entry.actorDisplayName);
+      const existing = counts.get(entry.actorUserId);
+      if (existing) {
+        existing.count++;
+      } else {
+        counts.set(entry.actorUserId, { name: entry.actorDisplayName, count: 1 });
       }
     }
-    return Array.from(seen.entries()).map(([id, name]) => ({ id, name }));
+    return Array.from(counts.entries()).map(([id, { name, count }]) => ({ id, name, count }));
   }, [allEntries]);
 
   const actions = useMemo(() => {
@@ -109,7 +112,7 @@ function AuditLogPageContent() {
               <option value="">All actors</option>
               {actors.map((actor) => (
                 <option key={actor.id} value={actor.id}>
-                  {actor.name}
+                  {actor.name} ({actor.count})
                 </option>
               ))}
             </select>
