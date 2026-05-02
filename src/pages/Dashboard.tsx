@@ -66,11 +66,11 @@ function statusText(status: CaseStatus): string {
     case "JOINT_ACTIVE":
       return "Joint Session Active";
     case "CLOSED_RESOLVED":
-      return "Closed — Resolved";
+      return "Resolved";
     case "CLOSED_UNRESOLVED":
-      return "Closed — Unresolved";
+      return "Unresolved";
     case "CLOSED_ABANDONED":
-      return "Closed — Abandoned";
+      return "Abandoned";
     default:
       return status;
   }
