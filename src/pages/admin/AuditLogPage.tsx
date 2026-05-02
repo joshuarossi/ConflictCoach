@@ -2,6 +2,7 @@ import { useState, useMemo } from "react";
 import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { Id } from "../../../convex/_generated/dataModel";
+import { formatAuditTimestamp } from "@/lib/formatAuditTimestamp";
 
 interface AuditEntry {
   _id: string;
@@ -12,19 +13,6 @@ interface AuditEntry {
   targetId: string;
   metadata?: unknown;
   createdAt: number;
-}
-
-function formatTimestamp(ts: number): string {
-  const date = new Date(ts);
-  return date.toLocaleDateString("en-US", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }) + " at " + date.toLocaleTimeString("en-US", {
-    hour: "numeric",
-    minute: "2-digit",
-    hour12: true,
-  });
 }
 
 export function AuditLogPage() {
@@ -134,7 +122,7 @@ export function AuditLogPage() {
                     {entry.targetType}:{entry.targetId}
                   </td>
                   <td className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
-                    {formatTimestamp(entry.createdAt)}
+                    {formatAuditTimestamp(entry.createdAt)}
                   </td>
                 </tr>
               ))}
