@@ -1,7 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-// @ts-expect-error WOR-49 red-state import: implementation is created by task-implement.
 import { JointChatView } from "@/components/JointChatView";
 
 /**
