@@ -7,7 +7,6 @@
  */
 import { describe, test, expect } from "vitest";
 
-// @ts-expect-error WOR-62 red-state import: formatAuditTimestamp will be created by task-implement.
 import { formatAuditTimestamp } from "@/lib/formatAuditTimestamp";
 
 describe("AC6: Timestamps are formatted in a human-readable format", () => {
