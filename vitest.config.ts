@@ -11,11 +11,6 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
-      // WOR-48: stub for not-yet-implemented module. Remove when real file exists.
-      "../../convex/jointChat/generateCoachResponse": path.resolve(
-        __dirname,
-        "./tests/wor-48/__stubs__/generateCoachResponse.ts",
-      ),
     },
   },
 });

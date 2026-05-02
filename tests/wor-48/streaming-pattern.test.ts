@@ -10,7 +10,6 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-// @ts-expect-error WOR-48 red-state import: implementation is created by task-implement.
 import { generateCoachResponse } from "../../convex/jointChat/generateCoachResponse";
 
 // ---------------------------------------------------------------------------
