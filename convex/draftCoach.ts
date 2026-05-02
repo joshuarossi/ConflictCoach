@@ -462,7 +462,9 @@ export const session = query({
     const currentSession = activeSession || sessions[sessions.length - 1];
 
     if (!currentSession) {
-      return null;
+      // Always return the same shape — callers pattern-match on
+      // session===null instead of also handling result===null.
+      return { session: null, messages: [] };
     }
 
     // Fetch messages for this session

@@ -12,34 +12,43 @@
  * a lightweight mock of the Convex runtime context. The mocked ctx
  * simulates db reads/writes, auth, and scheduler behavior.
  */
-import { describe, test, expect, vi, beforeAll } from "vitest";
+import { describe, test, expect, vi } from "vitest";
+import {
+  startSession as startSessionDef,
+  sendMessage as sendMessageDef,
+  sendFinalDraft as sendFinalDraftDef,
+  discardSession as discardSessionDef,
+  session as sessionDef,
+} from "../../convex/draftCoach";
 
-// ---------------------------------------------------------------------------
-// Dynamic import — module does not exist until implementation is created.
-// Tests fail with a clear "module not found" message (correct red state).
-// ---------------------------------------------------------------------------
-
+// Convex mutation()/query() return RegisteredMutation/RegisteredQuery
+// objects.  In Vitest the underlying handler is reachable either as the
+// callable itself or via the `.handler` / `._handler` properties depending
+// on Convex version.  Resolve to a callable shape that always works.
 interface ConvexFn {
   handler: (ctx: unknown, args: Record<string, unknown>) => Promise<unknown>;
 }
-
-let startSession: ConvexFn;
-let sendMessage: ConvexFn;
-let sendFinalDraft: ConvexFn;
-let discardSession: ConvexFn;
-let session: ConvexFn;
-
-beforeAll(async () => {
-  // WOR-50 red-state import: convex/draftCoach is created by task-implement.
-  // Variable indirection prevents Vite static analysis from failing at transform time.
-  const modulePath = "../../convex/draftCoach";
-  const mod = await import(/* @vite-ignore */ modulePath);
-  startSession = mod.startSession;
-  sendMessage = mod.sendMessage;
-  sendFinalDraft = mod.sendFinalDraft;
-  discardSession = mod.discardSession;
-  session = mod.session;
-});
+function asCallable(fn: unknown): ConvexFn {
+  const anyFn = fn as { handler?: unknown; _handler?: unknown };
+  if (typeof anyFn === "function") {
+    return { handler: anyFn as ConvexFn["handler"] };
+  }
+  if (typeof anyFn?.handler === "function") {
+    return { handler: anyFn.handler as ConvexFn["handler"] };
+  }
+  if (typeof anyFn?._handler === "function") {
+    return { handler: anyFn._handler as ConvexFn["handler"] };
+  }
+  throw new Error(
+    "Could not resolve Convex function to a callable handler: " +
+      JSON.stringify(Object.keys((fn as object) ?? {})),
+  );
+}
+const startSession = asCallable(startSessionDef);
+const sendMessage = asCallable(sendMessageDef);
+const sendFinalDraft = asCallable(sendFinalDraftDef);
+const discardSession = asCallable(discardSessionDef);
+const session = asCallable(sessionDef);
 
 // ---------------------------------------------------------------------------
 // Branded Id helpers
