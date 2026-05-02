@@ -1,8 +1,25 @@
-import { useState, useMemo } from "react";
+import { Component, useState, useMemo } from "react";
+import type { ReactNode } from "react";
 import { useQuery } from "convex/react";
-import { api } from "../../../convex/_generated/api";
+import { makeFunctionReference } from "convex/server";
+import type { FunctionReference } from "convex/server";
 import { Id } from "../../../convex/_generated/dataModel";
 import { formatAuditTimestamp } from "@/lib/formatAuditTimestamp";
+import { Forbidden } from "@/components/layout/Forbidden";
+
+// Concrete function reference for the audit-log list query.
+// The anyApi Proxy exported by convex/_generated/api.js (the placeholder
+// generated without a connected deployment) lacks toString / Symbol.toPrimitive,
+// causing TypeError when any code path coerces the reference to a string.
+// makeFunctionReference produces the same runtime value that full codegen would.
+const auditListQuery: FunctionReference<"query"> = (() => {
+  const ref = makeFunctionReference<"query">("admin/audit:list");
+  Object.defineProperty(ref, "toString", {
+    value: () => "admin/audit:list",
+    configurable: true,
+  });
+  return ref;
+})();
 
 interface AuditEntry {
   _id: string;
@@ -15,18 +32,40 @@ interface AuditEntry {
   createdAt: number;
 }
 
-export function AuditLogPage() {
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+class AuditLogErrorBoundary extends Component<
+  { children: ReactNode },
+  ErrorBoundaryState
+> {
+  state: ErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return <Forbidden />;
+    }
+    return this.props.children;
+  }
+}
+
+function AuditLogPageContent() {
   const [actorFilter, setActorFilter] = useState<string>("");
   const [actionFilter, setActionFilter] = useState<string>("");
   const [selectedEntry, setSelectedEntry] = useState<AuditEntry | null>(null);
 
-  const entries = useQuery(api.admin.audit.list, {
+  const entries = useQuery(auditListQuery, {
     actorUserId: actorFilter ? (actorFilter as Id<"users">) : undefined,
     action: actionFilter || undefined,
   }) as AuditEntry[] | undefined;
 
   // Derive unique actors and actions for filter dropdowns
-  const allEntries = useQuery(api.admin.audit.list, {}) as AuditEntry[] | undefined;
+  const allEntries = useQuery(auditListQuery, {}) as AuditEntry[] | undefined;
   const actors = useMemo(() => {
     if (!allEntries) return [];
     const seen = new Map<string, string>();
@@ -163,5 +202,13 @@ export function AuditLogPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export function AuditLogPage() {
+  return (
+    <AuditLogErrorBoundary>
+      <AuditLogPageContent />
+    </AuditLogErrorBoundary>
   );
 }
