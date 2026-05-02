@@ -17,11 +17,16 @@ export async function listAuditLogsHandler(ctx: any, args: any) {
   let entries;
 
   if (args.actorUserId) {
-    // Use the by_actor index when filtering by actor
+    // Use the by_actor index when filtering by actor; defensively re-apply
+    // the actor filter in-memory in case the underlying iterator returns
+    // extra rows (some test mocks ignore the predicate).
     entries = await ctx.db
       .query("auditLog")
       .withIndex("by_actor", (q: any) => q.eq("actorUserId", args.actorUserId))
       .collect();
+    entries = entries.filter(
+      (entry: any) => entry.actorUserId === args.actorUserId,
+    );
   } else {
     entries = await ctx.db.query("auditLog").collect();
   }
