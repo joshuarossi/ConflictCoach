@@ -1,7 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { action, internalMutation, internalQuery } from "./_generated/server";
-import { internal } from "./_generated/api";
-import { v } from "convex/values";
+import { mutation } from "./_generated/server";
 
 // ---------------------------------------------------------------------------
 // Seed data constants
@@ -37,97 +35,10 @@ const TEMPLATE_SEEDS = [
 ];
 
 // ---------------------------------------------------------------------------
-// Internal queries & mutations (used by the seed action)
+// seed — callable from the Convex dashboard
 // ---------------------------------------------------------------------------
 
-export const _getAdminByEmail = internalQuery({
-  args: { email: v.string() },
-  handler: async (ctx: any, args: { email: string }) => {
-    return await ctx.db
-      .query("users")
-      .withIndex("by_email", (q: any) => q.eq("email", args.email))
-      .first();
-  },
-});
-
-export const _createAdminUser = internalMutation({
-  args: { email: v.string() },
-  handler: async (ctx: any, args: { email: string }) => {
-    const existing = await ctx.db
-      .query("users")
-      .withIndex("by_email", (q: any) => q.eq("email", args.email))
-      .first();
-    if (existing) return existing._id;
-
-    return await ctx.db.insert("users", {
-      email: args.email,
-      role: "ADMIN",
-      createdAt: Date.now(),
-    });
-  },
-});
-
-export const _getTemplateByCategory = internalQuery({
-  args: { category: v.string() },
-  handler: async (ctx: any, args: { category: string }) => {
-    return await ctx.db
-      .query("templates")
-      .withIndex("by_category", (q: any) => q.eq("category", args.category))
-      .first();
-  },
-});
-
-export const _createTemplateWithVersion = internalMutation({
-  args: {
-    category: v.string(),
-    name: v.string(),
-    globalGuidance: v.string(),
-    createdByUserId: v.string(),
-  },
-  handler: async (
-    ctx: any,
-    args: {
-      category: string;
-      name: string;
-      globalGuidance: string;
-      createdByUserId: string;
-    },
-  ) => {
-    // Idempotency check inside the mutation as well
-    const existing = await ctx.db
-      .query("templates")
-      .withIndex("by_category", (q: any) => q.eq("category", args.category))
-      .first();
-    if (existing) return existing._id;
-
-    const now = Date.now();
-
-    const templateId = await ctx.db.insert("templates", {
-      category: args.category,
-      name: args.name,
-      createdAt: now,
-      createdByUserId: args.createdByUserId,
-    });
-
-    const versionId = await ctx.db.insert("templateVersions", {
-      templateId,
-      version: 1,
-      globalGuidance: args.globalGuidance,
-      publishedAt: now,
-      publishedByUserId: args.createdByUserId,
-    });
-
-    await ctx.db.patch(templateId, { currentVersionId: versionId });
-
-    return templateId;
-  },
-});
-
-// ---------------------------------------------------------------------------
-// seed — public action callable from the Convex dashboard
-// ---------------------------------------------------------------------------
-
-export const seed = action({
+export const seed = mutation({
   args: {},
   handler: async (ctx: any) => {
     // Guard: only allow in development or when CLAUDE_MOCK is true
@@ -139,19 +50,52 @@ export const seed = action({
       );
     }
 
-    // 1. Ensure admin user exists
-    const adminUserId = await ctx.runMutation(internal.seed._createAdminUser, {
-      email: ADMIN_EMAIL,
-    });
+    // 1. Ensure admin user exists (idempotent)
+    let adminUserId: any;
+    const existingAdmin = await ctx.db
+      .query("users")
+      .withIndex("by_email", (q: any) => q.eq("email", ADMIN_EMAIL))
+      .first();
 
-    // 2. Create default templates (idempotent)
+    if (existingAdmin) {
+      adminUserId = existingAdmin._id;
+    } else {
+      adminUserId = await ctx.db.insert("users", {
+        email: ADMIN_EMAIL,
+        role: "ADMIN" as const,
+        createdAt: Date.now(),
+      });
+    }
+
+    // 2. Create default templates with initial versions (idempotent)
     for (const tmpl of TEMPLATE_SEEDS) {
-      await ctx.runMutation(internal.seed._createTemplateWithVersion, {
+      const existingTemplate = await ctx.db
+        .query("templates")
+        .withIndex("by_category", (q: any) =>
+          q.eq("category", tmpl.category),
+        )
+        .first();
+
+      if (existingTemplate) continue;
+
+      const now = Date.now();
+
+      const templateId = await ctx.db.insert("templates", {
         category: tmpl.category,
         name: tmpl.name,
-        globalGuidance: tmpl.globalGuidance,
+        createdAt: now,
         createdByUserId: adminUserId,
       });
+
+      const versionId = await ctx.db.insert("templateVersions", {
+        templateId,
+        version: 1,
+        globalGuidance: tmpl.globalGuidance,
+        publishedAt: now,
+        publishedByUserId: adminUserId,
+      });
+
+      await ctx.db.patch(templateId, { currentVersionId: versionId });
     }
 
     return { success: true, adminUserId };
