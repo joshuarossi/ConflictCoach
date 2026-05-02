@@ -65,7 +65,7 @@ function statusText(status: CaseStatus): string {
     case "READY_FOR_JOINT":
       return "Ready for Joint Session";
     case "JOINT_ACTIVE":
-      return "Joint Session Active";
+      return "In Session";
     case "CLOSED_RESOLVED":
       return "Resolved";
     case "CLOSED_UNRESOLVED":
@@ -216,13 +216,11 @@ export function Dashboard() {
             <span className="text-label">{closedExpanded ? "▼" : "▶"}</span>
             Closed ({closedCases.length})
           </button>
-          {closedExpanded && (
-            <div className="flex flex-col gap-2">
-              {closedCases.map((c: CaseRow) => (
-                <CaseRowItem key={c.id} caseItem={c} />
-              ))}
-            </div>
-          )}
+          <div hidden={!closedExpanded} className="flex flex-col gap-2">
+            {closedCases.map((c: CaseRow) => (
+              <CaseRowItem key={c.id} caseItem={c} />
+            ))}
+          </div>
         </section>
       )}
     </div>
