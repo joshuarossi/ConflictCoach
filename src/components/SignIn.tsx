@@ -1,14 +1,13 @@
 import { useAuthActions } from "@convex-dev/auth/react";
 import { useConvexAuth } from "@convex-dev/auth/react";
 import { useState, useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
+import { Navigate, useSearchParams } from "react-router-dom";
 
 const INVITE_TOKEN_KEY = "conflict_coach_invite_token";
 
 export function SignIn() {
   const { signIn } = useAuthActions();
   const { isAuthenticated, isLoading } = useConvexAuth();
-  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -25,20 +24,6 @@ export function SignIn() {
       }
     }
   }, [searchParams]);
-
-  // Redirect authenticated users to dashboard or stashed invite URL
-  useEffect(() => {
-    if (isAuthenticated) {
-      const stashedToken = localStorage.getItem(INVITE_TOKEN_KEY);
-      if (stashedToken) {
-        localStorage.removeItem(INVITE_TOKEN_KEY);
-        navigate(`/invite/${stashedToken}`, { replace: true });
-      } else {
-        const returnTo = searchParams.get("returnTo");
-        navigate(returnTo || "/dashboard", { replace: true });
-      }
-    }
-  }, [isAuthenticated, navigate, searchParams]);
 
   async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault();
@@ -79,7 +64,13 @@ export function SignIn() {
   }
 
   if (isAuthenticated) {
-    return null;
+    const stashedToken = localStorage.getItem(INVITE_TOKEN_KEY);
+    if (stashedToken) {
+      localStorage.removeItem(INVITE_TOKEN_KEY);
+      return <Navigate to={`/invite/${stashedToken}`} replace />;
+    }
+    const returnTo = searchParams.get("returnTo");
+    return <Navigate to={returnTo || "/dashboard"} replace />;
   }
 
   return (
