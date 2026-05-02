@@ -1,12 +1,44 @@
 import { useAuthActions } from "@convex-dev/auth/react";
-import { useState } from "react";
+import { useConvexAuth } from "@convex-dev/auth/react";
+import { useState, useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+
+const INVITE_TOKEN_KEY = "conflict_coach_invite_token";
 
 export function SignIn() {
   const { signIn } = useAuthActions();
+  const { isAuthenticated, isLoading } = useConvexAuth();
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  // Stash invite token from returnTo param so it survives OAuth redirects
+  useEffect(() => {
+    const returnTo = searchParams.get("returnTo");
+    if (returnTo) {
+      const match = returnTo.match(/^\/invite\/(.+)/);
+      if (match) {
+        localStorage.setItem(INVITE_TOKEN_KEY, match[1]);
+      }
+    }
+  }, [searchParams]);
+
+  // Redirect authenticated users to dashboard or stashed invite URL
+  useEffect(() => {
+    if (isAuthenticated) {
+      const stashedToken = localStorage.getItem(INVITE_TOKEN_KEY);
+      if (stashedToken) {
+        localStorage.removeItem(INVITE_TOKEN_KEY);
+        navigate(`/invite/${stashedToken}`, { replace: true });
+      } else {
+        const returnTo = searchParams.get("returnTo");
+        navigate(returnTo || "/dashboard", { replace: true });
+      }
+    }
+  }, [isAuthenticated, navigate, searchParams]);
 
   async function handleMagicLink(e: React.FormEvent) {
     e.preventDefault();
@@ -38,18 +70,24 @@ export function SignIn() {
     }
   }
 
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <p className="text-gray-500">Loading…</p>
+      </div>
+    );
+  }
+
+  if (isAuthenticated) {
+    return null;
+  }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-sm space-y-6 rounded-lg border bg-white p-8 shadow-sm">
+      <div className="w-full max-w-[400px] space-y-6 rounded-lg border bg-white p-8 shadow-sm">
         <h1 className="text-center text-2xl font-bold text-gray-900">
           Sign in to Conflict Coach
         </h1>
-
-        {error && (
-          <p role="alert" className="text-center text-sm text-red-600">
-            {error}
-          </p>
-        )}
 
         {submitted ? (
           <p className="text-center text-gray-600">
@@ -70,12 +108,17 @@ export function SignIn() {
                 className="w-full rounded-md border px-3 py-2 text-sm"
                 required
               />
+              {error && (
+                <p role="alert" className="text-sm text-red-600">
+                  {error}
+                </p>
+              )}
               <button
                 type="submit"
                 disabled={pending}
                 className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
               >
-                Sign in with Magic Link
+                Send magic link
               </button>
             </form>
 
@@ -98,6 +141,18 @@ export function SignIn() {
             </button>
           </>
         )}
+
+        <p className="text-center text-xs text-gray-500">
+          By signing in, you agree to our{" "}
+          <a href="/terms" className="underline hover:text-gray-700">
+            Terms
+          </a>{" "}
+          and{" "}
+          <a href="/privacy" className="underline hover:text-gray-700">
+            Privacy Policy
+          </a>
+          .
+        </p>
       </div>
     </div>
   );
