@@ -24,51 +24,28 @@ test.describe("WOR-63: Abandoned case cleanup cron", () => {
     expect(response!.status()).toBeLessThan(400);
   });
 
-  test("Cleanup mutation is not callable from the client (internalMutation)", async ({
-    page,
-  }) => {
+  test("Cleanup mutation uses internalMutation (not client-callable)", async () => {
     // AC: The cron mutation should be internal (not client-callable).
-    // Attempting to invoke it from the browser should fail.
-    // We load the app and try to call the mutation via the Convex client.
-    await page.goto("/");
+    // We verify this via source-code inspection — checking that the
+    // cleanup module uses internalMutation rather than the public mutation
+    // export. This is more reliable than trying to call it from a browser
+    // context where the Convex client may not be globally exposed.
+    const { readFileSync } = await import("node:fs");
+    const { resolve } = await import("node:path");
 
-    // Wait for the Convex client to initialize (the app renders after
-    // connecting to Convex).
-    await page.waitForLoadState("networkidle");
+    const source = readFileSync(
+      resolve(__dirname, "../../convex/crons.cleanup.ts"),
+      "utf-8",
+    );
 
-    // Attempt to call the internal mutation from the browser console.
-    // Internal mutations are not exposed to the client API, so this should
-    // throw or return an error.
-    const result = await page.evaluate(async () => {
-      try {
-        // The Convex client is typically available on the window or via
-        // React context. We try to access the underlying ConvexClient.
-        // If the mutation is properly internal, the client won't even
-        // have a reference to it — the function ID won't resolve.
-        const convex = (window as unknown as { __CONVEX_CLIENT__?: { mutation: (name: string, args: Record<string, unknown>) => Promise<unknown> } }).__CONVEX_CLIENT__;
-        if (!convex) {
-          // No global client exposed — that's fine. We'll verify via
-          // dynamic import instead.
-          return { error: "NO_CLIENT", message: "Convex client not exposed globally" };
-        }
-        // Try calling the cleanup mutation — should fail for internal mutations
-        await convex.mutation("crons.cleanup:cleanupAbandonedCases", {});
-        return { error: null, message: "Mutation succeeded unexpectedly" };
-      } catch (e: unknown) {
-        return { error: "BLOCKED", message: e instanceof Error ? e.message : String(e) };
-      }
-    });
+    // Must import internalMutation
+    expect(source).toMatch(/import\s.*internalMutation.*from/);
 
-    // The mutation should NOT succeed from the client.
-    // Either the client isn't exposed (fine — internal mutations aren't
-    // registered in the client API) or calling it throws an error.
-    expect(result.error).not.toBeNull();
-    if (result.error === "BLOCKED") {
-      // The call was rejected — this is the expected behavior for an
-      // internalMutation.
-      expect(result.message).toBeTruthy();
-    }
-    // If error is "NO_CLIENT", the Convex client isn't globally exposed,
-    // which is also acceptable — internal mutations shouldn't be accessible.
+    // Must NOT export a plain (client-callable) mutation
+    const lines = source.split("\n");
+    const publicMutationLines = lines.filter(
+      (line) => /\bmutation\b/.test(line) && !/internalMutation/.test(line),
+    );
+    expect(publicMutationLines).toHaveLength(0);
   });
 });

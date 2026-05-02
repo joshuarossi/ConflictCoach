@@ -1,41 +1,16 @@
-import { validateTransition, type CaseStatus } from "./lib/stateMachine";
+import { internalMutation, MutationCtx } from "./_generated/server";
+import { validateTransition } from "./lib/stateMachine";
 
 const ABANDONED_CASE_AGE_MS = 30 * 24 * 60 * 60 * 1000;
 
-type CleanupCase = {
-  _id: string;
-  status: CaseStatus;
-  updatedAt: number;
-};
-
-type CleanupCtx = {
-  db: {
-    query: (table: "cases") => {
-      filter?: (predicate: unknown) => {
-        collect: () => Promise<CleanupCase[]>;
-      };
-      collect?: () => Promise<CleanupCase[]>;
-    };
-    patch: (
-      id: string,
-      fields: { status: CaseStatus; closedAt: number; updatedAt: number },
-    ) => Promise<void>;
-  };
-};
-
-export async function cleanupAbandonedCases(
-  ctx: CleanupCtx,
-  _args?: Record<string, never>,
-) {
+export async function cleanupAbandonedCases(ctx: MutationCtx, _args: Record<string, never> = {} as Record<string, never>) {
   void _args;
   const now = Date.now();
   const cutoff = now - ABANDONED_CASE_AGE_MS;
-  const query = ctx.db.query("cases");
-  const candidates = query.filter
-    ? await query.filter(() => true).collect()
-    : await query.collect?.();
 
-  const staleCases = (candidates ?? []).filter(
+  const allCases = await ctx.db.query("cases").collect();
+
+  const staleCases = allCases.filter(
     (caseDoc) =>
       caseDoc.status === "JOINT_ACTIVE" && caseDoc.updatedAt < cutoff,
   );
@@ -51,3 +26,8 @@ export async function cleanupAbandonedCases(
 
   return { processed: staleCases.length };
 }
+
+export const cleanupAbandonedCasesMutation = internalMutation({
+  args: {},
+  handler: cleanupAbandonedCases,
+});
