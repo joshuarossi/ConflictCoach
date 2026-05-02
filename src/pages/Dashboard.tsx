@@ -24,14 +24,24 @@ function isClosed(status: string): boolean {
  *   ◐ amber  = ready for joint
  *   ◼ neutral = closed
  */
-function statusIndicator(status: CaseStatus): {
+function statusIndicator(
+  status: CaseStatus,
+  hasCompletedPC: boolean,
+): {
   glyph: string;
   colorClass: string;
   label: string;
 } {
   switch (status) {
     case "DRAFT_PRIVATE_COACHING":
+      return { glyph: "●", colorClass: "text-success", label: "Your turn" };
     case "BOTH_PRIVATE_COACHING":
+      // If the current user has completed private coaching, they are waiting
+      // on the other party; otherwise it's their turn.
+      if (hasCompletedPC) {
+        return { glyph: "○", colorClass: "text-text-tertiary", label: "Waiting" };
+      }
+      return { glyph: "●", colorClass: "text-success", label: "Your turn" };
     case "JOINT_ACTIVE":
       return { glyph: "●", colorClass: "text-success", label: "Your turn" };
     case "READY_FOR_JOINT":
@@ -95,7 +105,7 @@ interface CaseRow {
 }
 
 function CaseRowItem({ caseItem }: { caseItem: CaseRow }) {
-  const indicator = statusIndicator(caseItem.status);
+  const indicator = statusIndicator(caseItem.status, caseItem.hasCompletedPC);
   const otherPartyName =
     caseItem.displayName || (caseItem.isSolo ? "Solo case" : "Pending invite");
 
@@ -127,7 +137,7 @@ function CaseRowItem({ caseItem }: { caseItem: CaseRow }) {
             <span>·</span>
             <span>Created {formatDate(caseItem.createdAt)}</span>
             <span>·</span>
-            <span>Active {formatRelativeTime(caseItem.updatedAt)}</span>
+            <span>Updated {formatRelativeTime(caseItem.updatedAt)}</span>
           </div>
         </div>
       </div>
@@ -205,13 +215,11 @@ export function Dashboard() {
             <span className="text-label">{closedExpanded ? "▼" : "▶"}</span>
             Closed ({closedCases.length})
           </button>
-          {closedExpanded && (
-            <div className="flex flex-col gap-2">
-              {closedCases.map((c: CaseRow) => (
-                <CaseRowItem key={c.id} caseItem={c} />
-              ))}
-            </div>
-          )}
+          <div className="flex flex-col gap-2" hidden={!closedExpanded}>
+            {closedCases.map((c: CaseRow) => (
+              <CaseRowItem key={c.id} caseItem={c} />
+            ))}
+          </div>
         </section>
       )}
     </div>
