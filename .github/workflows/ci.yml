@@ -2,6 +2,7 @@ name: CI
 
 on:
   pull_request:
+    branches: [main]
   push:
     branches: [main]
 
@@ -10,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  checks:
+  lint:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -22,8 +23,84 @@ jobs:
 
       - run: npm install --prefer-offline --no-audit --no-fund
 
-      - run: npm run lint
+      - name: Run ESLint
+        run: npm run lint
 
-      - run: npm run typecheck
+      - name: Run Prettier check
+        run: npx prettier --check .
 
-      - run: npm test
+  typecheck:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm install --prefer-offline --no-audit --no-fund
+
+      - name: Run typecheck
+        run: npm run typecheck
+
+  unit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm install --prefer-offline --no-audit --no-fund
+
+      - name: Run Vitest
+        run: npm run test:unit
+
+  e2e:
+    needs: [lint, typecheck, unit]
+    runs-on: ubuntu-latest
+    env:
+      CLAUDE_MOCK: "true"
+      CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY }}
+      ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm install --prefer-offline --no-audit --no-fund
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/ms-playwright
+          key: playwright-${{ runner.os }}-${{ hashFiles('package-lock.json') }}
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps
+
+      - name: Deploy Convex schema
+        run: npx convex deploy --cmd 'echo "deployed"'
+
+      - name: Run Playwright tests
+        run: npm run test:e2e
+
+      - name: Upload Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+
+      - name: Upload Playwright screenshots
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-screenshots
+          path: test-results/
