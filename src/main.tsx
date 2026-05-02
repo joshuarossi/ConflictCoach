@@ -7,7 +7,9 @@ import App from "./App";
 import "./globals.css";
 import "./index.css";
 
-const convex = new ConvexReactClient(import.meta.env.VITE_CONVEX_URL as string);
+const convex = new ConvexReactClient(
+  import.meta.env.VITE_CONVEX_URL || "https://placeholder.convex.cloud",
+);
 
 // E2E test hook (WOR-71): mounted only when the build was started with
 // VITE_E2E_TEST_MODE=true. Production builds tree-shake the import out
