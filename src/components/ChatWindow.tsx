@@ -87,6 +87,9 @@ export function ChatWindow({
             createdAt={msg.createdAt}
             onCopy={msg.onCopy}
             onRetry={msg.onRetry}
+            variant={msg.variant}
+            partyRole={msg.partyRole}
+            isIntervention={msg.isIntervention}
           />
         );
       })}

@@ -32,7 +32,7 @@ export function SignIn() {
     try {
       await signIn("email", { email });
       setSubmitted(true);
-    } catch (err) {
+    } catch {
       setError("Failed to send magic link. Please try again.");
     } finally {
       setPending(false);
@@ -47,7 +47,7 @@ export function SignIn() {
       if (result.redirect) {
         window.location.href = result.redirect.toString();
       }
-    } catch (err) {
+    } catch {
       setError("Google sign-in failed. Please try again.");
     } finally {
       setPending(false);
