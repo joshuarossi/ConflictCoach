@@ -66,10 +66,22 @@ vi.mock("@convex-dev/auth/react", () => ({
 }));
 
 vi.mock("convex/react", () => ({
-  useQuery: (queryRef: unknown) => {
+  useQuery: (
+    queryRef: unknown,
+    args?: { actorUserId?: string; action?: string },
+  ) => {
     const name = String(queryRef ?? "");
     if (name.includes("audit")) {
-      return MOCK_AUDIT_ENTRIES;
+      // Honor filter args so the test's selectOptions actually narrows the set.
+      // The real backend filters server-side; the mock simulates that here.
+      let entries = MOCK_AUDIT_ENTRIES;
+      if (args?.actorUserId) {
+        entries = entries.filter((e) => e.actorUserId === args.actorUserId);
+      }
+      if (args?.action) {
+        entries = entries.filter((e) => e.action === args.action);
+      }
+      return entries;
     }
     return { role: "ADMIN", displayName: "Riley Admin" };
   },
