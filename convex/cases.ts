@@ -108,19 +108,7 @@ export const get = query({
       throwAppError("FORBIDDEN", "You are not a party to this case");
     }
 
-    // Resolve other party's display name for TopNav context header
-    const otherUserId =
-      caseDoc.initiatorUserId === user._id
-        ? caseDoc.inviteeUserId
-        : caseDoc.initiatorUserId;
-
-    let otherPartyName = "";
-    if (otherUserId) {
-      const otherUser = await ctx.db.get(otherUserId);
-      otherPartyName = otherUser?.displayName ?? "";
-    }
-
-    return { ...caseDoc, otherPartyName };
+    return caseDoc;
   },
 });
 
