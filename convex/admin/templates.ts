@@ -35,6 +35,7 @@ export async function createTemplateHandler(ctx: any, args: any) {
     draftCoachInstructions: args.draftCoachInstructions,
     publishedAt: now,
     publishedByUserId: user._id,
+    publishedByName: user.displayName || user.email || "Unknown",
     notes: args.notes,
   });
 
@@ -101,6 +102,7 @@ export async function publishVersionHandler(ctx: any, args: any) {
     draftCoachInstructions: args.draftCoachInstructions,
     publishedAt: now,
     publishedByUserId: user._id,
+    publishedByName: user.displayName || user.email || "Unknown",
     notes: args.notes,
   });
 

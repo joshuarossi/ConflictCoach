@@ -85,10 +85,15 @@ export function TemplateEditPage() {
     id ? { templateId: id as Id<"templates"> } : "skip",
   ) as TemplateDoc | undefined | null;
 
-  const versions = useQuery(
+  const rawVersions = useQuery(
     listVersionsQuery,
     id ? { templateId: id as Id<"templates"> } : "skip",
   ) as TemplateVersion[] | undefined;
+
+  // Ensure descending order by version number (newest first)
+  const versions = rawVersions
+    ? [...rawVersions].sort((a, b) => b.version - a.version)
+    : undefined;
 
   const publishVersion = useMutation(publishMutation);
   const archiveTemplate = useMutation(archiveMutation);
@@ -415,69 +420,67 @@ export function TemplateEditPage() {
         </DialogContent>
       </Dialog>
 
-      {/* View Version Dialog (read-only) */}
-      <Dialog
-        open={viewingVersion !== null}
-        onOpenChange={(open) => {
-          if (!open) setViewingVersion(null);
-        }}
-      >
-        <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          {viewingVersion && (
-            <>
-              <DialogHeader>
-                <DialogTitle>
-                  Version {viewingVersion.version} (Read-Only)
-                </DialogTitle>
-                <DialogDescription>
-                  Published {formatAuditTimestamp(viewingVersion.publishedAt)}{" "}
-                  by {viewingVersion.publishedByName || "Unknown"}
-                </DialogDescription>
-              </DialogHeader>
-              <div className="space-y-4 pt-2">
+      {/* View Version Dialog (read-only) — only mounted when a version is selected */}
+      {viewingVersion && (
+        <Dialog
+          open={true}
+          onOpenChange={(open) => {
+            if (!open) setViewingVersion(null);
+          }}
+        >
+          <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>
+                Version {viewingVersion.version} (Read-Only)
+              </DialogTitle>
+              <DialogDescription>
+                Published {formatAuditTimestamp(viewingVersion.publishedAt)}{" "}
+                by {viewingVersion.publishedByName || "Unknown"}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-4 pt-2">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Global Guidance
+                </label>
+                <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
+                  {viewingVersion.globalGuidance}
+                </div>
+              </div>
+              {viewingVersion.coachInstructions && (
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Global Guidance
+                    Coach Instructions
                   </label>
                   <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
-                    {viewingVersion.globalGuidance}
+                    {viewingVersion.coachInstructions}
                   </div>
                 </div>
-                {viewingVersion.coachInstructions && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Coach Instructions
-                    </label>
-                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
-                      {viewingVersion.coachInstructions}
-                    </div>
+              )}
+              {viewingVersion.draftCoachInstructions && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Draft Coach Instructions
+                  </label>
+                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
+                    {viewingVersion.draftCoachInstructions}
                   </div>
-                )}
-                {viewingVersion.draftCoachInstructions && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Draft Coach Instructions
-                    </label>
-                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
-                      {viewingVersion.draftCoachInstructions}
-                    </div>
+                </div>
+              )}
+              {viewingVersion.notes && (
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Notes
+                  </label>
+                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm whitespace-pre-wrap">
+                    {viewingVersion.notes}
                   </div>
-                )}
-                {viewingVersion.notes && (
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                      Notes
-                    </label>
-                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm whitespace-pre-wrap">
-                      {viewingVersion.notes}
-                    </div>
-                  </div>
-                )}
-              </div>
-            </>
-          )}
-        </DialogContent>
-      </Dialog>
+                </div>
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
     </div>
   );
 }

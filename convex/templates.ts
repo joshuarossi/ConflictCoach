@@ -67,6 +67,7 @@ export const createTemplate = mutation({
       draftCoachInstructions: args.draftCoachInstructions,
       publishedAt: now,
       publishedByUserId: user._id,
+      publishedByName: user.displayName || user.email || "Unknown",
     });
 
     // Update template to point to the initial version
@@ -123,6 +124,7 @@ export const publishNewVersion = mutation({
       draftCoachInstructions: args.draftCoachInstructions,
       publishedAt: now,
       publishedByUserId: user._id,
+      publishedByName: user.displayName || user.email || "Unknown",
       notes: args.notes,
     });
 
@@ -273,9 +275,12 @@ export const listTemplateVersions = query({
     // Sort by version descending
     versions.sort((a: any, b: any) => b.version - a.version);
 
-    // Enrich with publisher display name
+    // Enrich with publisher display name (prefer denormalized field, fall back to lookup)
     const enriched = await Promise.all(
       versions.map(async (ver: any) => {
+        if (ver.publishedByName) {
+          return ver;
+        }
         let publishedByName = "Unknown";
         if (ver.publishedByUserId) {
           const publisher = await ctx.db.get(ver.publishedByUserId);

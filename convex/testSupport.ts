@@ -58,12 +58,14 @@ export const createCase = mutation({
       createdByUserId: args.initiatorUserId,
     });
 
+    const initiator: any = await ctx.db.get(args.initiatorUserId);
     const templateVersionId = await ctx.db.insert("templateVersions", {
       templateId,
       version: 1,
       globalGuidance: "Test guidance for conflict coaching.",
       publishedAt: Date.now(),
       publishedByUserId: args.initiatorUserId,
+      publishedByName: initiator?.displayName || initiator?.email || "Unknown",
     });
 
     await ctx.db.patch(templateId, { currentVersionId: templateVersionId });
@@ -130,6 +132,7 @@ export const createCaseForEmail = mutation({
       globalGuidance: "Test guidance for conflict coaching.",
       publishedAt: Date.now(),
       publishedByUserId: user._id,
+      publishedByName: user.displayName || user.email || "Unknown",
     });
     await ctx.db.patch(templateId, { currentVersionId: templateVersionId });
 
