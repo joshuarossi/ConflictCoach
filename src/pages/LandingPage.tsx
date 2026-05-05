@@ -1,6 +1,14 @@
-import { Link } from "react-router-dom";
+import { useConvexAuth } from "@convex-dev/auth/react";
+import { Link, Navigate } from "react-router-dom";
 
 export function LandingPage() {
+  const { isLoading, isAuthenticated } = useConvexAuth();
+
+  // Authenticated users skip the marketing page and land on the dashboard.
+  if (!isLoading && isAuthenticated) {
+    return <Navigate to="/dashboard" replace />;
+  }
+
   return (
     <div className="flex flex-col items-center justify-center py-24 px-4">
       <h1 className="text-4xl font-bold text-gray-900 mb-4">

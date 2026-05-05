@@ -28,6 +28,13 @@ export default defineConfig({
           url: "http://localhost:5174",
           reuseExistingServer: !process.env.CI,
           timeout: 15000,
+          // E2E sign-in goes through window.__TEST_SIGN_IN__, mounted only
+          // when Vite sees VITE_E2E_TEST_MODE=true at startup. Pass both flags
+          // explicitly so the spawned dev server has the test-mode shim.
+          env: {
+            VITE_E2E_TEST_MODE: "true",
+            CLAUDE_MOCK: "true",
+          },
         },
       }),
 });

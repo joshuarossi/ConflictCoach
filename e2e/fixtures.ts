@@ -59,6 +59,16 @@ export async function createTestUser(_page?: Page): Promise<TestUser> {
  */
 export async function loginAsUser(page: Page, user: TestUser): Promise<void> {
   await page.goto("/");
+  // TestHooksMount installs window.__TEST_SIGN_IN__ from a useEffect that
+  // fires after React commit, behind a lazy() Suspense boundary. Wait for
+  // the hook to be ready so cold-server runs don't race the mount.
+  await page.waitForFunction(
+    () =>
+      (window as unknown as { __TEST_SIGN_IN__?: unknown })
+        .__TEST_SIGN_IN__ !== undefined,
+    null,
+    { timeout: 10000 },
+  );
   // Drive the Convex Auth Password sign-in directly via the global window
   // hook the app exposes. The app's main.tsx wires `useAuthActions().signIn`
   // through ConvexAuthProvider, so we navigate to a dedicated test sign-in
@@ -99,6 +109,14 @@ export async function createTestCase(
 ): Promise<TestCase> {
   const category = overrides.category ?? "workplace";
   const isSolo = overrides.isSolo ?? true;
+  // Same race as loginAsUser — the hook is set in a useEffect.
+  await page.waitForFunction(
+    () =>
+      (window as unknown as { __TEST_CREATE_CASE__?: unknown })
+        .__TEST_CREATE_CASE__ !== undefined,
+    null,
+    { timeout: 10000 },
+  );
   const caseId = await page.evaluate(
     async ({ email, category, isSolo }) => {
       const w = window as unknown as {
