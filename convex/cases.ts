@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { query } from "./_generated/server";
 import { v } from "convex/values";
-import { requireAuth, isAdmin, getUserByEmail } from "./lib/auth";
+import { requireAuth, isAdmin } from "./lib/auth";
 import { throwAppError } from "./lib/errors";
 import { DEFAULT_AI_USAGE } from "./lib/costBudget";
 
@@ -184,56 +184,31 @@ export const partyStates = query({
 // getCaseCost — return AI cost data for a case (party or admin)
 // ---------------------------------------------------------------------------
 
-async function getCaseCostHandler(ctx: any, args: { caseId: string }) {
-  // Use flexible auth: try email lookup first, fall back to subject as user ID.
-  // This supports auth providers that may not include email in the identity token.
-  const identity = await ctx.auth.getUserIdentity();
-  if (!identity) {
-    throwAppError("UNAUTHENTICATED", "Authentication required");
-  }
-
-  let user: any = null;
-  if (identity.email) {
-    user = await getUserByEmail(ctx, identity.email);
-  }
-  if (!user && identity.subject) {
-    try {
-      user = await ctx.db.get(identity.subject);
-    } catch {
-      // subject is not a valid document ID — ignore
-    }
-  }
-  if (!user) {
-    throwAppError("UNAUTHENTICATED", "User record not found");
-  }
-
-  const caseDoc = await ctx.db.get(args.caseId);
-  if (!caseDoc) {
-    throwAppError("NOT_FOUND", "Case not found");
-  }
-
-  // Allow access for case parties and admins
-  const isParty =
-    caseDoc.initiatorUserId === user._id ||
-    caseDoc.inviteeUserId === user._id;
-  if (!isParty && !isAdmin(user)) {
-    throwAppError("FORBIDDEN", "You are not authorized to view this case's cost");
-  }
-
-  const usage = caseDoc.aiUsage ?? DEFAULT_AI_USAGE;
-  return {
-    totalInputTokens: usage.totalInputTokens,
-    totalOutputTokens: usage.totalOutputTokens,
-    totalCostUsd: usage.totalCostUsd,
-    totalCost: usage.totalCostUsd,
-    softCapReachedAt: usage.softCapReachedAt ?? null,
-  };
-}
-
-// Export as both a callable function (for direct use) and a registered Convex
-// query (for the Convex runtime). Object.assign preserves the RegisteredQuery
-// properties while adding the function call signature.
-export const getCaseCost = Object.assign(getCaseCostHandler, query({
+export const getCaseCost = query({
   args: { caseId: v.id("cases") },
-  handler: getCaseCostHandler,
-}));
+  handler: async (ctx, args) => {
+    const user = await requireAuth(ctx as any);
+
+    const caseDoc = await ctx.db.get(args.caseId);
+    if (!caseDoc) {
+      throwAppError("NOT_FOUND", "Case not found");
+    }
+
+    // Allow access for case parties and admins
+    const isParty =
+      caseDoc.initiatorUserId === user._id ||
+      caseDoc.inviteeUserId === user._id;
+    if (!isParty && !isAdmin(user)) {
+      throwAppError("FORBIDDEN", "You are not authorized to view this case's cost");
+    }
+
+    const usage = caseDoc.aiUsage ?? DEFAULT_AI_USAGE;
+    return {
+      totalInputTokens: usage.totalInputTokens,
+      totalOutputTokens: usage.totalOutputTokens,
+      totalCostUsd: usage.totalCostUsd,
+      totalCost: usage.totalCostUsd,
+      softCapReachedAt: usage.softCapReachedAt ?? null,
+    };
+  },
+});

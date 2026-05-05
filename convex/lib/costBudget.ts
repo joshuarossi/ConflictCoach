@@ -3,6 +3,7 @@ import { internalMutation, internalQuery } from "../_generated/server";
 import { internal } from "../_generated/api";
 import { v } from "convex/values";
 import type { GenericActionCtx, GenericDataModel } from "convex/server";
+import { writeAuditLog } from "./audit";
 
 // ---------------------------------------------------------------------------
 // Anthropic pricing constants (per token)
@@ -268,13 +269,12 @@ export const writeSoftCapAuditLog = internalMutation({
     }
 
     // Write audit log entry — use initiator as actor since this is a system event
-    await ctx.db.insert("auditLog", {
-      actorUserId: caseDoc.initiatorUserId,
+    await writeAuditLog(ctx, {
+      actorUserId: String(caseDoc.initiatorUserId),
       action: "COST_SOFT_CAP_REACHED",
       targetType: "case",
       targetId: String(args.caseId),
       metadata: { currentCostUsd: String(current.totalCostUsd) },
-      createdAt: Date.now(),
     });
   },
 });
