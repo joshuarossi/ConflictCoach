@@ -1,5 +1,4 @@
-import { useAuthActions } from "@convex-dev/auth/react";
-import { useConvexAuth } from "@convex-dev/auth/react";
+import { useAuthActions, useConvexAuth } from "@convex-dev/auth/react";
 import { useState, useEffect } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 
@@ -34,7 +33,7 @@ export function SignIn() {
       await signIn("email", { email });
       setSubmitted(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to send magic link");
+      setError("Failed to send magic link. Please try again.");
     } finally {
       setPending(false);
     }
@@ -49,7 +48,7 @@ export function SignIn() {
         window.location.href = result.redirect.toString();
       }
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Google sign-in failed");
+      setError("Google sign-in failed. Please try again.");
     } finally {
       setPending(false);
     }
@@ -64,13 +63,26 @@ export function SignIn() {
   }
 
   if (isAuthenticated) {
+    const returnTo = searchParams.get("returnTo");
+    // Only allow relative paths (prevent open redirect)
+    const safeReturnTo =
+      returnTo && returnTo.startsWith("/") && !returnTo.startsWith("//")
+        ? returnTo
+        : "/dashboard";
+
+    // Prefer explicit returnTo over stale localStorage token
+    if (safeReturnTo !== "/dashboard") {
+      localStorage.removeItem(INVITE_TOKEN_KEY);
+      return <Navigate to={safeReturnTo} replace />;
+    }
+
     const stashedToken = localStorage.getItem(INVITE_TOKEN_KEY);
     if (stashedToken) {
       localStorage.removeItem(INVITE_TOKEN_KEY);
       return <Navigate to={`/invite/${stashedToken}`} replace />;
     }
-    const returnTo = searchParams.get("returnTo");
-    return <Navigate to={returnTo || "/dashboard"} replace />;
+
+    return <Navigate to="/dashboard" replace />;
   }
 
   return (
