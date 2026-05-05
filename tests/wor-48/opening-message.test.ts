@@ -11,7 +11,7 @@
  */
 import { describe, test, expect } from "vitest";
 
-import { buildOpeningMessagePrompt } from "../../convex/jointChat/generateCoachResponse";
+import { buildOpeningMessagePrompt } from "../../convex/jointChat";
 
 // ---------------------------------------------------------------------------
 // Fixtures
