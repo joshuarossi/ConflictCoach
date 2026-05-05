@@ -16,7 +16,7 @@ const convex = new ConvexReactClient(
 // because the dynamic import is behind a static-false branch.
 const isE2ETestMode =
   import.meta.env.VITE_E2E_TEST_MODE === "true" ||
-  import.meta.env.VITE_CLAUDE_MOCK === "true";
+  import.meta.env.CLAUDE_MOCK === "true";
 
 const TestHooksMount = isE2ETestMode
   ? lazy(() =>

@@ -5,6 +5,7 @@ import path from "path";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  envPrefix: ["VITE_", "CLAUDE_"],
   server: {
     port: 5174,
     strictPort: true,
