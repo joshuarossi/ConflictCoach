@@ -1,6 +1,4 @@
-"use node";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import crypto from "crypto";
 import { mutation } from "../_generated/server";
 import { v } from "convex/values";
 import { requireAuth } from "../lib/auth";
@@ -100,7 +98,13 @@ export const create = mutation({
     }
 
     // --- Normal mode: generate invite token ---
-    const token = crypto.randomBytes(24).toString("base64url");
+    // 24 random bytes → base64url. Convex V8 runtime exposes Web Crypto.
+    const tokenBytes = new Uint8Array(24);
+    crypto.getRandomValues(tokenBytes);
+    const token = btoa(String.fromCharCode(...tokenBytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
 
     await ctx.db.insert("inviteTokens", {
       caseId,

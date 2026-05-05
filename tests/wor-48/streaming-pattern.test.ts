@@ -10,7 +10,7 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-import { generateCoachResponse } from "../../convex/jointChat/generateCoachResponse";
+import { generateCoachResponseHandler as generateCoachResponse } from "../../convex/jointChat";
 
 // ---------------------------------------------------------------------------
 // Helpers

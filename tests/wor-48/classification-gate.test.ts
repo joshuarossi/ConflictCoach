@@ -12,7 +12,10 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-import { classifyMessage, generateCoachResponse } from "../../convex/jointChat/generateCoachResponse";
+import {
+  classifyMessage,
+  generateCoachResponseHandler as generateCoachResponse,
+} from "../../convex/jointChat";
 
 // ---------------------------------------------------------------------------
 // Shared mock setup

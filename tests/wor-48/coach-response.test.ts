@@ -13,7 +13,11 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-import { CLASSIFICATIONS_REQUIRING_RESPONSE, getIsIntervention, generateCoachResponse } from "../../convex/jointChat/generateCoachResponse";
+import {
+  CLASSIFICATIONS_REQUIRING_RESPONSE,
+  getIsIntervention,
+  generateCoachResponseHandler as generateCoachResponse,
+} from "../../convex/jointChat";
 
 // ---------------------------------------------------------------------------
 // Helpers

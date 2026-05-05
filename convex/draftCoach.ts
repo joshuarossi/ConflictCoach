@@ -2,7 +2,7 @@
 import {
   query,
   mutation,
-  action,
+  internalAction,
   internalQuery,
   internalMutation,
 } from "./_generated/server";
@@ -146,7 +146,7 @@ export const sendMessage = mutation({
 // with readiness detection
 // ---------------------------------------------------------------------------
 
-export const generateResponse = action({
+export const generateResponse = internalAction({
   args: {
     sessionId: v.id("draftSessions"),
   },
