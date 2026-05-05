@@ -365,7 +365,7 @@ export function TemplateEditPage() {
                         {formatAuditTimestamp(ver.publishedAt)}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {ver.publishedByName}
+                        {ver.publishedByName || "Unknown"}
                       </p>
                       {ver.notes && (
                         <p className="text-sm text-gray-700 mt-1">
@@ -423,56 +423,58 @@ export function TemplateEditPage() {
         }}
       >
         <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              Version {viewingVersion?.version} (Read-Only)
-            </DialogTitle>
-            <DialogDescription>
-              Published {viewingVersion ? formatAuditTimestamp(viewingVersion.publishedAt) : ""}{" "}
-              by {viewingVersion?.publishedByName}
-            </DialogDescription>
-          </DialogHeader>
           {viewingVersion && (
-            <div className="space-y-4 pt-2">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Global Guidance
-                </label>
-                <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
-                  {viewingVersion.globalGuidance}
+            <>
+              <DialogHeader>
+                <DialogTitle>
+                  Version {viewingVersion.version} (Read-Only)
+                </DialogTitle>
+                <DialogDescription>
+                  Published {formatAuditTimestamp(viewingVersion.publishedAt)}{" "}
+                  by {viewingVersion.publishedByName || "Unknown"}
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 pt-2">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                    Global Guidance
+                  </label>
+                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
+                    {viewingVersion.globalGuidance}
+                  </div>
                 </div>
+                {viewingVersion.coachInstructions && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Coach Instructions
+                    </label>
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
+                      {viewingVersion.coachInstructions}
+                    </div>
+                  </div>
+                )}
+                {viewingVersion.draftCoachInstructions && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Draft Coach Instructions
+                    </label>
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
+                      {viewingVersion.draftCoachInstructions}
+                    </div>
+                  </div>
+                )}
+                {viewingVersion.notes && (
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-1">
+                      Notes
+                    </label>
+                    <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm whitespace-pre-wrap">
+                      {viewingVersion.notes}
+                    </div>
+                  </div>
+                )}
               </div>
-              {viewingVersion.coachInstructions && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Coach Instructions
-                  </label>
-                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
-                    {viewingVersion.coachInstructions}
-                  </div>
-                </div>
-              )}
-              {viewingVersion.draftCoachInstructions && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Draft Coach Instructions
-                  </label>
-                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
-                    {viewingVersion.draftCoachInstructions}
-                  </div>
-                </div>
-              )}
-              {viewingVersion.notes && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Notes
-                  </label>
-                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm whitespace-pre-wrap">
-                    {viewingVersion.notes}
-                  </div>
-                </div>
-              )}
-            </div>
+            </>
           )}
         </DialogContent>
       </Dialog>
