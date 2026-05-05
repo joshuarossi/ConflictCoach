@@ -56,8 +56,7 @@ class AuditLogErrorBoundary extends Component<
     const isAuthError =
       message.includes("unauthorized") ||
       message.includes("forbidden") ||
-      message.includes("not authenticated") ||
-      message.includes("admin");
+      message.includes("not authenticated");
     return { hasError: true, isAuthError };
   }
 
@@ -177,16 +176,16 @@ function AuditLogPageContent() {
                   className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
                   style={{ background: "var(--bg-surface, #ffffff)" }}
                 >
-                  <td className="py-3 px-4 text-sm" style={{ color: "var(--text-primary, #111827)" }}>
+                  <td data-testid={`audit-row-${entry._id}-actor`} className="py-3 px-4 text-sm" style={{ color: "var(--text-primary, #111827)" }}>
                     {entry.actorDisplayName}
                   </td>
-                  <td className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
+                  <td data-testid={`audit-row-${entry._id}-action`} className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
                     {entry.action}
                   </td>
-                  <td className="py-3 px-4 text-sm" style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--text-secondary, #6b7280)" }}>
+                  <td data-testid={`audit-row-${entry._id}-target`} className="py-3 px-4 text-sm" style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--text-secondary, #6b7280)" }}>
                     {entry.targetType}:{entry.targetId}
                   </td>
-                  <td className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
+                  <td data-testid={`audit-row-${entry._id}-timestamp`} className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
                     {formatAuditTimestamp(entry.createdAt)}
                   </td>
                 </tr>
