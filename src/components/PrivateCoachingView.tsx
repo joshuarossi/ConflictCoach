@@ -161,9 +161,9 @@ type CoachingMessageRecord = {
 };
 
 export function ConnectedPrivateCoachingView() {
-  const { id } = useParams<{ id: string }>();
+  const { caseId: caseIdParam } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
-  const caseId = id as Id<"cases">;
+  const caseId = caseIdParam as Id<"cases">;
 
   // Data queries
   const caseData = useQuery(api.cases.get, { caseId });
