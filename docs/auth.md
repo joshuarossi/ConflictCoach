@@ -2,6 +2,32 @@
 
 Conflict Coach uses [Convex Auth](https://docs.convex.dev/auth) for identity verification. On top of that, `convex/lib/auth.ts` provides user provisioning and authorization helpers used across all backend functions.
 
+## Login page (`/login`)
+
+The login page (`src/components/SignIn.tsx`) is the primary authentication entry point. It renders a centered 400px card with two sign-in methods:
+
+1. **Magic link** — the user enters their email and clicks "Send magic link". On success the form is replaced with a "Check your email" confirmation message.
+2. **Google OAuth** — clicking "Continue with Google" initiates the OAuth flow via Convex Auth.
+
+No password field is presented (per PRD US-01).
+
+### Post-auth redirect
+
+After successful authentication the page redirects to:
+
+- `/dashboard` by default, or
+- `/invite/<token>` if an invite token was stashed in `localStorage` (key: `inviteToken`).
+
+The invite token is stashed automatically when the login page receives a `?returnTo=/invite/<token>` query parameter — this ensures the token survives OAuth redirects that leave the app.
+
+### Error handling
+
+Validation and auth errors are rendered inline below the email input. Network-level errors surface via toast (see `docs/error-handling.md`).
+
+### Fine print
+
+The card footer displays "By signing in, you agree to our Terms and Privacy Policy" with links to `/terms` and `/privacy`.
+
 ## User provisioning
 
 When a user logs in for the first time, `upsertUser` creates a row in the `users` table with:
