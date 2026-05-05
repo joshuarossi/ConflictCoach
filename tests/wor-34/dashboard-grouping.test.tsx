@@ -121,10 +121,12 @@ describe("AC: Dashboard lists cases grouped by Active and Closed sections", () =
       ];
       renderDashboard(cases);
 
-      // Locate the Closed section heading and its parent container
-      const closedHeading = screen.getByText(/closed/i);
-      const closedSection = (closedHeading.closest("section, [role='region'], details") ??
-        closedHeading.parentElement!) as HTMLElement;
+      // Locate the Closed section toggle and its parent container. The
+      // dashboard renders the section header as an aria-expanded button so
+      // the closed list collapses by default; it is not a real heading.
+      const closedToggle = screen.getByRole("button", { name: /closed/i });
+      const closedSection = (closedToggle.closest("section, [role='region'], details") ??
+        closedToggle.parentElement!) as HTMLElement;
       const closedScope = within(closedSection);
 
       // The closed party name must appear within the Closed section specifically
