@@ -81,4 +81,37 @@ export const { auth, signIn, signOut, store, isAuthenticated } = convexAuth({
     totalDurationMs: THIRTY_DAYS_MS,
     inactiveDurationMs: THIRTY_DAYS_MS,
   },
+  // The default createOrUpdateUser inserts a row with `{email, name, image}`,
+  // but this app's `users` schema requires `role` and `createdAt` (and rejects
+  // `name`/`image`). Without this override, the schema rejects the insert,
+  // the auth core swallows the error, and the OAuth callback silently
+  // redirects to the landing page — leaving the user unable to sign in.
+  callbacks: {
+    async createOrUpdateUser(ctx, { existingUserId, profile }) {
+      if (existingUserId) {
+        return existingUserId;
+      }
+      const email = (profile.email ?? "").toString().toLowerCase();
+      if (!email) {
+        throw new Error("Sign-in profile is missing an email address");
+      }
+      const existing = await (ctx.db as any)
+        .query("users")
+        .withIndex("by_email", (q: any) => q.eq("email", email))
+        .first();
+      if (existing) {
+        return existing._id;
+      }
+      const displayName =
+        (profile as { name?: string; displayName?: string }).name ??
+        (profile as { displayName?: string }).displayName ??
+        undefined;
+      return await ctx.db.insert("users", {
+        email,
+        displayName,
+        role: "USER" as const,
+        createdAt: Date.now(),
+      });
+    },
+  },
 });
