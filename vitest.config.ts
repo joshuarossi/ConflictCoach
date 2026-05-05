@@ -10,11 +10,6 @@ export default defineConfig({
   },
   resolve: {
     alias: {
-      // WOR-49: Stub alias — remove once src/components/JointChatView.tsx exists.
-      "@/components/JointChatView": path.resolve(
-        __dirname,
-        "./tests/wor-49/_stub-joint-chat-view.tsx",
-      ),
       "@": path.resolve(__dirname, "./src"),
     },
   },
