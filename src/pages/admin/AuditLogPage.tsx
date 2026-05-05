@@ -158,34 +158,36 @@ function AuditLogPageContent() {
         ) : entries.length === 0 ? (
           <p className="text-gray-500">No audit log entries found.</p>
         ) : (
-          <table className="w-full border-collapse">
+          <table role="grid" aria-label="Audit log" className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Actor</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Action</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Target</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Timestamp</th>
+              <tr role="row" className="border-b border-gray-200">
+                <th role="columnheader" className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Actor</th>
+                <th role="columnheader" className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Action</th>
+                <th role="columnheader" className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Target</th>
+                <th role="columnheader" className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Timestamp</th>
               </tr>
             </thead>
             <tbody>
               {entries.map((entry) => (
                 <tr
                   key={entry._id}
+                  role="row"
+                  aria-label={`${entry.actorDisplayName}, ${entry.action}, ${entry.targetType}:${entry.targetId}, ${formatAuditTimestamp(entry.createdAt)}`}
                   data-testid={`audit-row-${entry._id}`}
                   onClick={() => setSelectedEntry(entry)}
                   className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
                   style={{ background: "var(--bg-surface, #ffffff)" }}
                 >
-                  <td data-testid={`audit-row-${entry._id}-actor`} className="py-3 px-4 text-sm" style={{ color: "var(--text-primary, #111827)" }}>
+                  <td role="gridcell" data-testid={`audit-row-${entry._id}-actor`} className="py-3 px-4 text-sm" style={{ color: "var(--text-primary, #111827)" }}>
                     {entry.actorDisplayName}
                   </td>
-                  <td data-testid={`audit-row-${entry._id}-action`} className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
+                  <td role="gridcell" data-testid={`audit-row-${entry._id}-action`} className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
                     {entry.action}
                   </td>
-                  <td data-testid={`audit-row-${entry._id}-target`} className="py-3 px-4 text-sm" style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--text-secondary, #6b7280)" }}>
+                  <td role="gridcell" data-testid={`audit-row-${entry._id}-target`} className="py-3 px-4 text-sm" style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--text-secondary, #6b7280)" }}>
                     {entry.targetType}:{entry.targetId}
                   </td>
-                  <td data-testid={`audit-row-${entry._id}-timestamp`} className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
+                  <td role="gridcell" data-testid={`audit-row-${entry._id}-timestamp`} className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
                     {formatAuditTimestamp(entry.createdAt)}
                   </td>
                 </tr>
