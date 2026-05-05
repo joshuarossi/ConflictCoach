@@ -33,6 +33,7 @@ export function LandingPage() {
       {/* Three-step explainer */}
       <section className="px-4 py-16 bg-[var(--bg-surface)]">
         <div className="max-w-[720px] mx-auto">
+          <h2 className="sr-only">How it works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div className="flex flex-col items-center gap-3">
               <MessageCircle className="w-8 h-8 text-[var(--accent)]" strokeWidth={1.5} />
