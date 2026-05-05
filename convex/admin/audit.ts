@@ -17,9 +17,8 @@ export async function listAuditLogsHandler(ctx: any, args: any) {
   let entries;
 
   if (args.actorUserId) {
-    // Use the by_actor index when filtering by actor; defensively re-apply
-    // the actor filter in-memory in case the underlying iterator returns
-    // extra rows (some test mocks ignore the predicate).
+    // Use the by_actor index when filtering by actor; re-filter in-memory
+    // for defense-in-depth.
     entries = await ctx.db
       .query("auditLog")
       .withIndex("by_actor", (q: any) => q.eq("actorUserId", args.actorUserId))
@@ -39,7 +38,23 @@ export async function listAuditLogsHandler(ctx: any, args: any) {
   // Sort by createdAt descending (newest first)
   entries.sort((a: any, b: any) => b.createdAt - a.createdAt);
 
-  return entries;
+  // Enrich entries with actor display names
+  const actorIdSet = new Set<string>();
+  for (const e of entries) {
+    actorIdSet.add(String((e as any).actorUserId));
+  }
+  const actorMap: Record<string, string> = {};
+  for (const actorId of actorIdSet) {
+    const actor: any = await ctx.db.get(actorId as any);
+    if (actor) {
+      actorMap[actorId] = actor.displayName ?? actor.email ?? "Unknown";
+    }
+  }
+
+  return entries.map((entry: any) => ({
+    ...entry,
+    actorDisplayName: actorMap[String(entry.actorUserId)] ?? "Unknown",
+  }));
 }
 
 export const list = query({
