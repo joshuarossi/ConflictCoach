@@ -99,12 +99,28 @@ export async function requireAuth(ctx: AuthContext): Promise<UserRecord> {
     throwAppError("UNAUTHENTICATED", "Authentication required");
   }
 
-  const email = identity.email;
-  if (!email) {
-    throwAppError("UNAUTHENTICATED", "Identity missing email");
+  // Convex Auth identity tokens have no `email` claim — only `subject`,
+  // which is "<userId>|<sessionId>". The userId half is the `_id` of the
+  // row in the `users` table. Look up by that first, then fall back to
+  // email (for non-Convex-Auth identity providers that DO include email
+  // but no usable subject).
+  const subject = identity.subject ?? "";
+  const userIdFromSubject = subject.split("|")[0] || null;
+
+  let user: UserRecord | null = null;
+  if (userIdFromSubject) {
+    try {
+      user = (await ctx.db.get(userIdFromSubject)) ?? null;
+    } catch {
+      // Subject wasn't a valid users-table id; fall through to email lookup.
+      user = null;
+    }
   }
 
-  const user = await getUserByEmail(ctx, email);
+  if (!user && identity.email) {
+    user = await getUserByEmail(ctx, identity.email);
+  }
+
   if (!user) {
     throwAppError("USER_NOT_FOUND", "User record not found");
   }

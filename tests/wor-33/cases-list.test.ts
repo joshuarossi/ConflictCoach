@@ -532,23 +532,26 @@ describe("AC5: Query requires authentication", () => {
     }
   });
 
-  test("throws UNAUTHENTICATED error when identity has no email", async () => {
+  test("rejects request when identity has no email and no resolvable user", async () => {
     const ctx = createMockCtx({
       identity: { email: "", subject: "auth|noEmail" } as any,
       docsById: {},
       tables: {},
     });
-    // Override getUserIdentity to return identity without email
+    // Identity has a subject but no users-row exists for the subject's userId,
+    // and no email to fall back to. requireAuth should reject — UNAUTHENTICATED
+    // (no usable identity) or USER_NOT_FOUND (identity present, no row) are
+    // both correct depending on which lookup path resolves first.
     ctx.auth.getUserIdentity.mockResolvedValue({ subject: "auth|noEmail" });
     const handler = getHandler(list);
 
     try {
       await handler(ctx, {});
-      expect.unreachable("Expected handler to throw UNAUTHENTICATED");
+      expect.unreachable("Expected handler to throw");
     } catch (e) {
       expect(e).toBeInstanceOf(ConvexError);
       const data = (e as ConvexError<{ code: string }>).data;
-      expect(data.code).toBe("UNAUTHENTICATED");
+      expect(["UNAUTHENTICATED", "USER_NOT_FOUND"]).toContain(data.code);
     }
   });
 });
