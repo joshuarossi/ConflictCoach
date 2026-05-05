@@ -119,10 +119,15 @@ export function MessageBubble({
           : "bg-surface-subtle"
     : "";
 
+  const [isHovered, setIsHovered] = useState(false);
+
   return (
     <div
       className={cn("group flex w-full flex-col", wrapperAlignment, errorClasses)}
       data-author-type={resolvedAuthorType}
+      data-hovered={isHovered ? "true" : "false"}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       style={authorColor ? { borderColor: authorColor } : undefined}
     >
       <div className={cn("flex max-w-[80%] gap-2", isUser && "flex-row-reverse")}>
@@ -196,7 +201,7 @@ export function MessageBubble({
               data-testid="timestamp"
               className={cn(
                 "mt-1 block text-meta text-text-tertiary",
-                isJoint && "opacity-0 transition-opacity group-hover:opacity-100",
+                isJoint && (isHovered ? "opacity-100 transition-opacity" : "opacity-0 transition-opacity"),
                 !isJoint && !isComplete && "hidden",
               )}
             >

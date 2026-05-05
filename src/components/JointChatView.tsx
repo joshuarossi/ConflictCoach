@@ -4,7 +4,6 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { ChatWindow, type ChatMessage } from "./ChatWindow";
-import { StreamingIndicator } from "./StreamingIndicator";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import {
   Dialog,
@@ -169,11 +168,6 @@ export function JointChatView({
       <div className="mx-auto flex w-full max-w-[1080px] flex-1 flex-col overflow-hidden">
         <ChatWindow messages={chatMessages} isStreaming={isStreaming} />
 
-        {/* Streaming indicator (when no message is actively streaming) */}
-        {isStreaming && !messages.some((m) => m.status === "STREAMING") && (
-          <StreamingIndicator label="Coach is replying" />
-        )}
-
         {/* Input area with Send + Draft with Coach */}
         <div className="flex items-end gap-2 border-t border-border-default px-4 py-3">
           <textarea
@@ -203,7 +197,8 @@ export function JointChatView({
                 if (el) el.value = "";
               }
             }}
-            className="inline-flex h-10 shrink-0 items-center justify-center rounded-md bg-accent px-4 text-accent-on hover:bg-accent-hover"
+            disabled={isStreaming}
+            className="inline-flex h-10 shrink-0 items-center justify-center rounded-md bg-accent px-4 text-accent-on hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-50"
             aria-label="Send message"
           >
             Send
