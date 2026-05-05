@@ -272,8 +272,8 @@ export const writeSoftCapAuditLog = internalMutation({
       actorUserId: caseDoc.initiatorUserId,
       action: "COST_SOFT_CAP_REACHED",
       targetType: "case",
-      targetId: args.caseId,
-      metadata: { currentCostUsd: current.totalCostUsd },
+      targetId: String(args.caseId),
+      metadata: { currentCostUsd: String(current.totalCostUsd) },
       createdAt: Date.now(),
     });
   },

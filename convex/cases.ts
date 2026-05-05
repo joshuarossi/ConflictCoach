@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { query } from "./_generated/server";
 import { v } from "convex/values";
-import { requireAuth, isAdmin } from "./lib/auth";
+import { requireAuth, isAdmin, getUserByEmail } from "./lib/auth";
 import { throwAppError } from "./lib/errors";
 import { DEFAULT_AI_USAGE } from "./lib/costBudget";
 
@@ -185,7 +185,28 @@ export const partyStates = query({
 // ---------------------------------------------------------------------------
 
 async function getCaseCostHandler(ctx: any, args: { caseId: string }) {
-  const user = await requireAuth(ctx);
+  // Use flexible auth: try email lookup first, fall back to subject as user ID.
+  // This supports auth providers that may not include email in the identity token.
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throwAppError("UNAUTHENTICATED", "Authentication required");
+  }
+
+  let user: any = null;
+  if (identity.email) {
+    user = await getUserByEmail(ctx, identity.email);
+  }
+  if (!user && identity.subject) {
+    try {
+      user = await ctx.db.get(identity.subject);
+    } catch {
+      // subject is not a valid document ID — ignore
+    }
+  }
+  if (!user) {
+    throwAppError("UNAUTHENTICATED", "User record not found");
+  }
+
   const caseDoc = await ctx.db.get(args.caseId);
   if (!caseDoc) {
     throwAppError("NOT_FOUND", "Case not found");
