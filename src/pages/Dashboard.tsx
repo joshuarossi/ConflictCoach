@@ -44,7 +44,7 @@ function statusIndicator(
       // Other party still working — you are waiting on them.
       return { glyph: "○", colorClass: "text-text-tertiary", label: "Waiting" };
     case "JOINT_ACTIVE":
-      return { glyph: "●", colorClass: "text-success", label: "Your turn" };
+      return { glyph: "◐", colorClass: "text-warning", label: "Ready for joint session" };
     case "READY_FOR_JOINT":
       return { glyph: "◐", colorClass: "text-warning", label: "Ready for joint session" };
     case "CLOSED_RESOLVED":

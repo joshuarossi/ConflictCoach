@@ -34,10 +34,10 @@ Color-coded glyphs communicate turn-based state without requiring the user to re
 
 | Glyph | Color | Meaning | Statuses |
 |---|---|---|---|
-| ● | Green (`text-green-600`) | Your turn | `DRAFT_PRIVATE_COACHING` (when private coaching not yet completed) |
-| ○ | Gray (`text-gray-400`) | Waiting on other party | `DRAFT_PRIVATE_COACHING` (when private coaching completed), `BOTH_PRIVATE_COACHING` |
-| ◐ | Amber (`text-amber-500`) | Ready for joint session | `READY_FOR_JOINT`, `JOINT_ACTIVE` |
-| ◼ | Neutral (`text-gray-500`) | Closed | `CLOSED_RESOLVED`, `CLOSED_UNRESOLVED`, `CLOSED_ABANDONED` |
+| ● | Green (`text-success`) | Your turn | `DRAFT_PRIVATE_COACHING`, `BOTH_PRIVATE_COACHING` (when PC completed) |
+| ○ | Gray (`text-text-tertiary`) | Waiting on other party | `BOTH_PRIVATE_COACHING` (when PC not completed) |
+| ◐ | Amber (`text-warning`) | Ready for joint session | `READY_FOR_JOINT`, `JOINT_ACTIVE` |
+| ◼ | Neutral (`text-text-secondary`) | Closed | `CLOSED_RESOLVED`, `CLOSED_UNRESOLVED`, `CLOSED_ABANDONED` |
 
 ## Empty state
 
