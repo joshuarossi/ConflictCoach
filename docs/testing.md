@@ -32,6 +32,22 @@ End-to-end tests live in `e2e/` and run against a live Convex dev server:
 npm run test:e2e
 ```
 
+### Privacy Security Suite
+
+The `e2e/wor-75/privacy.spec.ts` suite validates the application's core privacy guarantees at the browser level:
+
+| Test | What It Validates |
+|---|---|
+| Cross-party message isolation (AC1) | User B cannot access User A's private coaching messages — server returns `FORBIDDEN` |
+| Admin access denial (AC2) | Admin users cannot read either party's private coaching content |
+| Coach AI leak prevention (AC3) | Coach responses in joint chat contain no 8-consecutive-token substring from either party's private messages |
+| Party state redaction (AC4) | The `partyStates` query exposes only phase-level booleans (e.g. `hasCompletedPC`) for the other party, never form fields |
+| Loud failure (AC5) | All authorization violations produce explicit `FORBIDDEN` errors, not empty results or silent failures |
+
+These tests are currently marked `fixme` pending the full E2E auth infrastructure (T49).
+
+Companion Vitest integration tests in `tests/wor-75/` cover the same access-control scenarios at the function level without requiring a browser.
+
 ## Continuous Integration
 
 The GitHub Actions workflow at `.github/workflows/ci.yml` runs automatically on pushes to `main` and on pull requests targeting `main`.

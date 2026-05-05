@@ -42,6 +42,30 @@ throwAppError(UNAUTHENTICATED, "You must be signed in");
 
 Unknown codes automatically fall back to `INTERNAL` / 500.
 
+## Client-side: `ConvexErrorBoundary`
+
+`src/components/layout/ConvexErrorBoundary.tsx` is a React error boundary that catches `ConvexError` exceptions thrown during render (e.g. from `useQuery`). It maps error codes to appropriate UI:
+
+- **FORBIDDEN** — renders the `<Forbidden />` component (a full-page "access denied" screen).
+- **Other codes** — displays a generic error message with the error's `message` field.
+- **Non-Convex errors** — re-thrown so React's default error handling applies.
+
+Wrap any page or subtree that calls Convex queries which may throw authorization errors:
+
+```tsx
+import { ConvexErrorBoundary } from "@/components/layout/ConvexErrorBoundary";
+
+export function MyPage() {
+  return (
+    <ConvexErrorBoundary>
+      <MyPageContent />
+    </ConvexErrorBoundary>
+  );
+}
+```
+
+The `CaseDetail`, `JointChatPage`, and `PrivateCoachingPage` pages all use this boundary.
+
 ## Client-side: `src/lib/errors.ts`
 
 ### `parseConvexError(error)`
