@@ -184,29 +184,35 @@ export const partyStates = query({
 // getCaseCost — return AI cost data for a case (party or admin)
 // ---------------------------------------------------------------------------
 
-export const getCaseCost = query({
+async function getCaseCostHandler(ctx: any, args: { caseId: string }) {
+  const user = await requireAuth(ctx);
+  const caseDoc = await ctx.db.get(args.caseId);
+  if (!caseDoc) {
+    throwAppError("NOT_FOUND", "Case not found");
+  }
+
+  // Allow access for case parties and admins
+  const isParty =
+    caseDoc.initiatorUserId === user._id ||
+    caseDoc.inviteeUserId === user._id;
+  if (!isParty && !isAdmin(user)) {
+    throwAppError("FORBIDDEN", "You are not authorized to view this case's cost");
+  }
+
+  const usage = caseDoc.aiUsage ?? DEFAULT_AI_USAGE;
+  return {
+    totalInputTokens: usage.totalInputTokens,
+    totalOutputTokens: usage.totalOutputTokens,
+    totalCostUsd: usage.totalCostUsd,
+    totalCost: usage.totalCostUsd,
+    softCapReachedAt: usage.softCapReachedAt ?? null,
+  };
+}
+
+// Export as both a callable function (for direct use) and a registered Convex
+// query (for the Convex runtime). Object.assign preserves the RegisteredQuery
+// properties while adding the function call signature.
+export const getCaseCost = Object.assign(getCaseCostHandler, query({
   args: { caseId: v.id("cases") },
-  handler: async (ctx: any, args: { caseId: string }) => {
-    const user = await requireAuth(ctx);
-    const caseDoc = await ctx.db.get(args.caseId);
-    if (!caseDoc) {
-      throwAppError("NOT_FOUND", "Case not found");
-    }
-
-    // Allow access for case parties and admins
-    const isParty =
-      caseDoc.initiatorUserId === user._id ||
-      caseDoc.inviteeUserId === user._id;
-    if (!isParty && !isAdmin(user)) {
-      throwAppError("FORBIDDEN", "You are not authorized to view this case's cost");
-    }
-
-    const usage = caseDoc.aiUsage ?? DEFAULT_AI_USAGE;
-    return {
-      totalInputTokens: usage.totalInputTokens,
-      totalOutputTokens: usage.totalOutputTokens,
-      totalCostUsd: usage.totalCostUsd,
-      softCapReachedAt: usage.softCapReachedAt ?? null,
-    };
-  },
-});
+  handler: getCaseCostHandler,
+}));
