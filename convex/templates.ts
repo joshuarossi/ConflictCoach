@@ -179,7 +179,76 @@ export const listAllTemplates = query({
     requireAdmin(user);
 
     const templates = await ctx.db.query("templates").collect();
-    return templates;
+
+    const enriched = await Promise.all(
+      templates.map(async (t: any) => {
+        // Get current version number
+        let currentVersion: number | null = null;
+        if (t.currentVersionId) {
+          const ver = await ctx.db.get(t.currentVersionId);
+          if (ver) currentVersion = ver.version;
+        }
+
+        // Count pinned cases: cases whose templateVersionId belongs to this template
+        const versions = await ctx.db
+          .query("templateVersions")
+          .withIndex("by_template", (q: any) => q.eq("templateId", t._id))
+          .collect();
+        const versionIds = new Set(versions.map((v: any) => v._id));
+
+        let pinnedCasesCount = 0;
+        const cases = await ctx.db.query("cases").collect();
+        for (const c of cases) {
+          if (versionIds.has(c.templateVersionId)) {
+            pinnedCasesCount++;
+          }
+        }
+
+        return {
+          ...t,
+          currentVersion,
+          pinnedCasesCount,
+        };
+      }),
+    );
+
+    return enriched;
+  },
+});
+
+// ---------------------------------------------------------------------------
+// admin/templates/get — single template by ID
+// ---------------------------------------------------------------------------
+
+export const getTemplate = query({
+  args: {
+    templateId: v.id("templates"),
+  },
+  handler: async (ctx: any, args: any) => {
+    const user = await requireAuth(ctx);
+    requireAdmin(user);
+
+    const template = await ctx.db.get(args.templateId);
+    if (!template) {
+      throwAppError("NOT_FOUND", "Template not found");
+    }
+
+    // Count pinned cases
+    const versions = await ctx.db
+      .query("templateVersions")
+      .withIndex("by_template", (q: any) => q.eq("templateId", args.templateId))
+      .collect();
+    const versionIds = new Set(versions.map((v: any) => v._id));
+
+    let pinnedCasesCount = 0;
+    const cases = await ctx.db.query("cases").collect();
+    for (const c of cases) {
+      if (versionIds.has(c.templateVersionId)) {
+        pinnedCasesCount++;
+      }
+    }
+
+    return { ...template, pinnedCasesCount };
   },
 });
 
@@ -204,6 +273,20 @@ export const listTemplateVersions = query({
     // Sort by version descending
     versions.sort((a: any, b: any) => b.version - a.version);
 
-    return versions;
+    // Enrich with publisher display name
+    const enriched = await Promise.all(
+      versions.map(async (ver: any) => {
+        let publishedByName = "Unknown";
+        if (ver.publishedByUserId) {
+          const publisher = await ctx.db.get(ver.publishedByUserId);
+          if (publisher) {
+            publishedByName = publisher.displayName || publisher.email || "Unknown";
+          }
+        }
+        return { ...ver, publishedByName };
+      }),
+    );
+
+    return enriched;
   },
 });
