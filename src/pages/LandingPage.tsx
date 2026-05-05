@@ -74,7 +74,7 @@ export function LandingPage() {
             to="/privacy"
             className="text-[var(--accent)] hover:text-[var(--accent-hover)] underline text-sm"
           >
-            Read our privacy policy
+            Learn how we protect your data
           </Link>
         </div>
       </section>
