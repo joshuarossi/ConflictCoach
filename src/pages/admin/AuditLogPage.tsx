@@ -41,21 +41,36 @@ interface AuditEntry {
 
 interface ErrorBoundaryState {
   hasError: boolean;
+  isAuthError: boolean;
 }
 
 class AuditLogErrorBoundary extends Component<
   { children: ReactNode },
   ErrorBoundaryState
 > {
-  state: ErrorBoundaryState = { hasError: false };
+  state: ErrorBoundaryState = { hasError: false, isAuthError: false };
 
-  static getDerivedStateFromError(): ErrorBoundaryState {
-    return { hasError: true };
+  static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
+    const message =
+      error instanceof Error ? error.message.toLowerCase() : "";
+    const isAuthError =
+      message.includes("unauthorized") ||
+      message.includes("forbidden") ||
+      message.includes("not authenticated") ||
+      message.includes("admin");
+    return { hasError: true, isAuthError };
   }
 
   render() {
     if (this.state.hasError) {
-      return <Forbidden />;
+      if (this.state.isAuthError) {
+        return <Forbidden />;
+      }
+      return (
+        <div className="min-h-screen flex items-center justify-center">
+          <p className="text-red-600">Something went wrong loading the audit log.</p>
+        </div>
+      );
     }
     return this.props.children;
   }
@@ -157,6 +172,7 @@ function AuditLogPageContent() {
               {entries.map((entry) => (
                 <tr
                   key={entry._id}
+                  data-testid={`audit-row-${entry._id}`}
                   onClick={() => setSelectedEntry(entry)}
                   className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
                   style={{ background: "var(--bg-surface, #ffffff)" }}
