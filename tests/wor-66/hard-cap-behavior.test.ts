@@ -6,7 +6,6 @@
  */
 import { describe, test, expect } from "vitest";
 
-// @ts-expect-error WOR-66 red-state import: implementation is created by task-implement.
 import { checkCostBudget } from "../../convex/lib/costBudget";
 
 describe("WOR-66: $10 hard cap enforcement", () => {

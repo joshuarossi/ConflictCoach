@@ -8,7 +8,6 @@ import { describe, test, expect, vi } from "vitest";
 
 // @ts-expect-error WOR-66 red-state import: implementation is created by task-implement.
 import { calculateCost, accumulateUsage, type AiUsageEntry } from "../../convex/lib/costBudget";
-// @ts-expect-error WOR-66 red-state import: implementation is created by task-implement.
 import { getCaseCost } from "../../convex/cases";
 
 describe("WOR-66: Per-case cost queryable", () => {

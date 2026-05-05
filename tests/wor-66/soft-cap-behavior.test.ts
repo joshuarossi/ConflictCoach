@@ -6,9 +6,7 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-// @ts-expect-error WOR-66 red-state import: implementation is created by task-implement.
 import { SOFT_CAP_BOILERPLATE, checkCostBudget } from "../../convex/lib/costBudget";
-// @ts-expect-error WOR-66 red-state import: implementation is created by task-implement.
 import { enforceCostBudget } from "../../convex/lib/costBudget";
 
 describe("WOR-66: $2 soft cap enforcement", () => {
