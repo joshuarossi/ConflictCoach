@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { query } from "./_generated/server";
 import { v } from "convex/values";
-import { requireAuth } from "./lib/auth";
+import { requireAuth, isAdmin } from "./lib/auth";
 import { throwAppError } from "./lib/errors";
+import { DEFAULT_AI_USAGE } from "./lib/costBudget";
 
 // ---------------------------------------------------------------------------
 // list — return all cases where the authenticated user is a party
@@ -175,6 +176,37 @@ export const partyStates = query({
             displayName: otherPartyName,
           }
         : null,
+    };
+  },
+});
+
+// ---------------------------------------------------------------------------
+// getCaseCost — return AI cost data for a case (party or admin)
+// ---------------------------------------------------------------------------
+
+export const getCaseCost = query({
+  args: { caseId: v.id("cases") },
+  handler: async (ctx: any, args: { caseId: string }) => {
+    const user = await requireAuth(ctx);
+    const caseDoc = await ctx.db.get(args.caseId);
+    if (!caseDoc) {
+      throwAppError("NOT_FOUND", "Case not found");
+    }
+
+    // Allow access for case parties and admins
+    const isParty =
+      caseDoc.initiatorUserId === user._id ||
+      caseDoc.inviteeUserId === user._id;
+    if (!isParty && !isAdmin(user)) {
+      throwAppError("FORBIDDEN", "You are not authorized to view this case's cost");
+    }
+
+    const usage = caseDoc.aiUsage ?? DEFAULT_AI_USAGE;
+    return {
+      totalInputTokens: usage.totalInputTokens,
+      totalOutputTokens: usage.totalOutputTokens,
+      totalCostUsd: usage.totalCostUsd,
+      softCapReachedAt: usage.softCapReachedAt ?? null,
     };
   },
 });
