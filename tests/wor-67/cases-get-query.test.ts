@@ -60,22 +60,27 @@ function createMockCtx(dbGetMap: Record<string, unknown>) {
 }
 
 describe("AC: cases/get returns case data for authorized party", () => {
-  test("returns the full case document when user is the initiator", async () => {
+  test("returns the case document with otherPartyName enrichment when user is the initiator", async () => {
     mockedRequireAuth.mockResolvedValueOnce({ _id: USER_A_ID, email: "a@test.com", role: "USER" });
     const ctx = createMockCtx({ [CASE_ID]: CASE_DOC });
 
     const handler = getHandler(get);
     const result = await handler(ctx, { caseId: CASE_ID });
-    expect(result).toEqual(CASE_DOC);
+    // The query returns a superset of the raw case document — including
+    // `otherPartyName` so TopNav can render "Case with {name}" without a
+    // second lookup. All raw fields must still be present.
+    expect(result).toMatchObject(CASE_DOC);
+    expect(result).toHaveProperty("otherPartyName");
   });
 
-  test("returns the full case document when user is the invitee", async () => {
+  test("returns the case document with otherPartyName enrichment when user is the invitee", async () => {
     mockedRequireAuth.mockResolvedValueOnce({ _id: USER_B_ID, email: "b@test.com", role: "USER" });
     const ctx = createMockCtx({ [CASE_ID]: CASE_DOC });
 
     const handler = getHandler(get);
     const result = await handler(ctx, { caseId: CASE_ID });
-    expect(result).toEqual(CASE_DOC);
+    expect(result).toMatchObject(CASE_DOC);
+    expect(result).toHaveProperty("otherPartyName");
   });
 });
 
