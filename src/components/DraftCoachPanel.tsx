@@ -55,6 +55,9 @@ export function DraftCoachPanel({
   );
 
   useEffect(() => {
+    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+      return;
+    }
     const mql = window.matchMedia("(max-width: 767px)");
     const handler = (e: MediaQueryListEvent | MediaQueryList) =>
       setIsMobile(e.matches);
