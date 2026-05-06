@@ -49,12 +49,12 @@ function formatDate(ts: number): string {
 // ---------------------------------------------------------------------------
 
 export interface ClosedCaseViewProps {
-  caseName: string;
-  category: string;
-  closedAt: number;
-  status: string;
+  caseName?: string;
+  category?: string;
+  closedAt?: number;
+  status?: string;
   closureSummary?: string | null;
-  jointMessages: Array<{
+  jointMessages?: Array<{
     _id: string;
     authorType: "USER" | "COACH";
     authorUserId?: string;
@@ -63,14 +63,14 @@ export interface ClosedCaseViewProps {
     isIntervention?: boolean;
     createdAt: number;
   }>;
-  privateMessages: Array<{
+  privateMessages?: Array<{
     _id: string;
     role: "USER" | "AI";
     content: string;
     status: "STREAMING" | "COMPLETE" | "ERROR";
     createdAt: number;
   }>;
-  synthesisText: string | null;
+  synthesisText?: string | null;
   initiatorUserId?: string;
   currentUserId?: string;
   defaultTab?: string;
@@ -78,14 +78,14 @@ export interface ClosedCaseViewProps {
 }
 
 export function ClosedCaseView({
-  caseName,
-  category,
-  closedAt,
-  status,
+  caseName = "",
+  category = "",
+  closedAt = Date.now(),
+  status = "",
   closureSummary,
-  jointMessages,
-  privateMessages,
-  synthesisText,
+  jointMessages = [],
+  privateMessages = [],
+  synthesisText = null,
   initiatorUserId,
   defaultTab = "joint",
   onTabChange,
