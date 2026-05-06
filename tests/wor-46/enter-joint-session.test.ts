@@ -12,7 +12,6 @@
 import { describe, test, expect, vi } from "vitest";
 import { ConvexError } from "convex/values";
 
-// @ts-expect-error WOR-46 red-state import: enterJointSession mutation is created by task-implement.
 import { enterJointSession } from "../../convex/jointChat";
 
 // ---------------------------------------------------------------------------

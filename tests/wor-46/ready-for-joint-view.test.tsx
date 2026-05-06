@@ -92,7 +92,6 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// @ts-expect-error WOR-46 red-state import: implementation is created by task-implement.
 import { ReadyForJointView } from "../../src/components/ReadyForJointView";
 
 // ---------------------------------------------------------------------------
