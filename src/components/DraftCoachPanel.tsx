@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useEffect } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
@@ -49,7 +49,23 @@ export function DraftCoachPanel({
   onKeepRefining,
   onDiscard,
 }: DraftCoachPanelProps) {
+  const [isDraftDismissed, setIsDraftDismissed] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 768 : false,
+  );
+
+  useEffect(() => {
+    const mql = window.matchMedia("(max-width: 767px)");
+    const handler = (e: MediaQueryListEvent | MediaQueryList) =>
+      setIsMobile(e.matches);
+    handler(mql);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, []);
+
   if (!isOpen) return null;
+
+  const showDraftCard = !!finalDraft && !isDraftDismissed;
 
   const chatMessages: ChatMessage[] = messages.map((m) => ({
     _id: m._id,
@@ -60,20 +76,29 @@ export function DraftCoachPanel({
     variant: "private" as const,
   }));
 
-  const privacyText = `This is private to you. ${otherPartyName} can\u2019t see what you\u2019re discussing here.`;
-  const tooltipText = `${otherPartyName} can\u2019t see any of this. Only the final message you send goes to the joint chat.`;
+  const privacyText = `This is private to you. ${otherPartyName} can't see what you're discussing here.`;
+  const tooltipText = `${otherPartyName} can't see any of this. Only the final message you send goes to the joint chat.`;
+
+  const handleKeepRefining = () => {
+    setIsDraftDismissed(true);
+    onKeepRefining?.();
+  };
 
   return (
     <div
       className={cn(
-        "fixed inset-y-0 right-0 z-40 flex flex-col bg-[var(--bg-surface)] transition-transform duration-200",
-        // Desktop: side panel 420px with shadow-3
-        "w-full md:w-[420px]",
+        "fixed z-40 flex flex-col bg-[var(--bg-surface)] transition-transform duration-200",
         "shadow-[0_12px_32px_rgba(0,0,0,0.10)]",
+        isMobile
+          ? // Mobile: full-screen bottom sheet
+            "inset-0 bottom-sheet"
+          : // Desktop: side panel 420px anchored right
+            "inset-y-0 right-0 w-[420px] side-panel",
       )}
       role="complementary"
       aria-label="Draft Coach panel"
       data-testid="draft-coach-panel"
+      data-layout={isMobile ? "bottom-sheet" : "side-panel"}
     >
       {/* Header */}
       <header className="flex items-center justify-between border-b border-[var(--border-default)] px-4 py-3">
@@ -112,19 +137,19 @@ export function DraftCoachPanel({
       <div className="flex flex-1 flex-col overflow-hidden">
         <ChatWindow messages={chatMessages} isStreaming={isStreaming} />
 
-        {/* Draft Ready Card — shown when finalDraft is set */}
-        {finalDraft && (
+        {/* Draft Ready Card — shown when finalDraft is set and not dismissed */}
+        {showDraftCard && (
           <DraftReadyCard
-            draftText={finalDraft}
+            draftText={finalDraft!}
             onSend={() => onSendFinalDraft?.()}
-            onEdit={() => onEditDraft?.(finalDraft)}
-            onKeepRefining={() => onKeepRefining?.()}
+            onEdit={() => onEditDraft?.(finalDraft!)}
+            onKeepRefining={handleKeepRefining}
             onDiscard={() => onDiscard?.()}
           />
         )}
 
         {/* Input area with Draft it for me button */}
-        {!finalDraft && (
+        {!showDraftCard && (
           <div className="border-t border-[var(--border-default)]">
             <MessageInput
               onSend={onSendMessage}
