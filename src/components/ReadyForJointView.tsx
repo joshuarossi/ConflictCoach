@@ -22,6 +22,11 @@ export function ReadyForJointView({ caseId, otherPartyName: otherPartyNameProp }
   const navigate = useNavigate();
   const typedCaseId = caseId as Id<"cases">;
 
+  // Read otherPartyName from cases.get (the canonical source — same
+  // convention as ClosedCasePage and other case-context views). Falls
+  // back to the optional prop, then to a generic placeholder.
+  const caseData = useQuery(api.cases.get, { caseId: typedCaseId });
+
   const synthesisData = useQuery(api.jointChat.mySynthesis, {
     caseId: typedCaseId,
   });
@@ -57,7 +62,11 @@ export function ReadyForJointView({ caseId, otherPartyName: otherPartyNameProp }
   }
 
   const synthesisText = synthesisData?.synthesisText ?? null;
-  const otherPartyName = otherPartyNameProp ?? synthesisData?.otherPartyName ?? "the other party";
+  const otherPartyName =
+    otherPartyNameProp ??
+    (caseData as { otherPartyName?: string } | null | undefined)?.otherPartyName ??
+    synthesisData?.otherPartyName ??
+    "the other party";
 
   return (
     <div className="mx-auto w-full max-w-[720px] px-4 py-8">

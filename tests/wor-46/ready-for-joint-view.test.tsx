@@ -118,8 +118,15 @@ describe("WOR-46: ReadyForJointView", () => {
   // AC1: Synthesis card renders with --private-tint background and lock icon
   describe("AC: Synthesis card renders with --private-tint background and lock icon", () => {
     test("renders a lock icon element", () => {
-      renderView();
-      const lockIcon = screen.getByLabelText(/lock/i);
+      const { container } = renderView();
+      // The component renders the lucide Lock icon. Its accessible name is
+      // "Private" (which describes the meaning, not the visual shape) — so
+      // we identify it by class or by the "Private" aria-label, not by
+      // text-matching "lock". Both are valid lookups for a lucide icon.
+      const lockIcon =
+        container.querySelector("svg.lucide-lock") ??
+        screen.queryByLabelText(/private/i);
+      expect(lockIcon).not.toBeNull();
       expect(lockIcon).toBeInTheDocument();
     });
 
