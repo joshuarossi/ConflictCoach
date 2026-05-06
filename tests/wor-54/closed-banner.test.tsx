@@ -39,7 +39,6 @@ vi.mock("convex/react", () => ({
   useMutation: () => vi.fn(),
 }));
 
-// @ts-expect-error WOR-54 red-state import: implementation is created by task-implement.
 import { ClosedCaseView } from "@/pages/ClosedCasePage";
 
 function renderView() {
