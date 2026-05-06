@@ -74,6 +74,21 @@ These tests are currently marked `fixme` pending the full E2E auth infrastructur
 
 Companion Vitest integration tests in `tests/wor-75/` cover the same access-control scenarios at the function level without requiring a browser.
 
+### Admin Template Management
+
+The `e2e/wor-76/admin-templates.spec.ts` suite validates the full admin template lifecycle in a single sequential test:
+
+1. **Admin login** — logs in as an admin user and navigates to `/admin/templates`.
+2. **Template creation** — creates a new template with a category and guidance text; verifies it appears in the template list.
+3. **Initial version (v1)** — confirms the auto-published v1 is visible in version history.
+4. **Case pinning** — creates a case while v1 is current, capturing the `templateVersionId`.
+5. **Publish v2** — edits guidance, publishes a new version, and asserts both v1 and v2 appear in version history.
+6. **Version pin verification** — queries the case created in step 4 and asserts its `templateVersionId` still points to v1, not v2.
+7. **Archive** — archives the template; verifies the "Archived" badge appears in the admin list and that archived templates do not break the category picker on `/cases/new`.
+8. **Pinned case still works** — navigates to the pinned case's private coaching page, sends a message, and confirms the mock AI responds, proving template version resolution works for archived templates.
+
+This test uses the `callQuery` fixture (`e2e/fixtures.ts`) which dispatches Convex queries through the `window.__TEST_CALL_QUERY__` browser hook (see `src/testHooks.ts`). Like other E2E tests, it runs with `CLAUDE_MOCK=true`.
+
 ## Continuous Integration
 
 The GitHub Actions workflow at `.github/workflows/ci.yml` runs automatically on pushes to `main` and on pull requests targeting `main`.
