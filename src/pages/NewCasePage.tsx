@@ -22,7 +22,18 @@ export function NewCasePage() {
         desiredOutcome: values.desiredOutcome.trim() || undefined,
         isSolo: values.isSolo,
       });
-      navigate(`/cases/${result.caseId}/invite`);
+      if (result.inviteUrl) {
+        navigate(`/cases/${result.caseId}/invite`, {
+          state: {
+            inviteUrl: result.inviteUrl,
+            otherPartyName: values.otherPartyName?.trim(),
+            mainTopic: values.mainTopic.trim(),
+          },
+        });
+      } else {
+        // Solo cases skip the invite screen
+        navigate(`/cases/${result.caseId}/private`);
+      }
     } catch (err) {
       setSubmitError(
         err instanceof Error ? err.message : "Failed to create case",
