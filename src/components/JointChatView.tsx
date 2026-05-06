@@ -4,6 +4,8 @@ import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { ChatWindow, type ChatMessage } from "./ChatWindow";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useNetworkErrorToast } from "@/hooks/useNetworkErrorToast";
 import { ConnectedDraftCoachPanel } from "./DraftCoachPanel";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import {
@@ -275,33 +277,32 @@ export function ConnectedJointChatView() {
   const sendMessage = useMutation(api.jointChat.sendUserMessage);
   const proposeClosure = useMutation(api.caseClosure.proposeClosure);
 
-  const [mutationError, setMutationError] = useState<string | null>(null);
+  // Network error toast (DesignDoc §6.2) — supersedes inline mutationError
+  const showNetworkError = useNetworkErrorToast();
   const [isDraftCoachOpen, setIsDraftCoachOpen] = useState(false);
 
   const handleSendMessage = useCallback(
     async (content: string) => {
-      setMutationError(null);
       try {
         await sendMessage({ caseId: typedCaseId, content });
       } catch (err) {
-        setMutationError(
+        showNetworkError(
           err instanceof Error ? err.message : "Failed to send message",
         );
       }
     },
-    [sendMessage, typedCaseId],
+    [sendMessage, typedCaseId, showNetworkError],
   );
 
   const handleProposeClosure = useCallback(async () => {
-    setMutationError(null);
     try {
       await proposeClosure({ caseId: typedCaseId });
     } catch (err) {
-      setMutationError(
+      showNetworkError(
         err instanceof Error ? err.message : "Failed to propose closure",
       );
     }
-  }, [proposeClosure, typedCaseId]);
+  }, [proposeClosure, typedCaseId, showNetworkError]);
 
   const handleEditDraft = useCallback((draftText: string) => {
     setIsDraftCoachOpen(false);
@@ -325,11 +326,27 @@ export function ConnectedJointChatView() {
     [messagesData],
   );
 
-  // Loading state
+  // Loading state — skeleton chat bubbles per DesignDoc §6.3
   if (caseData === undefined || partyData === undefined) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-text-secondary">Loading…</p>
+      <div className="flex h-screen flex-col">
+        <div className="flex items-center gap-3 border-b border-border-default px-4 py-3">
+          <Skeleton className="h-5 w-5 rounded-full" />
+          <Skeleton className="h-4 w-48" />
+        </div>
+        <div className="flex-1 flex flex-col gap-3 px-4 py-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              data-testid="skeleton-bubble"
+              className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"}`}
+            >
+              <Skeleton
+                className={`h-16 rounded-lg ${i % 2 === 0 ? "w-2/3" : "w-1/2"}`}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -382,14 +399,6 @@ export function ConnectedJointChatView() {
 
   return (
     <>
-      {mutationError && (
-        <div
-          role="alert"
-          className="fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-md bg-red-50 px-4 py-2 text-sm text-red-700 shadow"
-        >
-          {mutationError}
-        </div>
-      )}
       <JointChatView
         caseId={caseId}
         otherPartyName={otherPartyName}

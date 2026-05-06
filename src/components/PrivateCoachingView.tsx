@@ -8,6 +8,8 @@ import { PrivacyBanner } from "./PrivacyBanner";
 import { SoloBanner } from "./SoloBanner";
 import { ChatWindow, type ChatMessage } from "./ChatWindow";
 import { MessageInput } from "./MessageInput";
+import { Skeleton } from "@/components/ui/skeleton";
+import { useNetworkErrorToast } from "@/hooks/useNetworkErrorToast";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -189,12 +191,11 @@ export function ConnectedPrivateCoachingView() {
   const sendMessage = useMutation(api.privateCoaching.sendUserMessage);
   const markComplete = useMutation(api.privateCoaching.markComplete);
 
-  // Error state for mutation failures
-  const [mutationError, setMutationError] = useState<string | null>(null);
+  // Network error toast (DesignDoc §6.2)
+  const showNetworkError = useNetworkErrorToast();
 
   const handleSendMessage = useCallback(
     async (content: string) => {
-      setMutationError(null);
       try {
         await sendMessage({
           caseId,
@@ -202,24 +203,23 @@ export function ConnectedPrivateCoachingView() {
           ...(isSolo ? { partyRole: actingRole as "INITIATOR" | "INVITEE" } : {}),
         });
       } catch (err) {
-        setMutationError(
+        showNetworkError(
           err instanceof Error ? err.message : "Failed to send message",
         );
       }
     },
-    [sendMessage, caseId, isSolo, actingRole],
+    [sendMessage, caseId, isSolo, actingRole, showNetworkError],
   );
 
   const handleMarkComplete = useCallback(async () => {
-    setMutationError(null);
     try {
       await markComplete({ caseId });
     } catch (err) {
-      setMutationError(
+      showNetworkError(
         err instanceof Error ? err.message : "Failed to mark complete",
       );
     }
-  }, [markComplete, caseId]);
+  }, [markComplete, caseId, showNetworkError]);
 
   // Derive state
   const isCompleted = partyData?.self?.privateCoachingCompletedAt != null;
@@ -244,8 +244,23 @@ export function ConnectedPrivateCoachingView() {
 
   if (caseData === undefined || partyData === undefined || (isSolo && actingUserId === null)) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-text-secondary">Loading…</p>
+      <div className="flex h-screen flex-col">
+        <div className="px-4 py-3 border-b border-border-default">
+          <Skeleton className="h-4 w-64" />
+        </div>
+        <div className="flex-1 flex flex-col gap-3 px-4 py-4">
+          {[0, 1, 2, 3].map((i) => (
+            <div
+              key={i}
+              data-testid="skeleton-bubble"
+              className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"}`}
+            >
+              <Skeleton
+                className={`h-16 rounded-lg ${i % 2 === 0 ? "w-2/3" : "w-1/2"}`}
+              />
+            </div>
+          ))}
+        </div>
       </div>
     );
   }
@@ -285,14 +300,7 @@ export function ConnectedPrivateCoachingView() {
 
   return (
     <>
-      {mutationError && (
-        <div
-          role="alert"
-          className="fixed left-1/2 top-4 z-50 -translate-x-1/2 rounded-md bg-red-50 px-4 py-2 text-sm text-red-700 shadow"
-        >
-          {mutationError}
-        </div>
-      )}
+      {/* Network errors render via toast (DesignDoc §6.2), not inline */}
       {isSolo && <SoloBanner />}
       <PrivateCoachingView
         caseId={caseId}

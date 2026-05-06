@@ -67,7 +67,7 @@ class AuditLogErrorBoundary extends Component<
       }
       return (
         <div className="min-h-screen flex items-center justify-center">
-          <p className="text-red-600">Something went wrong loading the audit log.</p>
+          <p className="text-danger">Something went wrong loading the audit log.</p>
         </div>
       );
     }
@@ -106,19 +106,19 @@ function AuditLogPageContent() {
   return (
     <div style={{ background: "var(--bg-canvas, #f9fafb)" }} className="min-h-screen">
       <div className="px-4 py-6">
-        <h1 className="text-2xl font-bold text-gray-900 mb-6">Audit Log</h1>
+        <h1 className="text-h1 font-bold text-text-primary mb-6">Audit Log</h1>
 
         {/* Filters */}
         <div className="flex gap-4 mb-6">
           <div>
-            <label htmlFor="actor-filter" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="actor-filter" className="block text-meta font-medium text-text-secondary mb-1">
               Actor
             </label>
             <select
               id="actor-filter"
               value={actorFilter}
               onChange={(e) => setActorFilter(e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm bg-white"
+              className="rounded-md border border-border-default px-3 py-2 text-meta bg-surface"
             >
               <option value="">All actors</option>
               {actors.map((actor) => (
@@ -130,14 +130,14 @@ function AuditLogPageContent() {
           </div>
 
           <div>
-            <label htmlFor="action-filter" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="action-filter" className="block text-meta font-medium text-text-secondary mb-1">
               Action
             </label>
             <select
               id="action-filter"
               value={actionFilter}
               onChange={(e) => setActionFilter(e.target.value)}
-              className="rounded-md border border-gray-300 px-3 py-2 text-sm bg-white"
+              className="rounded-md border border-border-default px-3 py-2 text-meta bg-surface"
             >
               <option value="">All actions</option>
               {actions.map((action) => (
@@ -151,13 +151,13 @@ function AuditLogPageContent() {
 
         {/* Table */}
         {entries === undefined ? (
-          <p className="text-gray-500">Loading…</p>
+          <p className="text-text-secondary">Loading…</p>
         ) : entries.length === 0 ? (
-          <p className="text-gray-500">No audit log entries found.</p>
+          <p className="text-text-secondary">No audit log entries found.</p>
         ) : (
           <table aria-label="Audit log" className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-gray-200">
+              <tr className="border-b border-border-default">
                 <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Actor</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Action</th>
                 <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Target</th>
@@ -170,7 +170,7 @@ function AuditLogPageContent() {
                   key={entry._id}
                   data-testid={`audit-row-${entry._id}`}
                   onClick={() => setSelectedEntry(entry)}
-                  className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
+                  className="border-b border-border-default hover:bg-surface-subtle cursor-pointer"
                   style={{ background: "var(--bg-surface, #ffffff)" }}
                 >
                   <td className="py-3 px-4 text-sm" style={{ color: "var(--text-primary, #111827)" }}>
@@ -203,22 +203,22 @@ function AuditLogPageContent() {
             role="dialog"
             aria-label="Audit entry details"
             data-testid="audit-detail-drawer"
-            className="relative w-full max-w-md bg-white h-full overflow-y-auto p-6"
+            className="relative w-full max-w-md bg-surface h-full overflow-y-auto p-6"
             style={{ boxShadow: "var(--shadow-3, -4px 0 24px rgba(0,0,0,0.15))" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-lg font-semibold text-gray-900">Entry Details</h2>
+              <h2 className="text-h2 font-semibold text-text-primary">Entry Details</h2>
               <button
                 onClick={() => setSelectedEntry(null)}
-                className="text-gray-400 hover:text-gray-600 text-xl leading-none"
+                className="text-text-tertiary hover:text-text-secondary text-xl leading-none"
                 aria-label="Close drawer"
               >
                 &times;
               </button>
             </div>
             <pre
-              className="text-sm rounded-md bg-gray-50 p-4 overflow-x-auto whitespace-pre-wrap"
+              className="text-meta rounded-md bg-surface-subtle p-4 overflow-x-auto whitespace-pre-wrap"
               style={{ fontFamily: "'JetBrains Mono', monospace" }}
             >
               {JSON.stringify(selectedEntry.metadata ?? {}, null, 2)}
