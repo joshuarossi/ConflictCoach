@@ -26,6 +26,7 @@ export function NewCasePage() {
         navigate(`/cases/${result.caseId}/invite`, {
           state: {
             inviteUrl: result.inviteUrl,
+            otherPartyName: values.otherPartyName?.trim(),
             mainTopic: values.mainTopic.trim(),
           },
         });

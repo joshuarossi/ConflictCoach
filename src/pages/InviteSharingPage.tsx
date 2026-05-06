@@ -77,7 +77,7 @@ export function InviteSharingView({
             size="sm"
             onClick={() => handleCopy(inviteUrl, "copy-link")}
             className="shrink-0"
-            aria-label="Copy invite link to clipboard"
+            aria-label="Copy link to clipboard"
           >
             {copiedButton === "copy-link" ? (
               <>

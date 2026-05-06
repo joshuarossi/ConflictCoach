@@ -15,6 +15,7 @@ export interface NewCaseFormValues {
   mainTopic: string;
   description: string;
   desiredOutcome: string;
+  otherPartyName: string;
   isSolo: boolean;
 }
 
@@ -83,6 +84,7 @@ export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormPro
   const [mainTopic, setMainTopic] = useState("");
   const [description, setDescription] = useState("");
   const [desiredOutcome, setDesiredOutcome] = useState("");
+  const [otherPartyName, setOtherPartyName] = useState("");
   const [isSolo, setIsSolo] = useState(false);
   const [advancedOpen, setAdvancedOpen] = useState(false);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -93,6 +95,7 @@ export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormPro
       mainTopic,
       description,
       desiredOutcome,
+      otherPartyName,
       isSolo,
     };
     const fieldErrors = validate(values);
@@ -254,6 +257,30 @@ export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormPro
             placeholder="What would a good resolution look like?"
             rows={3}
             className="w-full rounded-md border border-border-default bg-private-tint px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none overflow-hidden"
+          />
+        </div>
+      )}
+
+      {/* Step 5: Other party's name */}
+      {showAdvancedAndSubmit && !isSolo && (
+        <div>
+          <label
+            htmlFor="otherPartyName"
+            className="block text-label font-medium text-text-primary mb-1"
+          >
+            Other person&apos;s name
+          </label>
+          <p className="text-meta text-text-secondary mb-1">
+            Used to personalise the invite you&apos;ll send them.
+          </p>
+          <input
+            id="otherPartyName"
+            type="text"
+            value={otherPartyName}
+            onChange={(e) => setOtherPartyName(e.target.value)}
+            disabled={disabled}
+            placeholder="e.g. Jordan"
+            className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
           />
         </div>
       )}
