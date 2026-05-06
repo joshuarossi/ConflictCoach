@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Link, useParams, useLocation } from "react-router-dom";
+import { Link, useParams, useLocation, useNavigate } from "react-router-dom";
+import { useState, useRef, useEffect } from "react";
 import type { ReactNode } from "react";
 import { useQuery } from "convex/react";
+import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "../../../convex/_generated/api";
 
 /** Maps route segments to human-readable phase labels. */
@@ -41,6 +43,66 @@ function getStatusPhaseLabel(status: string | undefined): string | null {
 export interface TopNavProps {
   /** Optional slot for PartyToggle or other controls */
   children?: ReactNode;
+}
+
+function UserMenu() {
+  const { signOut } = useAuthActions();
+  const navigate = useNavigate();
+  const user = useQuery(api.users.me);
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  const displayLabel = user?.displayName || user?.email || "Account";
+
+  async function handleLogout() {
+    await signOut();
+    navigate("/login");
+  }
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+        aria-label="User menu"
+        data-testid="user-menu-button"
+      >
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600">
+          {(user?.displayName || user?.email || "?")[0].toUpperCase()}
+        </span>
+        <span className="hidden sm:inline">{displayLabel}</span>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-10 mt-1 w-48 rounded-md border bg-white py-1 shadow-lg"
+        >
+          <div className="border-b px-3 py-2 text-sm text-gray-500 truncate">
+            {user?.email}
+          </div>
+          <button
+            role="menuitem"
+            onClick={handleLogout}
+            className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+            data-testid="logout-button"
+          >
+            Log out
+          </button>
+        </div>
+      )}
+    </div>
+  );
 }
 
 export function TopNav({ children }: TopNavProps) {
@@ -104,6 +166,7 @@ export function TopNav({ children }: TopNavProps) {
         </Link>
         <div className="flex items-center gap-4">
           {children}
+          <UserMenu />
         </div>
       </div>
     </nav>

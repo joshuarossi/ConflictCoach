@@ -10,7 +10,7 @@ import { renderHook } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
 import type { ReactNode } from "react";
 
-import { useActingPartyUserId } from "./__stubs__/useActingPartyUserId";
+import { useActingPartyUserId } from "@/hooks/useActingPartyUserId";
 
 // Mock Convex React hooks
 const mockUseQuery = vi.fn();
@@ -20,7 +20,7 @@ vi.mock("convex/react", () => ({
 
 vi.mock("../../convex/_generated/api", () => ({
   api: {
-    cases: { get: "cases:get" },
+    cases: { get: "cases:get", partyStates: "cases:partyStates" },
   },
 }));
 
@@ -31,10 +31,12 @@ vi.mock("../../convex/_generated/api", () => ({
 const INITIATOR_USER_ID = "users:initiator_001";
 const INVITEE_USER_ID = "users:invitee_002";
 
-const SOLO_CASE_PARTY_STATES = [
-  { userId: INITIATOR_USER_ID, role: "INITIATOR" },
-  { userId: INVITEE_USER_ID, role: "INVITEE" },
-];
+const SOLO_CASE_PARTY_STATES = {
+  all: [
+    { userId: INITIATOR_USER_ID, role: "INITIATOR" },
+    { userId: INVITEE_USER_ID, role: "INVITEE" },
+  ],
+};
 
 // ---------------------------------------------------------------------------
 // Helpers

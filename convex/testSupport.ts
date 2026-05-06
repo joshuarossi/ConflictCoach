@@ -58,12 +58,14 @@ export const createCase = mutation({
       createdByUserId: args.initiatorUserId,
     });
 
+    const initiator: any = await ctx.db.get(args.initiatorUserId);
     const templateVersionId = await ctx.db.insert("templateVersions", {
       templateId,
       version: 1,
       globalGuidance: "Test guidance for conflict coaching.",
       publishedAt: Date.now(),
       publishedByUserId: args.initiatorUserId,
+      publishedByName: initiator?.displayName || initiator?.email || "Unknown",
     });
 
     await ctx.db.patch(templateId, { currentVersionId: templateVersionId });
@@ -88,6 +90,79 @@ export const createCase = mutation({
     });
 
     return caseId;
+  },
+});
+
+// ---------------------------------------------------------------------------
+// setCaseStatus — directly set a case's status for E2E lifecycle testing
+// ---------------------------------------------------------------------------
+
+export const setCaseStatus = mutation({
+  args: {
+    caseId: v.id("cases"),
+    status: v.string(),
+  },
+  handler: async (
+    ctx: any,
+    args: { caseId: string; status: string },
+  ) => {
+    assertTestMode();
+    await ctx.db.patch(args.caseId, {
+      status: args.status,
+      updatedAt: Date.now(),
+    });
+  },
+});
+
+// ---------------------------------------------------------------------------
+// createInviteToken �� create an invite token for a case (E2E fixture)
+// ---------------------------------------------------------------------------
+
+export const createInviteToken = mutation({
+  args: {
+    caseId: v.id("cases"),
+  },
+  handler: async (ctx: any, args: { caseId: string }) => {
+    assertTestMode();
+
+    const tokenBytes = new Uint8Array(24);
+    crypto.getRandomValues(tokenBytes);
+    const token = btoa(String.fromCharCode(...tokenBytes))
+      .replace(/\+/g, "-")
+      .replace(/\//g, "_")
+      .replace(/=/g, "");
+
+    await ctx.db.insert("inviteTokens", {
+      caseId: args.caseId,
+      token,
+      status: "ACTIVE" as const,
+      createdAt: Date.now(),
+    });
+
+    return token;
+  },
+});
+
+// ---------------------------------------------------------------------------
+// addPartyState — add a party state row for a user on a case (E2E fixture)
+// ---------------------------------------------------------------------------
+
+export const addPartyState = mutation({
+  args: {
+    caseId: v.id("cases"),
+    userId: v.id("users"),
+    role: v.string(),
+  },
+  handler: async (
+    ctx: any,
+    args: { caseId: string; userId: string; role: string },
+  ) => {
+    assertTestMode();
+    await ctx.db.insert("partyStates", {
+      caseId: args.caseId,
+      userId: args.userId,
+      role: args.role,
+    });
   },
 });
 
@@ -130,6 +205,7 @@ export const createCaseForEmail = mutation({
       globalGuidance: "Test guidance for conflict coaching.",
       publishedAt: Date.now(),
       publishedByUserId: user._id,
+      publishedByName: user.displayName || user.email || "Unknown",
     });
     await ctx.db.patch(templateId, { currentVersionId: templateVersionId });
 

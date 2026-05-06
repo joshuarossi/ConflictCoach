@@ -83,7 +83,6 @@ export default defineSchema({
     content: v.string(),
     status: v.union(v.literal("STREAMING"), v.literal("COMPLETE"), v.literal("ERROR")),
     tokens: v.optional(v.number()),
-    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
     createdAt: v.number(),
   })
     .index("by_case_and_user", ["caseId", "userId"])
@@ -155,6 +154,7 @@ export default defineSchema({
     draftCoachInstructions: v.optional(v.string()),
     publishedAt: v.number(),
     publishedByUserId: v.id("users"),
+    publishedByName: v.optional(v.string()), // denormalized display name at publish time
     notes: v.optional(v.string()),
   }).index("by_template", ["templateId"]),
 

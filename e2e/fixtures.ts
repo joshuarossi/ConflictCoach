@@ -23,8 +23,10 @@ export interface TestCase {
   caseId: string;
   category: string;
   isSolo: boolean;
-  /** Initial case status — BOTH_PRIVATE_COACHING for solo cases, DRAFT_PRIVATE_COACHING otherwise. */
-  status: "DRAFT_PRIVATE_COACHING" | "BOTH_PRIVATE_COACHING";
+  /** Initial case status — always DRAFT_PRIVATE_COACHING from createCaseForEmail. */
+  status: "DRAFT_PRIVATE_COACHING";
+  /** Invite token for two-party cases. Undefined for solo cases. */
+  inviteToken?: string;
 }
 
 function uniqueSuffix(): string {
@@ -117,14 +119,14 @@ export async function createTestCase(
     null,
     { timeout: 10000 },
   );
-  const caseId = await page.evaluate(
+  const result = await page.evaluate(
     async ({ email, category, isSolo }) => {
       const w = window as unknown as {
         __TEST_CREATE_CASE__?: (args: {
           email: string;
           category: string;
           isSolo: boolean;
-        }) => Promise<string>;
+        }) => Promise<string | { caseId: string; inviteToken?: string }>;
       };
       if (!w.__TEST_CREATE_CASE__) {
         throw new Error(
@@ -132,9 +134,64 @@ export async function createTestCase(
             "Ensure CLAUDE_MOCK=true and the test case shim is mounted.",
         );
       }
-      return await w.__TEST_CREATE_CASE__({ email, category, isSolo });
+      const res = await w.__TEST_CREATE_CASE__({ email, category, isSolo });
+      // Support both legacy (string) and structured ({ caseId, inviteToken }) return shapes
+      if (typeof res === "string") {
+        return { caseId: res, inviteToken: undefined };
+      }
+      return res;
     },
     { email: user.email, category, isSolo },
   );
-  return { caseId, category, isSolo, status: isSolo ? "BOTH_PRIVATE_COACHING" : "DRAFT_PRIVATE_COACHING" };
+  return {
+    caseId: result.caseId,
+    category,
+    isSolo,
+    status: "DRAFT_PRIVATE_COACHING" as const,
+    inviteToken: result.inviteToken,
+  };
+}
+
+/**
+ * Calls a Convex mutation via the test window hook and returns the result or
+ * a structured error with the ConvexError code.
+ *
+ * Implementation must wire `window.__TEST_CALL_MUTATION__` in the app's test
+ * shim (alongside `__TEST_SIGN_IN__` and `__TEST_CREATE_CASE__`). The hook
+ * should forward the call through the real Convex client so that auth and
+ * permission checks are exercised.
+ */
+export async function callMutation(
+  page: Page,
+  mutation: string,
+  args: Record<string, unknown>,
+): Promise<{ ok: true; value: unknown } | { ok: false; code: string; message: string }> {
+  return page.evaluate(
+    async ({ mutation, args }) => {
+      const w = window as unknown as {
+        __TEST_CALL_MUTATION__?: (
+          mutation: string,
+          args: Record<string, unknown>,
+        ) => Promise<unknown>;
+      };
+      if (!w.__TEST_CALL_MUTATION__) {
+        throw new Error(
+          "Test mutation hook __TEST_CALL_MUTATION__ not found on window. " +
+            "Ensure CLAUDE_MOCK=true and the test shim is mounted.",
+        );
+      }
+      try {
+        const value = await w.__TEST_CALL_MUTATION__(mutation, args);
+        return { ok: true as const, value };
+      } catch (e: unknown) {
+        const err = e as { data?: { code?: string }; message?: string };
+        return {
+          ok: false as const,
+          code: err.data?.code ?? "UNKNOWN",
+          message: err.message ?? String(e),
+        };
+      }
+    },
+    { mutation, args },
+  );
 }
