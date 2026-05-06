@@ -19,7 +19,9 @@ interface ReadDbContext {
   query: (table: string) => {
     withIndex: (
       name: string,
-      predicate: (q: { eq: (field: string, value: string) => unknown }) => unknown,
+      predicate: (q: {
+        eq: (field: string, value: string) => unknown;
+      }) => unknown,
     ) => { first: () => Promise<UserRecord | null> };
   };
 }
@@ -56,7 +58,9 @@ export async function getUserByEmail(
  * and createdAt if none exists; returns the existing record otherwise.
  * Must be called from a mutation context (needs db.insert).
  */
-export async function upsertUser(ctx: MutationAuthContext): Promise<UserRecord> {
+export async function upsertUser(
+  ctx: MutationAuthContext,
+): Promise<UserRecord> {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
     throwAppError("UNAUTHENTICATED", "Authentication required");

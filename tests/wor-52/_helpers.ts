@@ -124,6 +124,10 @@ export function createMockCtx(options: CreateMockCtxOptions = {}) {
  * Convex wraps handlers in an object; this unwraps it.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getHandler(fn: Record<string, unknown> | ((...args: unknown[]) => unknown)): (...args: any[]) => any {
-  return typeof fn === "function" ? fn : fn.handler as (...args: unknown[]) => unknown;
+export function getHandler(
+  fn: Record<string, unknown> | ((...args: unknown[]) => unknown),
+): (...args: any[]) => any {
+  return typeof fn === "function"
+    ? fn
+    : (fn.handler as (...args: unknown[]) => unknown);
 }

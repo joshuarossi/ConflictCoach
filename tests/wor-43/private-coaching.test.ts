@@ -117,9 +117,14 @@ function createMockQueryCtx(options: {
   // Auto-seed a users row that matches the authenticated identity so that
   // requireAuth (WOR-27) can resolve identity → user record via by_email.
   // Test fixtures use the userId string as both _id and the email-key suffix.
-  const email = authenticatedUserId ? `${authenticatedUserId}@test.local` : null;
+  const email = authenticatedUserId
+    ? `${authenticatedUserId}@test.local`
+    : null;
   const seededUsers = [...(dbData.users ?? [])];
-  if (authenticatedUserId && !seededUsers.some((u) => u._id === authenticatedUserId)) {
+  if (
+    authenticatedUserId &&
+    !seededUsers.some((u) => u._id === authenticatedUserId)
+  ) {
     seededUsers.push({
       _id: authenticatedUserId,
       email,
@@ -146,9 +151,7 @@ function createMockQueryCtx(options: {
         }
       }
       const matched = filters.length
-        ? rows.filter((r) =>
-            filters.every((f) => r[f.field] === f.value),
-          )
+        ? rows.filter((r) => filters.every((f) => r[f.field] === f.value))
         : rows;
       return {
         collect: vi.fn(async () => matched),
@@ -227,15 +230,16 @@ function createMockMutationCtx(options: {
   };
 }
 
-function createMockActionCtx(options: {
-  authenticatedUserId?: string | null;
-}) {
+function createMockActionCtx(options: { authenticatedUserId?: string | null }) {
   const mutations: Array<{ ref: any; args: any }> = [];
   return {
     auth: {
       getUserIdentity: vi.fn(async () =>
         options.authenticatedUserId
-          ? { subject: options.authenticatedUserId, tokenIdentifier: `token:${options.authenticatedUserId}` }
+          ? {
+              subject: options.authenticatedUserId,
+              tokenIdentifier: `token:${options.authenticatedUserId}`,
+            }
           : null,
       ),
     },
@@ -269,7 +273,10 @@ describe("AC 1: myMessages query returns only the caller's own messages", () => 
     });
 
     // The query handler is the .handler property on a Convex query definition
-    const handler = typeof myMessages === "function" ? myMessages : (myMessages as any).handler;
+    const handler =
+      typeof myMessages === "function"
+        ? myMessages
+        : (myMessages as any).handler;
     const result = await handler(ctx, { caseId: CASE_ID });
 
     // Should return only party A's messages
@@ -292,7 +299,10 @@ describe("AC 1: myMessages query returns only the caller's own messages", () => 
       },
     });
 
-    const handler = typeof myMessages === "function" ? myMessages : (myMessages as any).handler;
+    const handler =
+      typeof myMessages === "function"
+        ? myMessages
+        : (myMessages as any).handler;
     const result = await handler(ctx, { caseId: CASE_ID });
 
     expect(Array.isArray(result)).toBe(true);
@@ -313,7 +323,10 @@ describe("AC 1: myMessages query returns only the caller's own messages", () => 
       },
     });
 
-    const handler = typeof myMessages === "function" ? myMessages : (myMessages as any).handler;
+    const handler =
+      typeof myMessages === "function"
+        ? myMessages
+        : (myMessages as any).handler;
 
     await expect(handler(ctx, { caseId: CASE_ID })).rejects.toThrow();
   });
@@ -333,7 +346,10 @@ describe("AC 2: sendUserMessage inserts message row and schedules AI action", ()
       },
     });
 
-    const handler = typeof sendUserMessage === "function" ? sendUserMessage : (sendUserMessage as any).handler;
+    const handler =
+      typeof sendUserMessage === "function"
+        ? sendUserMessage
+        : (sendUserMessage as any).handler;
     await handler(ctx, {
       caseId: CASE_ID,
       content: "I need help with this conflict.",
@@ -341,7 +357,9 @@ describe("AC 2: sendUserMessage inserts message row and schedules AI action", ()
 
     // Verify a privateMessages row was inserted
     expect(ctx.db.insert).toHaveBeenCalled();
-    const insertCall = ctx.insertedRows.find((r) => r.table === "privateMessages");
+    const insertCall = ctx.insertedRows.find(
+      (r) => r.table === "privateMessages",
+    );
     expect(insertCall).toBeDefined();
     expect(insertCall!.doc.role).toBe("USER");
     expect(insertCall!.doc.status).toBe("COMPLETE");
@@ -394,7 +412,10 @@ describe("AC 4: markComplete sets privateCoachingCompletedAt and triggers synthe
       },
     });
 
-    const handler = typeof markComplete === "function" ? markComplete : (markComplete as any).handler;
+    const handler =
+      typeof markComplete === "function"
+        ? markComplete
+        : (markComplete as any).handler;
     await handler(ctx, { caseId: CASE_ID });
 
     // Verify partyState was patched with privateCoachingCompletedAt
@@ -418,12 +439,15 @@ describe("AC 4: markComplete sets privateCoachingCompletedAt and triggers synthe
       },
     });
 
-    const handler = typeof markComplete === "function" ? markComplete : (markComplete as any).handler;
+    const handler =
+      typeof markComplete === "function"
+        ? markComplete
+        : (markComplete as any).handler;
     await handler(ctx, { caseId: CASE_ID });
 
     // Synthesis action should NOT be scheduled yet
-    const synthesisCalls = ctx.scheduledActions.filter(
-      (a) => JSON.stringify(a).includes("synthesis"),
+    const synthesisCalls = ctx.scheduledActions.filter((a) =>
+      JSON.stringify(a).includes("synthesis"),
     );
     expect(synthesisCalls.length).toBe(0);
   });
@@ -441,7 +465,10 @@ describe("AC 4: markComplete sets privateCoachingCompletedAt and triggers synthe
       },
     });
 
-    const handler = typeof markComplete === "function" ? markComplete : (markComplete as any).handler;
+    const handler =
+      typeof markComplete === "function"
+        ? markComplete
+        : (markComplete as any).handler;
     await handler(ctx, { caseId: CASE_ID });
 
     // Verify synthesis action was scheduled
@@ -467,7 +494,10 @@ describe("AC 5: markComplete is idempotent", () => {
       },
     });
 
-    const handler = typeof markComplete === "function" ? markComplete : (markComplete as any).handler;
+    const handler =
+      typeof markComplete === "function"
+        ? markComplete
+        : (markComplete as any).handler;
 
     // First call — should not throw
     await expect(handler(ctx, { caseId: CASE_ID })).resolves.not.toThrow();
@@ -489,7 +519,10 @@ describe("AC 5: markComplete is idempotent", () => {
       },
     });
 
-    const handler = typeof markComplete === "function" ? markComplete : (markComplete as any).handler;
+    const handler =
+      typeof markComplete === "function"
+        ? markComplete
+        : (markComplete as any).handler;
     await handler(ctx, { caseId: CASE_ID });
 
     // If already completed, the timestamp should not be overwritten.

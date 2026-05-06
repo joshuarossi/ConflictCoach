@@ -12,20 +12,20 @@ The main panel component. Renders as a 420 px side panel on desktop and a full-s
 
 **Key props (`DraftCoachPanelProps`):**
 
-| Prop | Type | Description |
-|---|---|---|
-| `isOpen` | `boolean` | Controls panel visibility |
-| `onClose` | `() => void` | Called when the user closes the panel |
-| `otherPartyName` | `string` | Interpolated into the privacy banner text |
-| `messages` | `DraftCoachMessage[]` | Coach conversation messages |
-| `isStreaming` | `boolean` | Whether an AI response is currently streaming |
-| `finalDraft` | `string \| null` | When set, the DraftReadyCard is shown |
-| `onSendMessage` | `(content: string) => void` | Send a user message to the coach |
-| `onDraftItForMe` | `() => void` | Sends the canonical "draft it for me" readiness message |
-| `onSendFinalDraft` | `() => void` | Posts the draft to joint chat |
-| `onEditDraft` | `(draftText: string) => void` | Drops draft text into the joint chat input |
-| `onKeepRefining` | `() => void` | Dismisses the draft card, returns to coaching |
-| `onDiscard` | `() => void` | Discards the session and closes the panel |
+| Prop               | Type                          | Description                                             |
+| ------------------ | ----------------------------- | ------------------------------------------------------- |
+| `isOpen`           | `boolean`                     | Controls panel visibility                               |
+| `onClose`          | `() => void`                  | Called when the user closes the panel                   |
+| `otherPartyName`   | `string`                      | Interpolated into the privacy banner text               |
+| `messages`         | `DraftCoachMessage[]`         | Coach conversation messages                             |
+| `isStreaming`      | `boolean`                     | Whether an AI response is currently streaming           |
+| `finalDraft`       | `string \| null`              | When set, the DraftReadyCard is shown                   |
+| `onSendMessage`    | `(content: string) => void`   | Send a user message to the coach                        |
+| `onDraftItForMe`   | `() => void`                  | Sends the canonical "draft it for me" readiness message |
+| `onSendFinalDraft` | `() => void`                  | Posts the draft to joint chat                           |
+| `onEditDraft`      | `(draftText: string) => void` | Drops draft text into the joint chat input              |
+| `onKeepRefining`   | `() => void`                  | Dismisses the draft card, returns to coaching           |
+| `onDiscard`        | `() => void`                  | Discards the session and closes the panel               |
 
 **Privacy banner:** A persistent banner with a lock icon displays: _"This is private to you. {name} can't see what you're discussing here."_ A hover tooltip provides additional reassurance.
 
@@ -37,12 +37,12 @@ Rendered inside `DraftCoachPanel` when `finalDraft` is set. Displays the draft t
 
 **Actions:**
 
-| Button | Behaviour |
-|---|---|
+| Button                          | Behaviour                                                                         |
+| ------------------------------- | --------------------------------------------------------------------------------- |
 | **Send this message** (primary) | Calls `draftCoach/sendFinalDraft` — the only path for a draft to reach joint chat |
-| **Edit before sending** | Drops the draft text into the joint chat input field and closes the panel |
-| **Keep refining with Coach** | Dismisses the card and returns to the coaching conversation |
-| **Discard** | Calls `draftCoach/discardSession`, closes the panel, no message is sent |
+| **Edit before sending**         | Drops the draft text into the joint chat input field and closes the panel         |
+| **Keep refining with Coach**    | Dismisses the card and returns to the coaching conversation                       |
+| **Discard**                     | Calls `draftCoach/discardSession`, closes the panel, no message is sent           |
 
 ### `ConnectedDraftCoachPanel`
 
@@ -58,10 +58,10 @@ A data-connected wrapper that wires `DraftCoachPanel` to Convex backend APIs. Us
 
 ## Responsive layout
 
-| Viewport | Layout | Details |
-|---|---|---|
-| Desktop (≥ 768 px) | Side panel | 420 px wide, anchored to the right, `shadow-3` |
-| Mobile (< 768 px) | Bottom sheet | Full-screen overlay |
+| Viewport           | Layout       | Details                                        |
+| ------------------ | ------------ | ---------------------------------------------- |
+| Desktop (≥ 768 px) | Side panel   | 420 px wide, anchored to the right, `shadow-3` |
+| Mobile (< 768 px)  | Bottom sheet | Full-screen overlay                            |
 
 ## Integration with Joint Chat
 

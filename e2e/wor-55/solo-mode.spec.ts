@@ -23,14 +23,18 @@ test.describe("AC 3: URL persistence of party toggle state", () => {
     await page.goto(`/cases/${soloCase.caseId}`);
 
     // Find and click the invitee toggle segment
-    const inviteeToggle = page.getByRole("button", { name: /invitee|jordan|viewing as/i }).last();
+    const inviteeToggle = page
+      .getByRole("button", { name: /invitee|jordan|viewing as/i })
+      .last();
     await inviteeToggle.click();
 
     // URL should contain ?as=invitee
     await expect(page).toHaveURL(/[?&]as=invitee/);
   });
 
-  test("?as=invitee survives page refresh — toggle remains on invitee", async ({ page }) => {
+  test("?as=invitee survives page refresh — toggle remains on invitee", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
     const soloCase = await createTestCase(page, user, { isSolo: true });
@@ -39,7 +43,9 @@ test.describe("AC 3: URL persistence of party toggle state", () => {
     await page.goto(`/cases/${soloCase.caseId}?as=invitee`);
 
     // The invitee toggle segment should be active/selected
-    const inviteeSegment = page.getByRole("button", { name: /invitee|jordan/i }).last();
+    const inviteeSegment = page
+      .getByRole("button", { name: /invitee|jordan/i })
+      .last();
     await expect(inviteeSegment).toHaveAttribute("aria-pressed", "true");
 
     // Reload the page
@@ -49,11 +55,18 @@ test.describe("AC 3: URL persistence of party toggle state", () => {
     await expect(page).toHaveURL(/[?&]as=invitee/);
 
     // Toggle should still show invitee selected
-    const inviteeSegmentAfterReload = page.getByRole("button", { name: /invitee|jordan/i }).last();
-    await expect(inviteeSegmentAfterReload).toHaveAttribute("aria-pressed", "true");
+    const inviteeSegmentAfterReload = page
+      .getByRole("button", { name: /invitee|jordan/i })
+      .last();
+    await expect(inviteeSegmentAfterReload).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
   });
 
-  test("default state is ?as=initiator when no param present", async ({ page }) => {
+  test("default state is ?as=initiator when no param present", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
     const soloCase = await createTestCase(page, user, { isSolo: true });
@@ -62,7 +75,9 @@ test.describe("AC 3: URL persistence of party toggle state", () => {
     await page.goto(`/cases/${soloCase.caseId}`);
 
     // The initiator segment should be active by default
-    const initiatorSegment = page.getByRole("button", { name: /initiator|alex/i }).first();
+    const initiatorSegment = page
+      .getByRole("button", { name: /initiator|alex/i })
+      .first();
     await expect(initiatorSegment).toHaveAttribute("aria-pressed", "true");
   });
 });
@@ -72,7 +87,9 @@ test.describe("AC 3: URL persistence of party toggle state", () => {
 //        content for each party
 // ---------------------------------------------------------------------------
 test.describe("AC 5: Private coaching data isolation between parties in solo mode", () => {
-  test("message sent as initiator is NOT visible when toggled to invitee", async ({ page }) => {
+  test("message sent as initiator is NOT visible when toggled to invitee", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
     const soloCase = await createTestCase(page, user, { isSolo: true });
@@ -92,10 +109,14 @@ test.describe("AC 5: Private coaching data isolation between parties in solo mod
     await page.goto(`/cases/${soloCase.caseId}/private?as=invitee`);
 
     // The initiator's message should NOT be visible
-    await expect(page.getByText("This is my initiator concern.")).not.toBeVisible();
+    await expect(
+      page.getByText("This is my initiator concern."),
+    ).not.toBeVisible();
   });
 
-  test("message sent as invitee is NOT visible when toggled to initiator", async ({ page }) => {
+  test("message sent as invitee is NOT visible when toggled to initiator", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
     const soloCase = await createTestCase(page, user, { isSolo: true });
@@ -106,13 +127,17 @@ test.describe("AC 5: Private coaching data isolation between parties in solo mod
     await messageInput.fill("This is my invitee perspective.");
     await page.getByRole("button", { name: /send/i }).click();
 
-    await expect(page.getByText("This is my invitee perspective.")).toBeVisible();
+    await expect(
+      page.getByText("This is my invitee perspective."),
+    ).toBeVisible();
 
     // Switch to initiator
     await page.goto(`/cases/${soloCase.caseId}/private?as=initiator`);
 
     // Invitee's message should NOT be visible
-    await expect(page.getByText("This is my invitee perspective.")).not.toBeVisible();
+    await expect(
+      page.getByText("This is my invitee perspective."),
+    ).not.toBeVisible();
   });
 });
 
@@ -143,7 +168,9 @@ test.describe("AC 7: Solo cases are visually distinct with banner and toggle", (
     await expect(toggle).toBeVisible();
   });
 
-  test("non-solo case does NOT show PartyToggle or solo banner", async ({ page }) => {
+  test("non-solo case does NOT show PartyToggle or solo banner", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
     const normalCase = await createTestCase(page, user, { isSolo: false });
@@ -162,7 +189,9 @@ test.describe("AC 7: Solo cases are visually distinct with banner and toggle", (
 // AC 8: Dashboard flags solo cases distinctly from real cases
 // ---------------------------------------------------------------------------
 test.describe("AC 8: Dashboard shows 'Solo' badge for solo cases", () => {
-  test("solo case row on dashboard displays a 'Solo' badge", async ({ page }) => {
+  test("solo case row on dashboard displays a 'Solo' badge", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
     await createTestCase(page, user, { isSolo: true });
@@ -183,13 +212,18 @@ test.describe("AC 8: Dashboard shows 'Solo' badge for solo cases", () => {
     await page.goto("/dashboard");
 
     // Wait for cases to load
-    await page.waitForSelector("[data-testid='case-row'], [data-testid='case-card'], .case-item", {
-      timeout: 5000,
-    });
+    await page.waitForSelector(
+      "[data-testid='case-row'], [data-testid='case-card'], .case-item",
+      {
+        timeout: 5000,
+      },
+    );
 
     // Non-solo case should not show "Solo" badge in its row
     // (The text "Solo" might appear in the "New Solo Case" button — we check the case list area)
-    const caseListArea = page.locator("[data-testid='case-list'], main, [role='main']").first();
+    const caseListArea = page
+      .locator("[data-testid='case-list'], main, [role='main']")
+      .first();
     const soloBadges = caseListArea.getByTestId("solo-badge");
     await expect(soloBadges).toHaveCount(0);
   });

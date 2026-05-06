@@ -42,9 +42,9 @@ test.describe("Joint Chat — navigation actions", () => {
     await page.waitForLoadState("networkidle");
 
     // Click "My guidance" in the top nav
-    const guidanceLink = page.getByRole("button", { name: /my guidance/i }).or(
-      page.getByRole("link", { name: /my guidance/i }),
-    );
+    const guidanceLink = page
+      .getByRole("button", { name: /my guidance/i })
+      .or(page.getByRole("link", { name: /my guidance/i }));
     await expect(guidanceLink).toBeVisible();
     await guidanceLink.click();
 
@@ -171,15 +171,11 @@ test.describe("Joint Chat — timestamp on hover", () => {
     await page.waitForLoadState("networkidle");
 
     // Wait for at least one message to appear (coach opening message)
-    const messageBubble = page
-      .locator('[data-author-type]')
-      .first();
+    const messageBubble = page.locator("[data-author-type]").first();
     await expect(messageBubble).toBeVisible({ timeout: 10000 });
 
     // Before hover, timestamp should be hidden
-    const timestamp = messageBubble.locator(
-      'time, [data-testid="timestamp"]',
-    );
+    const timestamp = messageBubble.locator('time, [data-testid="timestamp"]');
 
     // Hover to reveal
     await messageBubble.hover();

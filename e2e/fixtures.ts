@@ -91,8 +91,8 @@ export async function loginAsUser(page: Page, user: TestUser): Promise<void> {
   // the hook to be ready so cold-server runs don't race the mount.
   await page.waitForFunction(
     () =>
-      (window as unknown as { __TEST_SIGN_IN__?: unknown })
-        .__TEST_SIGN_IN__ !== undefined,
+      (window as unknown as { __TEST_SIGN_IN__?: unknown }).__TEST_SIGN_IN__ !==
+      undefined,
     null,
     { timeout: 10000 },
   );
@@ -100,25 +100,22 @@ export async function loginAsUser(page: Page, user: TestUser): Promise<void> {
   // hook the app exposes. The app's main.tsx wires `useAuthActions().signIn`
   // through ConvexAuthProvider, so we navigate to a dedicated test sign-in
   // route that calls signIn("test-password", {...}).
-  await page.evaluate(
-    async ({ email, password, name }) => {
-      const w = window as unknown as {
-        __TEST_SIGN_IN__?: (args: {
-          email: string;
-          password: string;
-          name: string;
-        }) => Promise<void>;
-      };
-      if (!w.__TEST_SIGN_IN__) {
-        throw new Error(
-          "Test sign-in hook __TEST_SIGN_IN__ not found on window. " +
-            "Ensure CLAUDE_MOCK=true and the test sign-in shim is mounted.",
-        );
-      }
-      await w.__TEST_SIGN_IN__({ email, password, name });
-    },
-    user,
-  );
+  await page.evaluate(async ({ email, password, name }) => {
+    const w = window as unknown as {
+      __TEST_SIGN_IN__?: (args: {
+        email: string;
+        password: string;
+        name: string;
+      }) => Promise<void>;
+    };
+    if (!w.__TEST_SIGN_IN__) {
+      throw new Error(
+        "Test sign-in hook __TEST_SIGN_IN__ not found on window. " +
+          "Ensure CLAUDE_MOCK=true and the test sign-in shim is mounted.",
+      );
+    }
+    await w.__TEST_SIGN_IN__({ email, password, name });
+  }, user);
   // Wait for the post-login UI to render. Dashboard route or any
   // authenticated landing page should be visible.
   await page.waitForLoadState("networkidle");
@@ -190,7 +187,9 @@ export async function callMutation(
   page: Page,
   mutation: string,
   args: Record<string, unknown>,
-): Promise<{ ok: true; value: unknown } | { ok: false; code: string; message: string }> {
+): Promise<
+  { ok: true; value: unknown } | { ok: false; code: string; message: string }
+> {
   return page.evaluate(
     async ({ mutation, args }) => {
       const w = window as unknown as {
@@ -234,7 +233,9 @@ export async function callQuery(
   page: Page,
   query: string,
   args: Record<string, unknown>,
-): Promise<{ ok: true; value: unknown } | { ok: false; code: string; message: string }> {
+): Promise<
+  { ok: true; value: unknown } | { ok: false; code: string; message: string }
+> {
   return page.evaluate(
     async ({ query, args }) => {
       const w = window as unknown as {

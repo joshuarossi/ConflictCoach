@@ -107,15 +107,12 @@ test.describe("AC5: Draft Coach send gate", () => {
       .click();
 
     // Wait for the message to appear in joint chat
-    await page.waitForFunction(
-      (prevCount) => {
-        const msgs = document.querySelectorAll(
-          "[data-testid='joint-chat-messages'] [data-testid='message']",
-        );
-        return msgs.length > prevCount;
-      },
-      messagesBefore,
-    );
+    await page.waitForFunction((prevCount) => {
+      const msgs = document.querySelectorAll(
+        "[data-testid='joint-chat-messages'] [data-testid='message']",
+      );
+      return msgs.length > prevCount;
+    }, messagesBefore);
 
     // Joint chat now has one more message
     const messagesAfter = await page
@@ -151,9 +148,7 @@ test.describe("AC5: Draft Coach send gate", () => {
       .click();
 
     // Verify the draft panel closes or shows discarded state
-    await expect(
-      page.locator("[data-testid='final-draft']"),
-    ).not.toBeVisible();
+    await expect(page.locator("[data-testid='final-draft']")).not.toBeVisible();
 
     // CRITICAL ASSERTION: no new joint message
     const messagesAfter = await page

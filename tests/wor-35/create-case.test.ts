@@ -115,9 +115,16 @@ function createMockContext(options?: { isSolo?: boolean }) {
                   return probe;
                 },
               };
-              try { pred(probe); } catch { /* predicate shape may vary */ }
+              try {
+                pred(probe);
+              } catch {
+                /* predicate shape may vary */
+              }
               // Only return the template when the queried category matches
-              if (queriedCategory !== undefined && queriedCategory !== mockTemplate.category) {
+              if (
+                queriedCategory !== undefined &&
+                queriedCategory !== mockTemplate.category
+              ) {
                 return null;
               }
               return mockTemplate;
@@ -141,8 +148,15 @@ function createMockContext(options?: { isSolo?: boolean }) {
                   return probe;
                 },
               };
-              try { pred(probe); } catch { /* predicate shape may vary */ }
-              if (queriedCategory !== undefined && queriedCategory !== mockTemplate.category) {
+              try {
+                pred(probe);
+              } catch {
+                /* predicate shape may vary */
+              }
+              if (
+                queriedCategory !== undefined &&
+                queriedCategory !== mockTemplate.category
+              ) {
                 return [];
               }
               return [mockTemplate];
@@ -300,7 +314,9 @@ describe("AC2: Case row creation", () => {
     // "family" has no mock template — the category-aware mock returns null
     try {
       await create(ctx, { ...VALID_INPUT, category: "family" });
-      expect.fail("Expected mutation to throw when template is missing for category");
+      expect.fail(
+        "Expected mutation to throw when template is missing for category",
+      );
     } catch (e) {
       // The implementation should surface an error (e.g., INVALID_INPUT or
       // a descriptive message) when no active template matches the category.

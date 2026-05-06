@@ -10,7 +10,10 @@ export function parseConvexError(error: unknown): ParsedError {
     const data = error.data as Record<string, unknown>;
     return {
       code: typeof data.code === "string" ? data.code : "INTERNAL",
-      message: typeof data.message === "string" ? data.message : "An unexpected error occurred",
+      message:
+        typeof data.message === "string"
+          ? data.message
+          : "An unexpected error occurred",
     };
   }
 

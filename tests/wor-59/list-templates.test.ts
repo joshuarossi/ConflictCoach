@@ -6,7 +6,11 @@
 import { describe, test, expect } from "vitest";
 import { createMockContext, callHandler, ADMIN_USER } from "./helpers";
 
-import { createTemplate, archiveTemplate, listAllTemplates } from "../../convex/templates";
+import {
+  createTemplate,
+  archiveTemplate,
+  listAllTemplates,
+} from "../../convex/templates";
 
 describe("AC6: admin/templates/listAll", () => {
   test("returns all templates when none are archived", async () => {

@@ -29,7 +29,10 @@ describe("AC6: workflow triggers on push to main and PRs targeting main", () => 
     expect(triggers).toBeDefined();
     expect(triggers).toHaveProperty("pull_request");
 
-    const pr = triggers!.pull_request as Record<string, unknown> | boolean | null;
+    const pr = triggers!.pull_request as
+      | Record<string, unknown>
+      | boolean
+      | null;
     if (isTrue(pr)) {
       // Triggers on all PRs — acceptable (includes those targeting main)
       expect(true).toBe(true);

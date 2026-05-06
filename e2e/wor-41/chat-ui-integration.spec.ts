@@ -30,7 +30,7 @@ test.describe("WOR-41: Shared Chat UI Components — E2E", () => {
 
     // Look for a coach message bubble (identified by sparkles icon or coach-specific selector)
     const coachBubble = page.locator(
-      '[data-testid="message-bubble-coach"], [data-author-type="COACH"]'
+      '[data-testid="message-bubble-coach"], [data-author-type="COACH"]',
     );
 
     // If no coach message exists in initial state, this test documents the expectation
@@ -53,7 +53,7 @@ test.describe("WOR-41: Shared Chat UI Components — E2E", () => {
     await page.goto(CHAT_URL);
 
     const input = page.locator(
-      'textarea[data-testid="message-input"], textarea, [role="textbox"]'
+      'textarea[data-testid="message-input"], textarea, [role="textbox"]',
     );
     await expect(input.first()).toBeVisible();
 
@@ -71,7 +71,7 @@ test.describe("WOR-41: Shared Chat UI Components — E2E", () => {
 
     // Look for the send button
     const sendButton = page.locator(
-      'button:has-text("Send"), button[aria-label*="send" i]'
+      'button:has-text("Send"), button[aria-label*="send" i]',
     );
 
     if ((await sendButton.count()) > 0) {
@@ -90,7 +90,7 @@ test.describe("WOR-41: Shared Chat UI Components — E2E", () => {
 
     // The streaming indicator should be a CSS-animated element
     const cursor = page.locator(
-      '[data-testid="streaming-cursor"], [data-testid="streaming-indicator"], [class*="cursor"][class*="blink"]'
+      '[data-testid="streaming-cursor"], [data-testid="streaming-indicator"], [class*="cursor"][class*="blink"]',
     );
 
     // This will only be visible when a message is actively streaming
@@ -109,7 +109,7 @@ test.describe("WOR-41: Shared Chat UI Components — E2E", () => {
 
     // Look for any complete message bubbles
     const completeBubble = page.locator(
-      '[data-status="COMPLETE"], [data-testid="message-bubble-complete"]'
+      '[data-status="COMPLETE"], [data-testid="message-bubble-complete"]',
     );
 
     if ((await completeBubble.count()) > 0) {
@@ -124,7 +124,7 @@ test.describe("WOR-41: Shared Chat UI Components — E2E", () => {
 
     // Streaming messages should NOT have copy button
     const streamingBubble = page.locator(
-      '[data-status="STREAMING"], [data-testid="message-bubble-streaming"]'
+      '[data-status="STREAMING"], [data-testid="message-bubble-streaming"]',
     );
     if ((await streamingBubble.count()) > 0) {
       const copyButton = streamingBubble
@@ -142,16 +142,14 @@ test.describe("WOR-41: Shared Chat UI Components — E2E", () => {
     await page.goto(CHAT_URL);
 
     const cursor = page.locator(
-      '[data-testid="streaming-cursor"], [data-testid="streaming-indicator"]'
+      '[data-testid="streaming-cursor"], [data-testid="streaming-indicator"]',
     );
 
     if ((await cursor.count()) > 0) {
       // With reduced motion, animation should be disabled
       const animationDuration = await cursor
         .first()
-        .evaluate(
-          (el) => window.getComputedStyle(el).animationDuration
-        );
+        .evaluate((el) => window.getComputedStyle(el).animationDuration);
       // Should be "0s" or empty when reduced motion is active
       expect(["0s", "0ms", "", "none"]).toContain(animationDuration);
     } else {

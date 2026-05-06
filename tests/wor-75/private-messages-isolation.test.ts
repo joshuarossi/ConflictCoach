@@ -60,7 +60,10 @@ describe("AC1: User B cannot access User A's private coaching messages", () => {
       // Load BOTH parties' messages so the test validates handler filtering,
       // not just that the mock was pre-filtered.
       dbQueries: {
-        privateMessages: [...USER_A_PRIVATE_MESSAGES, ...USER_B_PRIVATE_MESSAGES],
+        privateMessages: [
+          ...USER_A_PRIVATE_MESSAGES,
+          ...USER_B_PRIVATE_MESSAGES,
+        ],
       },
     });
 
@@ -80,7 +83,10 @@ describe("AC1: User B cannot access User A's private coaching messages", () => {
       // Load BOTH parties' messages so the test validates handler filtering,
       // not just that the mock was pre-filtered.
       dbQueries: {
-        privateMessages: [...USER_A_PRIVATE_MESSAGES, ...USER_B_PRIVATE_MESSAGES],
+        privateMessages: [
+          ...USER_A_PRIVATE_MESSAGES,
+          ...USER_B_PRIVATE_MESSAGES,
+        ],
       },
     });
 
@@ -114,7 +120,13 @@ describe("AC5: FORBIDDEN errors are explicit, not empty results or silent failur
       expect.unreachable("Expected FORBIDDEN error");
     } catch (err) {
       expect(err).toBeInstanceOf(ConvexError);
-      const data = (err as ConvexError<{ code: string; message: string; httpStatus: number }>).data;
+      const data = (
+        err as ConvexError<{
+          code: string;
+          message: string;
+          httpStatus: number;
+        }>
+      ).data;
       expect(data.code).toBe("FORBIDDEN");
       expect(data.httpStatus).toBe(403);
       expect(data.message).toBeTruthy();

@@ -52,8 +52,7 @@ describe("AC10: Desktop side panel vs. mobile bottom sheet", () => {
     const classes = panel!.className;
     const style = window.getComputedStyle(panel!);
     const hasShadowClass = classes.includes("shadow");
-    const hasShadowStyle =
-      style.boxShadow !== "" && style.boxShadow !== "none";
+    const hasShadowStyle = style.boxShadow !== "" && style.boxShadow !== "none";
     expect(hasShadowClass || hasShadowStyle).toBe(true);
   });
 
@@ -80,9 +79,9 @@ describe("AC10: Desktop side panel vs. mobile bottom sheet", () => {
     // "bottom-sheet" (or equivalent mobile-specific class).
     const layout = panel!.getAttribute("data-layout");
     const classes = panel!.className;
-    expect(
-      layout === "bottom-sheet" || classes.includes("bottom-sheet"),
-    ).toBe(true);
+    expect(layout === "bottom-sheet" || classes.includes("bottom-sheet")).toBe(
+      true,
+    );
 
     // Reset viewport
     Object.defineProperty(window, "innerWidth", {

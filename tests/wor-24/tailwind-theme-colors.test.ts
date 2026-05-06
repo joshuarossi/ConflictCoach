@@ -17,7 +17,8 @@ describe("AC: Tailwind config extends theme with custom colors mapped to CSS var
     expect(resolved.theme).toBeDefined();
 
     const colors =
-      (resolved.theme as Record<string, any>)?.extend?.colors ?? (resolved.theme as Record<string, any>)?.colors;
+      (resolved.theme as Record<string, any>)?.extend?.colors ??
+      (resolved.theme as Record<string, any>)?.colors;
 
     expect(colors, "Tailwind config must define custom colors").toBeDefined();
 
@@ -43,13 +44,16 @@ describe("AC: Tailwind config extends theme with custom colors mapped to CSS var
   test("color values reference CSS custom properties via var()", async () => {
     const config = await import("../../tailwind.config.ts");
     const colors =
-      (config.default.theme as Record<string, any>)?.extend?.colors ?? (config.default.theme as Record<string, any>)?.colors;
+      (config.default.theme as Record<string, any>)?.extend?.colors ??
+      (config.default.theme as Record<string, any>)?.colors;
 
     // Collect all leaf values from the colors object
     const values = collectLeafValues(colors);
 
     // At least some values should use var(--...) pattern
-    const varValues = values.filter((v) => typeof v === "string" && v.includes("var(--"));
+    const varValues = values.filter(
+      (v) => typeof v === "string" && v.includes("var(--"),
+    );
     expect(
       varValues.length,
       "Tailwind color values must use var(--...) CSS custom properties",

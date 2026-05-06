@@ -42,7 +42,9 @@ describe("AC: Form errors render inline below input fields", () => {
     await renderAndAdvanceToSubmit();
 
     // Submit form without filling required fields
-    const submitButton = screen.getByRole("button", { name: /create|start|submit/i });
+    const submitButton = screen.getByRole("button", {
+      name: /create|start|submit/i,
+    });
     fireEvent.click(submitButton);
 
     // Error messages should appear inline (near the input, not in a toast or alert)
@@ -55,14 +57,18 @@ describe("AC: Form errors render inline below input fields", () => {
   test("inline error is associated with the relevant input field", async () => {
     await renderAndAdvanceToSubmit();
 
-    const submitButton = screen.getByRole("button", { name: /create|start|submit/i });
+    const submitButton = screen.getByRole("button", {
+      name: /create|start|submit/i,
+    });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
       // Each error should be visually near/below its input via aria-describedby or similar
       const inputs = screen.getAllByRole("textbox");
       const hasDescribedError = inputs.some(
-        (input) => input.getAttribute("aria-describedby") || input.getAttribute("aria-invalid") === "true",
+        (input) =>
+          input.getAttribute("aria-describedby") ||
+          input.getAttribute("aria-invalid") === "true",
       );
       expect(hasDescribedError).toBe(true);
     });
@@ -71,12 +77,16 @@ describe("AC: Form errors render inline below input fields", () => {
   test("form errors do NOT use toast notifications", async () => {
     const { container } = await renderAndAdvanceToSubmit();
 
-    const submitButton = screen.getByRole("button", { name: /create|start|submit/i });
+    const submitButton = screen.getByRole("button", {
+      name: /create|start|submit/i,
+    });
     fireEvent.click(submitButton);
 
     await waitFor(() => {
       // No toast elements should appear for form validation errors
-      const toasts = container.querySelectorAll("[role='status'][data-toast], [class*='toast']");
+      const toasts = container.querySelectorAll(
+        "[role='status'][data-toast], [class*='toast']",
+      );
       expect(toasts.length).toBe(0);
     });
   });

@@ -110,10 +110,7 @@ describe("AC7: canProposeClosure guard", () => {
 
   test("returns false when case is not JOINT_ACTIVE", () => {
     expect(
-      canProposeClosure(
-        { ...caseDoc, status: "CLOSED_RESOLVED" },
-        "users:a",
-      ),
+      canProposeClosure({ ...caseDoc, status: "CLOSED_RESOLVED" }, "users:a"),
     ).toBe(false);
   });
 });
@@ -140,9 +137,7 @@ describe("AC7: canConfirmClosure guard", () => {
   });
 
   test("returns false for non-party user", () => {
-    expect(canConfirmClosure(caseDoc, "users:stranger", "users:a")).toBe(
-      false,
-    );
+    expect(canConfirmClosure(caseDoc, "users:stranger", "users:a")).toBe(false);
   });
 
   test("returns false when case is not JOINT_ACTIVE", () => {

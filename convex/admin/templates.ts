@@ -82,7 +82,10 @@ export async function publishVersionHandler(ctx: any, args: any) {
   }
 
   if (template.archivedAt) {
-    throwAppError("CONFLICT", "Cannot publish a version for an archived template");
+    throwAppError(
+      "CONFLICT",
+      "Cannot publish a version for an archived template",
+    );
   }
 
   // Determine the next version number
@@ -301,7 +304,8 @@ export const listVersions = query({
         if (ver.publishedByUserId) {
           const publisher = await ctx.db.get(ver.publishedByUserId);
           if (publisher) {
-            publishedByDisplayName = publisher.displayName || publisher.email || "Unknown";
+            publishedByDisplayName =
+              publisher.displayName || publisher.email || "Unknown";
           }
         }
         return { ...ver, publishedByDisplayName };

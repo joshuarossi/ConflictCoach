@@ -25,7 +25,10 @@ export const redeem = mutation({
 
     // --- Validate token is ACTIVE ---
     if (tokenDoc.status !== "ACTIVE") {
-      throwAppError("TOKEN_INVALID", "Invite token has already been used or revoked");
+      throwAppError(
+        "TOKEN_INVALID",
+        "Invite token has already been used or revoked",
+      );
     }
 
     // --- Load the case ---
@@ -36,7 +39,10 @@ export const redeem = mutation({
 
     // --- Prevent self-invite ---
     if (caseDoc.initiatorUserId === user._id) {
-      throwAppError("CONFLICT", "You cannot redeem an invite for your own case");
+      throwAppError(
+        "CONFLICT",
+        "You cannot redeem an invite for your own case",
+      );
     }
 
     // --- Validate case status transition ---

@@ -8,7 +8,10 @@ import {
   archiveTemplateHandler,
 } from "../../../convex/admin/templates";
 
-type Handler = (ctx: unknown, args: Record<string, unknown>) => Promise<unknown>;
+type Handler = (
+  ctx: unknown,
+  args: Record<string, unknown>,
+) => Promise<unknown>;
 
 export const createTemplate = createTemplateHandler as Handler;
 export const publishVersion = publishVersionHandler as Handler;

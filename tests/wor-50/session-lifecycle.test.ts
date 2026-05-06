@@ -105,46 +105,56 @@ function createMockCtx(options: {
       }
     }),
     query: vi.fn((table: string) => ({
-      withIndex: vi.fn((_indexName: string, predicate?: (q: {
-        eq: (field: string, value: unknown) => { eq: (field: string, value: unknown) => unknown };
-      }) => unknown) => {
-        // Simple query simulation: return rows matching index equality
-        return {
-          first: vi.fn(async () => {
-            const rows = store[table] ?? [];
-            if (!predicate) return rows[0] ?? null;
-            // For by_case_and_user: match caseId + userId
-            // For by_draft_session: match draftSessionId
-            // We rely on convention: the predicate calls eq twice for compound indexes
-            const eqCalls: Array<{ field: string; value: unknown }> = [];
-            const eqProxy = {
-              eq: (field: string, value: unknown) => {
-                eqCalls.push({ field, value });
-                return eqProxy;
-              },
-            };
-            predicate(eqProxy as never);
-            return rows.find((r) =>
-              eqCalls.every((c) => r[c.field] === c.value),
-            ) ?? null;
-          }),
-          collect: vi.fn(async () => {
-            const rows = store[table] ?? [];
-            if (!predicate) return rows;
-            const eqCalls: Array<{ field: string; value: unknown }> = [];
-            const eqProxy = {
-              eq: (field: string, value: unknown) => {
-                eqCalls.push({ field, value });
-                return eqProxy;
-              },
-            };
-            predicate(eqProxy as never);
-            return rows.filter((r) =>
-              eqCalls.every((c) => r[c.field] === c.value),
-            );
-          }),
-        };
-      }),
+      withIndex: vi.fn(
+        (
+          _indexName: string,
+          predicate?: (q: {
+            eq: (
+              field: string,
+              value: unknown,
+            ) => { eq: (field: string, value: unknown) => unknown };
+          }) => unknown,
+        ) => {
+          // Simple query simulation: return rows matching index equality
+          return {
+            first: vi.fn(async () => {
+              const rows = store[table] ?? [];
+              if (!predicate) return rows[0] ?? null;
+              // For by_case_and_user: match caseId + userId
+              // For by_draft_session: match draftSessionId
+              // We rely on convention: the predicate calls eq twice for compound indexes
+              const eqCalls: Array<{ field: string; value: unknown }> = [];
+              const eqProxy = {
+                eq: (field: string, value: unknown) => {
+                  eqCalls.push({ field, value });
+                  return eqProxy;
+                },
+              };
+              predicate(eqProxy as never);
+              return (
+                rows.find((r) =>
+                  eqCalls.every((c) => r[c.field] === c.value),
+                ) ?? null
+              );
+            }),
+            collect: vi.fn(async () => {
+              const rows = store[table] ?? [];
+              if (!predicate) return rows;
+              const eqCalls: Array<{ field: string; value: unknown }> = [];
+              const eqProxy = {
+                eq: (field: string, value: unknown) => {
+                  eqCalls.push({ field, value });
+                  return eqProxy;
+                },
+              };
+              predicate(eqProxy as never);
+              return rows.filter((r) =>
+                eqCalls.every((c) => r[c.field] === c.value),
+              );
+            }),
+          };
+        },
+      ),
     })),
   };
 
@@ -155,11 +165,18 @@ function createMockCtx(options: {
   };
 
   const auth = {
-    getUserIdentity: vi.fn(async () => ({
-      email: `${options.userId}@test.com`,
-      subject: options.userId,
-      tokenIdentifier: `token:${options.userId}`,
-    } as { email: string; subject: string; tokenIdentifier: string } | null)),
+    getUserIdentity: vi.fn(
+      async () =>
+        ({
+          email: `${options.userId}@test.com`,
+          subject: options.userId,
+          tokenIdentifier: `token:${options.userId}`,
+        }) as {
+          email: string;
+          subject: string;
+          tokenIdentifier: string;
+        } | null,
+    ),
   };
 
   return { ctx: { db, auth, scheduler }, store, scheduledActions };
@@ -184,8 +201,18 @@ function seedCaseAndParties(
   const caseStatus = options.caseStatus ?? "JOINT_ACTIVE";
 
   store.users = [
-    { _id: userAId, email: `${userAId}@test.com`, role: "USER", createdAt: 1000 },
-    { _id: userBId, email: `${userBId}@test.com`, role: "USER", createdAt: 1000 },
+    {
+      _id: userAId,
+      email: `${userAId}@test.com`,
+      role: "USER",
+      createdAt: 1000,
+    },
+    {
+      _id: userBId,
+      email: `${userBId}@test.com`,
+      role: "USER",
+      createdAt: 1000,
+    },
   ];
   store.cases = [
     {
@@ -302,13 +329,17 @@ describe("AC2: sendMessage inserts USER message and schedules generateResponse",
 
     const inserted = store.draftMessages?.find((r) => r.role === "USER");
     expect(inserted).toBeDefined();
-    expect(inserted?.content).toBe("Help me phrase my concerns about the budget");
+    expect(inserted?.content).toBe(
+      "Help me phrase my concerns about the budget",
+    );
     expect(inserted?.draftSessionId).toBe(SESSION_ID);
     expect(inserted?.role).toBe("USER");
   });
 
   test("schedules generateResponse action after message insert", async () => {
-    const { ctx, store, scheduledActions } = createMockCtx({ userId: USER_A_ID });
+    const { ctx, store, scheduledActions } = createMockCtx({
+      userId: USER_A_ID,
+    });
     seedCaseAndParties(store);
     store.draftSessions = [
       {
@@ -495,7 +526,7 @@ describe("AC7: session query returns caller's session only", () => {
       },
     ];
 
-    const result = await session.handler(ctx, { caseId: CASE_ID }) as {
+    const result = (await session.handler(ctx, { caseId: CASE_ID })) as {
       session: MockRow | null;
       messages: MockRow[];
     };
@@ -520,7 +551,7 @@ describe("AC7: session query returns caller's session only", () => {
       },
     ];
 
-    const result = await session.handler(ctx, { caseId: CASE_ID }) as {
+    const result = (await session.handler(ctx, { caseId: CASE_ID })) as {
       session: MockRow | null;
     };
 
@@ -539,8 +570,6 @@ describe("AC7: session query returns caller's session only", () => {
       createdAt: 1000,
     });
 
-    await expect(
-      session.handler(ctx, { caseId: CASE_ID }),
-    ).rejects.toThrow();
+    await expect(session.handler(ctx, { caseId: CASE_ID })).rejects.toThrow();
   });
 });

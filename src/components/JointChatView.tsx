@@ -100,9 +100,13 @@ export function JointChatView({
       messages.map((m) => {
         const mIsCoach = m.authorType === "COACH";
         const isInitiator =
-          !mIsCoach && m.authorUserId != null && m.authorUserId === initiatorUserId;
+          !mIsCoach &&
+          m.authorUserId != null &&
+          m.authorUserId === initiatorUserId;
         const isInvitee =
-          !mIsCoach && m.authorUserId != null && m.authorUserId !== initiatorUserId;
+          !mIsCoach &&
+          m.authorUserId != null &&
+          m.authorUserId !== initiatorUserId;
         const partyRole: "INITIATOR" | "INVITEE" | undefined = mIsCoach
           ? undefined
           : isInitiator
@@ -167,7 +171,9 @@ export function JointChatView({
             <ArrowLeft size={18} />
           </button>
           <span className="text-body font-medium text-text-primary">
-            {caseName ? `${caseName} \u2022 Joint Session` : `Case with ${otherPartyName} \u2022 Joint Session`}
+            {caseName
+              ? `${caseName} \u2022 Joint Session`
+              : `Case with ${otherPartyName} \u2022 Joint Session`}
           </span>
         </div>
         <div className="flex items-center gap-3">
@@ -224,7 +230,9 @@ export function JointChatView({
           <button
             type="button"
             onClick={() => {
-              const el = document.getElementById("joint-chat-input") as HTMLTextAreaElement | null;
+              const el = document.getElementById(
+                "joint-chat-input",
+              ) as HTMLTextAreaElement | null;
               const val = el?.value.trim();
               if (val) {
                 onSendMessage?.(val);
@@ -289,7 +297,9 @@ export function ConnectedJointChatView() {
   // Data queries
   const caseData = useQuery(api.cases.get, { caseId: typedCaseId });
   const partyData = useQuery(api.cases.partyStates, { caseId: typedCaseId });
-  const messagesData = useQuery(api.jointChat.messages, { caseId: typedCaseId });
+  const messagesData = useQuery(api.jointChat.messages, {
+    caseId: typedCaseId,
+  });
   const synthesisData = useQuery(api.jointChat.mySynthesis, {
     caseId: typedCaseId,
   });
@@ -370,7 +380,9 @@ export function ConnectedJointChatView() {
 
   const handleEditDraft = useCallback((draftText: string) => {
     setIsDraftCoachOpen(false);
-    const el = document.getElementById("joint-chat-input") as HTMLTextAreaElement | null;
+    const el = document.getElementById(
+      "joint-chat-input",
+    ) as HTMLTextAreaElement | null;
     if (el) {
       el.value = draftText;
       el.focus();

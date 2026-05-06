@@ -6,10 +6,10 @@ A persistent, non-dismissable banner that visually declares private data context
 
 ## Props
 
-| Prop | Type | Required | Description |
-|---|---|---|---|
-| `text` | `string` | Yes | Primary banner text (e.g., "This conversation is private to you.") |
-| `otherPartyName` | `string` | No | When provided, appends personalized copy: "{name} can't see this." |
+| Prop             | Type     | Required | Description                                                        |
+| ---------------- | -------- | -------- | ------------------------------------------------------------------ |
+| `text`           | `string` | Yes      | Primary banner text (e.g., "This conversation is private to you.") |
+| `otherPartyName` | `string` | No       | When provided, appends personalized copy: "{name} can't see this." |
 
 ## Usage
 

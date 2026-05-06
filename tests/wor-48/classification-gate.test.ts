@@ -38,7 +38,10 @@ function makeMockAnthropicClient(responseText: string) {
 describe("AC 1: Haiku classification gate", () => {
   test("classifies a hostile message as INFLAMMATORY", async () => {
     const client = makeMockAnthropicClient("INFLAMMATORY");
-    const result = await classifyMessage(client, "You're a terrible person and you know it!");
+    const result = await classifyMessage(
+      client,
+      "You're a terrible person and you know it!",
+    );
 
     // Red-state: stub returns undefined; real implementation returns "INFLAMMATORY"
     expect(result).toBe("INFLAMMATORY");
@@ -46,7 +49,10 @@ describe("AC 1: Haiku classification gate", () => {
 
   test("classifies agreement language as PROGRESS", async () => {
     const client = makeMockAnthropicClient("PROGRESS");
-    const result = await classifyMessage(client, "I think we agree on the timeline issue.");
+    const result = await classifyMessage(
+      client,
+      "I think we agree on the timeline issue.",
+    );
 
     expect(result).toBe("PROGRESS");
   });

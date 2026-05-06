@@ -11,7 +11,8 @@ import { filterOrRetry, FALLBACK_TEXT } from "../../convex/lib/privacyFilter";
 // ---------------------------------------------------------------------------
 describe("AC 5: Retry logic via filterOrRetry", () => {
   test("returns clean output on first attempt without retrying", async () => {
-    const cleanOutput = "Both parties have legitimate concerns worth discussing.";
+    const cleanOutput =
+      "Both parties have legitimate concerns worth discussing.";
     const generateFn = vi.fn().mockResolvedValue(cleanOutput);
     const otherPartyMessages = [
       "my boss never listens to me and always dismisses my ideas in front of clients every single time",
@@ -90,12 +91,7 @@ describe("AC 6: Admin flagging on final failure", () => {
     const mockInsert = vi.fn();
     const mockCtx = { db: { insert: mockInsert } };
 
-    await filterOrRetry(
-      generateFn,
-      otherPartyMessages,
-      2,
-      mockCtx as any,
-    );
+    await filterOrRetry(generateFn, otherPartyMessages, 2, mockCtx as any);
 
     expect(mockInsert).toHaveBeenCalledTimes(1);
     expect(mockInsert).toHaveBeenCalledWith(
@@ -125,12 +121,7 @@ describe("AC 6: Admin flagging on final failure", () => {
     const mockInsert = vi.fn();
     const mockCtx = { db: { insert: mockInsert } };
 
-    await filterOrRetry(
-      generateFn,
-      otherPartyMessages,
-      2,
-      mockCtx as any,
-    );
+    await filterOrRetry(generateFn, otherPartyMessages, 2, mockCtx as any);
 
     expect(mockInsert).not.toHaveBeenCalled();
   });

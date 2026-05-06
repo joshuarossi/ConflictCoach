@@ -16,7 +16,9 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 // ---------------------------------------------------------------------------
 
 const queryResults = vi.hoisted(() => ({
-  me: { role: "ADMIN", displayName: "Riley Admin" } as Record<string, unknown> | undefined,
+  me: { role: "ADMIN", displayName: "Riley Admin" } as
+    | Record<string, unknown>
+    | undefined,
   template: null as Record<string, unknown> | null,
   versions: [] as Record<string, unknown>[],
 }));

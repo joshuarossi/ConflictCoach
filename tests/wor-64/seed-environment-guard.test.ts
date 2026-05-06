@@ -46,9 +46,7 @@ describe("AC6: Environment guard", () => {
     const handler = getSeedHandler(seedModule);
     const { ctx } = createMockActionContext();
 
-    await expect(
-      callHandler(handler, ctx),
-    ).resolves.not.toThrow();
+    await expect(callHandler(handler, ctx)).resolves.not.toThrow();
   });
 
   test("succeeds when CLAUDE_MOCK is true (regardless of NODE_ENV)", async () => {
@@ -59,8 +57,6 @@ describe("AC6: Environment guard", () => {
     const handler = getSeedHandler(seedModule);
     const { ctx } = createMockActionContext();
 
-    await expect(
-      callHandler(handler, ctx),
-    ).resolves.not.toThrow();
+    await expect(callHandler(handler, ctx)).resolves.not.toThrow();
   });
 });

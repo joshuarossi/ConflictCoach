@@ -7,7 +7,11 @@ import { describe, test, expect } from "vitest";
  * This module does not exist yet — it is part of the WOR-71 implementation.
  */
 
-import { createTestUser, loginAsUser, createTestCase } from "../../e2e/fixtures";
+import {
+  createTestUser,
+  loginAsUser,
+  createTestCase,
+} from "../../e2e/fixtures";
 
 describe("AC: Test fixtures — createTestUser, loginAsUser, createTestCase helpers", () => {
   test("createTestUser is exported as a function", () => {

@@ -79,7 +79,8 @@ export const PARTY_STATE_B = {
   userId: USER_B._id,
   role: "INVITEE" as const,
   mainTopic: "Resource allocation conflict",
-  description: "The engineering team is being stretched too thin across projects.",
+  description:
+    "The engineering team is being stretched too thin across projects.",
   desiredOutcome: "Get dedicated engineering resources for our sprint.",
   formCompletedAt: 1100,
   privateCoachingCompletedAt: 2100,
@@ -102,7 +103,8 @@ export const USER_A_PRIVATE_MESSAGES = [
     caseId: CASE_ID,
     userId: USER_A._id,
     role: "AI" as const,
-    content: "That sounds frustrating. Can you tell me more about when this started?",
+    content:
+      "That sounds frustrating. Can you tell me more about when this started?",
     status: "COMPLETE" as const,
     createdAt: 1501,
   },
@@ -125,7 +127,8 @@ export const USER_B_PRIVATE_MESSAGES = [
     caseId: CASE_ID,
     userId: USER_B._id,
     role: "AI" as const,
-    content: "I understand that feeling. Let's explore what outcome you're hoping for.",
+    content:
+      "I understand that feeling. Let's explore what outcome you're hoping for.",
     status: "COMPLETE" as const,
     createdAt: 1601,
   },
@@ -184,6 +187,10 @@ export function createMockCtx(options: CreateMockCtxOptions = {}) {
  * Extract the handler function from a Convex function definition.
  */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function getHandler(fn: Record<string, unknown> | ((...args: unknown[]) => unknown)): (...args: any[]) => any {
-  return typeof fn === "function" ? fn : fn.handler as (...args: unknown[]) => unknown;
+export function getHandler(
+  fn: Record<string, unknown> | ((...args: unknown[]) => unknown),
+): (...args: any[]) => any {
+  return typeof fn === "function"
+    ? fn
+    : (fn.handler as (...args: unknown[]) => unknown);
 }

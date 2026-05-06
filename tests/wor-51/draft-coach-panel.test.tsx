@@ -41,12 +41,8 @@ describe("AC2: Privacy banner in DraftCoachPanel header", () => {
     );
 
     // The privacy banner must mention that the other party can't see the conversation
-    expect(
-      screen.getByText(/this is private to you/i),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText(/Jordan can't see/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/this is private to you/i)).toBeInTheDocument();
+    expect(screen.getByText(/Jordan can't see/i)).toBeInTheDocument();
   });
 
   it("interpolates a different party name correctly", () => {

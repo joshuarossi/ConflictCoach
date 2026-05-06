@@ -113,8 +113,7 @@ export const create = mutation({
       createdAt: now,
     });
 
-    const siteUrl =
-      process.env.SITE_URL ?? "https://conflictcoach.app";
+    const siteUrl = process.env.SITE_URL ?? "https://conflictcoach.app";
     const inviteUrl = `${siteUrl}/invite/${token}`;
 
     return { caseId, inviteUrl };

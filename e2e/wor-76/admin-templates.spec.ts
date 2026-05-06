@@ -16,11 +16,7 @@
  *   - Sequential — each AC depends on prior state
  */
 import { test, expect } from "@playwright/test";
-import {
-  createTestAdminUser,
-  loginAsUser,
-  callQuery,
-} from "../fixtures";
+import { createTestAdminUser, loginAsUser, callQuery } from "../fixtures";
 
 test.describe("WOR-76: Admin template management", () => {
   test("full admin template lifecycle: create, version, pin, archive", async ({
@@ -31,7 +27,8 @@ test.describe("WOR-76: Admin template management", () => {
     // Unique template name to avoid collisions
     const templateName = `E2E Template ${Date.now()}`;
     const templateCategory = "other";
-    const initialGuidance = "Initial test guidance for E2E template management.";
+    const initialGuidance =
+      "Initial test guidance for E2E template management.";
     const updatedGuidance = "Updated guidance for v2 of the E2E template.";
     const versionNotes = "Version 2 release notes for E2E test.";
 
@@ -122,7 +119,9 @@ test.describe("WOR-76: Admin template management", () => {
     // Assert version history panel shows v1
     const versionHistory = page
       .locator("[data-testid='version-history']")
-      .or(page.getByRole("heading", { name: /version history/i }).locator(".."));
+      .or(
+        page.getByRole("heading", { name: /version history/i }).locator(".."),
+      );
     await expect(versionHistory.first()).toBeVisible({ timeout: 10_000 });
 
     // v1 should be visible
@@ -136,9 +135,8 @@ test.describe("WOR-76: Admin template management", () => {
       { templateId },
     );
     expect(versionsResult.ok).toBe(true);
-    const versions = (
-      versionsResult as { ok: true; value: unknown }
-    ).value as Array<{ _id: string; version: number }>;
+    const versions = (versionsResult as { ok: true; value: unknown })
+      .value as Array<{ _id: string; version: number }>;
     expect(versions.length).toBeGreaterThanOrEqual(1);
     // Versions are sorted descending — find v1 explicitly
     const v1 =
@@ -221,9 +219,12 @@ test.describe("WOR-76: Admin template management", () => {
     const notesInput = page
       .getByRole("textbox", { name: /notes/i })
       .or(page.getByPlaceholder(/notes/i))
-      .or(page.locator("textarea").filter({ hasText: /notes/i }).or(
-        page.locator("[name='notes'], [data-testid='version-notes']"),
-      ));
+      .or(
+        page
+          .locator("textarea")
+          .filter({ hasText: /notes/i })
+          .or(page.locator("[name='notes'], [data-testid='version-notes']")),
+      );
     try {
       await notesInput.first().waitFor({ state: "visible", timeout: 3_000 });
       await notesInput.first().fill(versionNotes);
@@ -270,9 +271,9 @@ test.describe("WOR-76: Admin template management", () => {
       caseId,
     });
     expect(caseResult.ok).toBe(true);
-    const caseData = (
-      caseResult as { ok: true; value: unknown }
-    ).value as { templateVersionId?: string };
+    const caseData = (caseResult as { ok: true; value: unknown }).value as {
+      templateVersionId?: string;
+    };
     // The case must still be pinned to v1, not v2
     expect(caseData.templateVersionId).toBe(v1VersionId);
 
@@ -300,22 +301,24 @@ test.describe("WOR-76: Admin template management", () => {
     }
 
     // Verify template shows "Archived" status on the edit page
-    await expect(
-      page.getByText(/archived/i).first(),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/archived/i).first()).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Navigate to the admin templates list to verify archived status there
     await page.goto("/admin/templates");
     await page.waitForLoadState("networkidle");
 
     // The template row should show an "Archived" badge or status
-    const templateRow = page.locator("tr, [data-testid='template-row']").filter({
-      hasText: templateName,
-    });
+    const templateRow = page
+      .locator("tr, [data-testid='template-row']")
+      .filter({
+        hasText: templateName,
+      });
     await expect(templateRow.first()).toBeVisible({ timeout: 10_000 });
-    await expect(
-      templateRow.first().getByText(/archived/i),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(templateRow.first().getByText(/archived/i)).toBeVisible({
+      timeout: 5_000,
+    });
 
     // Verify picker behavior: navigate to /cases/new and confirm the
     // "other" category radio still exists (seed data has an active "other"
@@ -342,13 +345,15 @@ test.describe("WOR-76: Admin template management", () => {
     await expect(chatInput).toBeVisible({ timeout: 10_000 });
 
     // Send a message to verify the case functions correctly
-    await chatInput.fill("Testing that this case works after template archival.");
+    await chatInput.fill(
+      "Testing that this case works after template archival.",
+    );
     await chatInput.press("Enter");
 
     // Verify the user message appears
-    await expect(
-      page.getByText(/works after template archival/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/works after template archival/i)).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Wait for mock AI response — proves template version resolution works
     // for archived templates. The chat renders messages in sequence; wait

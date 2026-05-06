@@ -27,12 +27,14 @@ const USER_B = "user_b_id" as any;
 const CASE_ID = "case_id" as any;
 const TEMPLATE_VERSION_ID = "tv_id" as any;
 
-function makeCase(overrides: Partial<{
-  status: CaseStatus;
-  isSolo: boolean;
-  initiatorUserId: any;
-  inviteeUserId: any;
-}> = {}) {
+function makeCase(
+  overrides: Partial<{
+    status: CaseStatus;
+    isSolo: boolean;
+    initiatorUserId: any;
+    inviteeUserId: any;
+  }> = {},
+) {
   return {
     _id: CASE_ID,
     schemaVersion: 1 as const,
@@ -48,13 +50,15 @@ function makeCase(overrides: Partial<{
   };
 }
 
-function makePartyState(overrides: Partial<{
-  userId: any;
-  role: "INITIATOR" | "INVITEE";
-  privateCoachingCompletedAt: number | undefined;
-  closureProposed: boolean | undefined;
-  closureConfirmed: boolean | undefined;
-}> = {}) {
+function makePartyState(
+  overrides: Partial<{
+    userId: any;
+    role: "INITIATOR" | "INVITEE";
+    privateCoachingCompletedAt: number | undefined;
+    closureProposed: boolean | undefined;
+    closureConfirmed: boolean | undefined;
+  }> = {},
+) {
   return {
     caseId: CASE_ID,
     userId: USER_A,
@@ -113,7 +117,7 @@ describe("AC2: All valid transitions are enumerated", () => {
       // VALID_TRANSITIONS should be a map or similar structure that
       // contains these pairs. We verify via validateTransition not throwing.
       expect(() =>
-        validateTransition(from as CaseStatus, to as CaseStatus)
+        validateTransition(from as CaseStatus, to as CaseStatus),
       ).not.toThrow();
     }
   });
@@ -121,7 +125,7 @@ describe("AC2: All valid transitions are enumerated", () => {
   test("validateTransition does not throw for each valid transition", () => {
     for (const [from, to] of expectedValidTransitions) {
       expect(() =>
-        validateTransition(from as CaseStatus, to as CaseStatus)
+        validateTransition(from as CaseStatus, to as CaseStatus),
       ).not.toThrow();
     }
   });
@@ -156,7 +160,7 @@ describe("AC3: validateTransition throws a CONFLICT error for illegal transition
   for (const [from, to] of illegalTransitions) {
     test(`${from} → ${to} throws a CONFLICT error`, () => {
       expect(() =>
-        validateTransition(from as CaseStatus, to as CaseStatus)
+        validateTransition(from as CaseStatus, to as CaseStatus),
       ).toThrow(ConvexError);
 
       try {

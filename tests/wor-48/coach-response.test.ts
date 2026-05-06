@@ -43,16 +43,27 @@ function makeMockAnthropicClient(classification: string) {
       }),
       stream: vi.fn().mockImplementation(() => {
         const events = [
-          { type: "message_start", message: { usage: { input_tokens: 100, output_tokens: 0 } } },
-          { type: "content_block_delta", delta: { type: "text_delta", text: "Let me help." } },
-          { type: "message_delta", usage: { output_tokens: 8 }, delta: { stop_reason: "end_turn" } },
+          {
+            type: "message_start",
+            message: { usage: { input_tokens: 100, output_tokens: 0 } },
+          },
+          {
+            type: "content_block_delta",
+            delta: { type: "text_delta", text: "Let me help." },
+          },
+          {
+            type: "message_delta",
+            usage: { output_tokens: 8 },
+            delta: { stop_reason: "end_turn" },
+          },
         ];
         let idx = 0;
         return {
           [Symbol.asyncIterator]() {
             return {
               async next() {
-                if (idx < events.length) return { value: events[idx++], done: false };
+                if (idx < events.length)
+                  return { value: events[idx++], done: false };
                 return { value: undefined, done: true };
               },
             };

@@ -34,15 +34,16 @@ function createMockContext(options: {
         options.identity
           ? {
               email: options.identity.email,
-              subject: options.identity.subject ?? `subject_${options.identity.email}`,
+              subject:
+                options.identity.subject ?? `subject_${options.identity.email}`,
               tokenIdentifier: `token_${options.identity.email}`,
             }
           : null,
       ),
     },
     db: {
-      get: vi.fn(async (id: string) =>
-        usersTable.find((u) => u._id === id) ?? null,
+      get: vi.fn(
+        async (id: string) => usersTable.find((u) => u._id === id) ?? null,
       ),
       query: vi.fn((table: string) => ({
         withIndex: (_name: string, predicate: (q: any) => unknown) => {

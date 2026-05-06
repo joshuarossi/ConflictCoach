@@ -73,8 +73,7 @@ describe("Privacy response filter tests: true positives, true negatives, edge ca
 
     test("punctuation differences do not prevent detection", () => {
       // Same words but with added punctuation
-      const aiOutput =
-        'My boss, always undermines me... in front of the team!';
+      const aiOutput = "My boss, always undermines me... in front of the team!";
       const result = checkPrivacyViolation(aiOutput, [PRIVATE_MSG_10_TOKENS]);
       expect(result.isViolation).toBe(true);
     });
@@ -86,9 +85,7 @@ describe("Privacy response filter tests: true positives, true negatives, edge ca
 
   describe("true negatives (paraphrased content passes)", () => {
     test("paraphrased content does not trigger violation", () => {
-      const result = checkPrivacyViolation(PARAPHRASE, [
-        PRIVATE_MSG_10_TOKENS,
-      ]);
+      const result = checkPrivacyViolation(PARAPHRASE, [PRIVATE_MSG_10_TOKENS]);
       expect(result.isViolation).toBe(false);
       expect(result.matchDetails).toBeNull();
     });
@@ -140,10 +137,9 @@ describe("Privacy response filter tests: true positives, true negatives, edge ca
       const shortMsg = "I feel bad";
       // Even if the AI output contains this exact phrase, the message is too
       // short to form an 8-token window
-      const result = checkPrivacyViolation(
-        "I feel bad about the situation",
-        [shortMsg],
-      );
+      const result = checkPrivacyViolation("I feel bad about the situation", [
+        shortMsg,
+      ]);
       expect(result.isViolation).toBe(false);
     });
 

@@ -201,9 +201,7 @@ function assembleSynthesis(opts: AssemblePromptOpts): AssemblePromptResult {
   if (privateMessages && privateMessages.length > 0) {
     for (const ps of partyStates ?? []) {
       const label = ps.userId === actingUserId ? "Party A" : "Party B";
-      const partyMsgs = privateMessages.filter(
-        (m) => m.userId === ps.userId,
-      );
+      const partyMsgs = privateMessages.filter((m) => m.userId === ps.userId);
       if (partyMsgs.length > 0) {
         contextParts.push(
           `${label} private coaching messages:\n` +

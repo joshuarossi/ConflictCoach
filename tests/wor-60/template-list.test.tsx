@@ -15,7 +15,9 @@ import { MemoryRouter } from "react-router-dom";
 // ---------------------------------------------------------------------------
 
 const queryResults = vi.hoisted(() => ({
-  me: { role: "ADMIN", displayName: "Riley Admin" } as Record<string, unknown> | undefined,
+  me: { role: "ADMIN", displayName: "Riley Admin" } as
+    | Record<string, unknown>
+    | undefined,
   templates: [] as Record<string, unknown>[],
 }));
 
@@ -110,7 +112,9 @@ describe("AC1: Template list table", () => {
     ];
 
     for (const header of expectedHeaders) {
-      expect(screen.getByRole("columnheader", { name: header })).toBeInTheDocument();
+      expect(
+        screen.getByRole("columnheader", { name: header }),
+      ).toBeInTheDocument();
     }
   });
 
@@ -188,8 +192,6 @@ describe("AC2: '+ New Template' button", () => {
     queryResults.templates = [];
     renderList();
 
-    expect(
-      screen.getByText(/no templates yet/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/no templates yet/i)).toBeInTheDocument();
   });
 });

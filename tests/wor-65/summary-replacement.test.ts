@@ -20,13 +20,18 @@ const messages: Message[] = [
   { role: "user", content: "Message 5" },
 ];
 
-const summaryText = "Summary of the first two messages discussing the initial situation.";
+const summaryText =
+  "Summary of the first two messages discussing the initial situation.";
 
 describe("Compressed messages are replaced with a single SUMMARY: message in the context", () => {
   test("compressed messages are removed and replaced by a single summary message", () => {
     // Compress first 2 messages (indices 0-1)
     const compressedIndices = 2; // number of messages compressed from the start
-    const result = replaceSummarizedMessages(messages, compressedIndices, summaryText);
+    const result = replaceSummarizedMessages(
+      messages,
+      compressedIndices,
+      summaryText,
+    );
 
     // Total messages: 1 summary + 3 remaining = 4
     expect(result).toHaveLength(4);

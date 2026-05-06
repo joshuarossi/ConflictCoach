@@ -158,9 +158,7 @@ describe("AC4: Monotonic version numbers", () => {
     });
 
     const versions = getTable<MockTemplateVersion>("templateVersions");
-    const versionNumbers = versions
-      .map((v) => v.version)
-      .sort((a, b) => a - b);
+    const versionNumbers = versions.map((v) => v.version).sort((a, b) => a - b);
 
     expect(versionNumbers).toEqual([1, 2, 3]);
   });
@@ -185,9 +183,7 @@ describe("AC4: Monotonic version numbers", () => {
     }
 
     const versions = getTable<MockTemplateVersion>("templateVersions");
-    const sorted = versions
-      .map((v) => v.version)
-      .sort((a, b) => a - b);
+    const sorted = versions.map((v) => v.version).sort((a, b) => a - b);
 
     expect(sorted).toEqual([1, 2, 3, 4, 5]);
 

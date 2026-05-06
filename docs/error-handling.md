@@ -4,18 +4,18 @@ Conflict Coach uses a standardized error shape across the Convex backend and Rea
 
 ## Error Codes
 
-| Code | HTTP Status | When to use |
-|---|---|---|
-| `UNAUTHENTICATED` | 401 | No valid session / identity |
-| `FORBIDDEN` | 403 | Authenticated but not authorized for the resource |
-| `NOT_FOUND` | 404 | Resource does not exist |
-| `USER_NOT_FOUND` | 404 | Authenticated identity exists but no user record has been provisioned (see [Auth docs](auth.md)) |
-| `CONFLICT` | 409 | State transition not allowed (e.g., acting on a closed case) |
-| `INVALID_INPUT` | 400 | Request validation failed |
-| `TOKEN_INVALID` | 400 | Invite token expired or inactive |
-| `RATE_LIMITED` | 429 | Upstream rate limit hit |
-| `AI_ERROR` | 502 | Upstream AI provider error |
-| `INTERNAL` | 500 | Unexpected server failure |
+| Code              | HTTP Status | When to use                                                                                      |
+| ----------------- | ----------- | ------------------------------------------------------------------------------------------------ |
+| `UNAUTHENTICATED` | 401         | No valid session / identity                                                                      |
+| `FORBIDDEN`       | 403         | Authenticated but not authorized for the resource                                                |
+| `NOT_FOUND`       | 404         | Resource does not exist                                                                          |
+| `USER_NOT_FOUND`  | 404         | Authenticated identity exists but no user record has been provisioned (see [Auth docs](auth.md)) |
+| `CONFLICT`        | 409         | State transition not allowed (e.g., acting on a closed case)                                     |
+| `INVALID_INPUT`   | 400         | Request validation failed                                                                        |
+| `TOKEN_INVALID`   | 400         | Invite token expired or inactive                                                                 |
+| `RATE_LIMITED`    | 429         | Upstream rate limit hit                                                                          |
+| `AI_ERROR`        | 502         | Upstream AI provider error                                                                       |
+| `INTERNAL`        | 500         | Unexpected server failure                                                                        |
 
 ## Server-side: `convex/lib/errors.ts`
 

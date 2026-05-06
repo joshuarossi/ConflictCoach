@@ -13,7 +13,7 @@ describe('AC 3: Screen reader text: "Private conversation. Only you and the AI c
     // The exact text must be present for screen readers, either as
     // visually hidden text or via an aria-label on the banner region.
     const srText = screen.getByText(
-      "Private conversation. Only you and the AI coach see this."
+      "Private conversation. Only you and the AI coach see this.",
     );
     expect(srText).toBeInTheDocument();
   });

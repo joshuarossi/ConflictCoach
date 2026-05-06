@@ -10,7 +10,11 @@ import { streamAIResponse } from "./lib/streaming";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "./lib/privacyFilter";
 import { CLASSIFICATION_BUDGET, compressContext } from "./lib/compression";
 import { SONNET_MODEL, HAIKU_MODEL } from "./lib/models";
-import { enforceCostBudget, SOFT_CAP_BOILERPLATE, recordUsageFromAction } from "./lib/costBudget";
+import {
+  enforceCostBudget,
+  SOFT_CAP_BOILERPLATE,
+  recordUsageFromAction,
+} from "./lib/costBudget";
 import type { Message } from "./lib/prompts";
 
 // ---------------------------------------------------------------------------
@@ -183,9 +187,7 @@ export const sendUserMessage = mutation({
         });
       }
     } else {
-      console.warn(
-        "generateCoachResponse action not found — not yet deployed",
-      );
+      console.warn("generateCoachResponse action not found — not yet deployed");
     }
 
     return messageId;
@@ -359,7 +361,10 @@ export async function classifyMessage(
   const classificationMessages = compressContext(
     [
       ...messages,
-      { role: "user" as const, content: `Classify this message: "${messageContent}"` },
+      {
+        role: "user" as const,
+        content: `Classify this message: "${messageContent}"`,
+      },
     ],
     CLASSIFICATION_SYSTEM_PROMPT,
     CLASSIFICATION_BUDGET,
@@ -439,290 +444,282 @@ export async function generateCoachResponseHandler(
   ctx: any,
   rawArgs: CoachResponseDIArgs | CoachResponseRuntimeArgs,
 ): Promise<void> {
-    // Cost budget check (runtime path only — DI callers manage their own budget)
-    if (!isDIArgs(rawArgs)) {
-      const budget = await enforceCostBudget(ctx, rawArgs.caseId);
-      if (!budget.allowed && budget.status === "hard_cap") {
-        // Hard cap: no AI at all
-        return;
-      }
-      // Soft cap is handled below after classification (classification still runs)
+  // Cost budget check (runtime path only — DI callers manage their own budget)
+  if (!isDIArgs(rawArgs)) {
+    const budget = await enforceCostBudget(ctx, rawArgs.caseId);
+    if (!budget.allowed && budget.status === "hard_cap") {
+      // Hard cap: no AI at all
+      return;
     }
+    // Soft cap is handled below after classification (classification still runs)
+  }
 
-    let triggeringMessageContent: string;
-    let contextHistory: Message[];
-    let promptPartyStates: Array<{
-      userId: string;
-      role: string;
-      mainTopic?: string;
-      description?: string;
-      desiredOutcome?: string;
-      synthesisText?: string;
-    }>;
-    let promptJointMessages: Array<{
-      authorType: string;
-      authorUserId?: string;
-      content: string;
-    }>;
-    let initiatorUserId: string;
-    let allPrivateContents: string[];
-    let anthropicClient: any;
+  let triggeringMessageContent: string;
+  let contextHistory: Message[];
+  let promptPartyStates: Array<{
+    userId: string;
+    role: string;
+    mainTopic?: string;
+    description?: string;
+    desiredOutcome?: string;
+    synthesisText?: string;
+  }>;
+  let promptJointMessages: Array<{
+    authorType: string;
+    authorUserId?: string;
+    content: string;
+  }>;
+  let initiatorUserId: string;
+  let allPrivateContents: string[];
+  let anthropicClient: any;
 
-    if (isDIArgs(rawArgs)) {
-      // DI shape — caller supplies everything
-      triggeringMessageContent = rawArgs.messageText;
-      contextHistory = rawArgs.jointHistory ?? [];
-      anthropicClient = rawArgs.anthropicClient;
-      allPrivateContents = rawArgs.privateContents ?? [];
-      // Build party states from synthesis blob (DI tests don't seed party rows)
-      promptPartyStates = [
-        {
-          userId: "party-a",
-          role: "INITIATOR",
-          synthesisText: rawArgs.syntheses?.partyA,
-        },
-        {
-          userId: "party-b",
-          role: "INVITEE",
-          synthesisText: rawArgs.syntheses?.partyB,
-        },
-      ];
-      promptJointMessages = contextHistory.map((m) => ({
-        authorType: m.role === "assistant" ? "COACH" : "USER",
+  if (isDIArgs(rawArgs)) {
+    // DI shape — caller supplies everything
+    triggeringMessageContent = rawArgs.messageText;
+    contextHistory = rawArgs.jointHistory ?? [];
+    anthropicClient = rawArgs.anthropicClient;
+    allPrivateContents = rawArgs.privateContents ?? [];
+    // Build party states from synthesis blob (DI tests don't seed party rows)
+    promptPartyStates = [
+      {
+        userId: "party-a",
+        role: "INITIATOR",
+        synthesisText: rawArgs.syntheses?.partyA,
+      },
+      {
+        userId: "party-b",
+        role: "INVITEE",
+        synthesisText: rawArgs.syntheses?.partyB,
+      },
+    ];
+    promptJointMessages = contextHistory.map((m) => ({
+      authorType: m.role === "assistant" ? "COACH" : "USER",
+      content: m.content,
+    }));
+    initiatorUserId = "party-a";
+  } else {
+    // Runtime shape — fetch via internal queries
+    const caseDoc = await ctx.runQuery(internal.jointChat._getCase, {
+      caseId: rawArgs.caseId,
+    });
+    if (!caseDoc) {
+      throw new Error("Case not found");
+    }
+    const partyStates = await ctx.runQuery(internal.jointChat._getPartyStates, {
+      caseId: rawArgs.caseId,
+    });
+    const jointMsgs = await ctx.runQuery(internal.jointChat._getJointMessages, {
+      caseId: rawArgs.caseId,
+    });
+    const privateMessages = await ctx.runQuery(
+      internal.jointChat._getPrivateMessagesByCase,
+      { caseId: rawArgs.caseId },
+    );
+    const triggeringMessage = jointMsgs.find(
+      (m: any) => m._id === rawArgs.messageId,
+    );
+    if (!triggeringMessage) {
+      throw new Error("Triggering message not found");
+    }
+    triggeringMessageContent = triggeringMessage.content;
+    contextHistory = jointMsgs
+      .filter((m: any) => m._id !== rawArgs.messageId)
+      .map((m: any) => ({
+        role:
+          m.authorType === "COACH" ? ("assistant" as const) : ("user" as const),
         content: m.content,
       }));
-      initiatorUserId = "party-a";
-    } else {
-      // Runtime shape — fetch via internal queries
-      const caseDoc = await ctx.runQuery(internal.jointChat._getCase, {
-        caseId: rawArgs.caseId,
-      });
-      if (!caseDoc) {
-        throw new Error("Case not found");
-      }
-      const partyStates = await ctx.runQuery(
-        internal.jointChat._getPartyStates,
-        { caseId: rawArgs.caseId },
+    promptPartyStates = partyStates.map((ps: any) => ({
+      userId: ps.userId,
+      role: ps.role,
+      mainTopic: ps.mainTopic,
+      description: ps.description,
+      desiredOutcome: ps.desiredOutcome,
+      synthesisText: ps.synthesisText,
+    }));
+    promptJointMessages = jointMsgs.map((m: any) => ({
+      authorType: m.authorType,
+      authorUserId: m.authorUserId,
+      content: m.content,
+    }));
+    initiatorUserId = caseDoc.initiatorUserId;
+    allPrivateContents = privateMessages.map((m: any) => m.content);
+    const Anthropic = (await import("@anthropic-ai/sdk")).default;
+    anthropicClient = new Anthropic();
+  }
+
+  // Classify via Haiku gate
+  const classificationResult = await classifyMessage(
+    anthropicClient,
+    triggeringMessageContent,
+    contextHistory,
+    true,
+  );
+  const classification = classificationResult.classification;
+
+  // Record Haiku classification usage
+  if (!isDIArgs(rawArgs) && classificationResult.usage) {
+    try {
+      await recordUsageFromAction(
+        ctx,
+        rawArgs.caseId,
+        classificationResult.usage.input_tokens,
+        classificationResult.usage.output_tokens,
+        "haiku",
       );
-      const jointMsgs = await ctx.runQuery(
+    } catch (usageErr) {
+      console.error("Failed to record classification usage:", usageErr);
+    }
+  }
+
+  // Exit early for NORMAL_EXCHANGE — no coach response
+  if (classification === "NORMAL_EXCHANGE") {
+    return;
+  }
+
+  // Soft cap check: classification ran (cheap Haiku), but generation is
+  // replaced with boilerplate at soft cap
+  if (!isDIArgs(rawArgs)) {
+    const budget = await enforceCostBudget(ctx, rawArgs.caseId);
+    if (!budget.allowed && budget.status === "soft_cap") {
+      // Insert boilerplate as a COACH message instead of calling Sonnet
+      await ctx.runMutation(
+        (internal as any).lib.streaming.insertStreamingMessage,
+        {
+          table: "jointMessages",
+          caseId: rawArgs.caseId,
+          authorType: "COACH",
+          isIntervention: false,
+          content: SOFT_CAP_BOILERPLATE,
+          status: "COMPLETE" as const,
+          createdAt: Date.now(),
+        },
+      );
+      return;
+    }
+  }
+
+  // Assemble coach prompt (includes synthesis texts + joint history,
+  // NOT raw private messages)
+  const prompt = assemblePrompt({
+    role: "COACH",
+    caseId: rawArgs.caseId as any,
+    actingUserId: initiatorUserId as any,
+    recentHistory: [
+      { role: "user" as const, content: triggeringMessageContent },
+    ],
+    templateVersion: undefined,
+    partyStates: promptPartyStates as any,
+    jointMessages: promptJointMessages as any,
+  });
+
+  // Determine isIntervention flag
+  const isIntervention = getIsIntervention(classification);
+
+  try {
+    const messageId = await streamAIResponse({
+      ctx,
+      anthropicClient,
+      table: "jointMessages",
+      messageFields: {
+        caseId: rawArgs.caseId,
+        authorType: "COACH",
+        isIntervention,
+      },
+      model: SONNET_MODEL,
+      systemPrompt: prompt.system,
+      userMessages: prompt.messages,
+      caseId: rawArgs.caseId,
+    });
+
+    // Privacy filter (runtime-only — requires runQuery to re-read the
+    // message). DI callers can run their own privacy check.
+    if (!isDIArgs(rawArgs) && allPrivateContents.length > 0) {
+      const completedMsgs = await ctx.runQuery(
         internal.jointChat._getJointMessages,
         { caseId: rawArgs.caseId },
       );
-      const privateMessages = await ctx.runQuery(
-        internal.jointChat._getPrivateMessagesByCase,
-        { caseId: rawArgs.caseId },
-      );
-      const triggeringMessage = jointMsgs.find(
-        (m: any) => m._id === rawArgs.messageId,
-      );
-      if (!triggeringMessage) {
-        throw new Error("Triggering message not found");
-      }
-      triggeringMessageContent = triggeringMessage.content;
-      contextHistory = jointMsgs
-        .filter((m: any) => m._id !== rawArgs.messageId)
-        .map((m: any) => ({
-          role:
-            m.authorType === "COACH"
-              ? ("assistant" as const)
-              : ("user" as const),
-          content: m.content,
-        }));
-      promptPartyStates = partyStates.map((ps: any) => ({
-        userId: ps.userId,
-        role: ps.role,
-        mainTopic: ps.mainTopic,
-        description: ps.description,
-        desiredOutcome: ps.desiredOutcome,
-        synthesisText: ps.synthesisText,
-      }));
-      promptJointMessages = jointMsgs.map((m: any) => ({
-        authorType: m.authorType,
-        authorUserId: m.authorUserId,
-        content: m.content,
-      }));
-      initiatorUserId = caseDoc.initiatorUserId;
-      allPrivateContents = privateMessages.map((m: any) => m.content);
-      const Anthropic = (await import("@anthropic-ai/sdk")).default;
-      anthropicClient = new Anthropic();
-    }
-
-    // Classify via Haiku gate
-    const classificationResult = await classifyMessage(
-      anthropicClient,
-      triggeringMessageContent,
-      contextHistory,
-      true,
-    );
-    const classification = classificationResult.classification;
-
-    // Record Haiku classification usage
-    if (!isDIArgs(rawArgs) && classificationResult.usage) {
-      try {
-        await recordUsageFromAction(
-          ctx,
-          rawArgs.caseId,
-          classificationResult.usage.input_tokens,
-          classificationResult.usage.output_tokens,
-          "haiku",
+      const coachMsg = completedMsgs.find((m: any) => m._id === messageId);
+      if (coachMsg && coachMsg.status === "COMPLETE") {
+        const violation = checkPrivacyViolation(
+          coachMsg.content,
+          allPrivateContents,
         );
-      } catch (usageErr) {
-        console.error("Failed to record classification usage:", usageErr);
-      }
-    }
-
-    // Exit early for NORMAL_EXCHANGE — no coach response
-    if (classification === "NORMAL_EXCHANGE") {
-      return;
-    }
-
-    // Soft cap check: classification ran (cheap Haiku), but generation is
-    // replaced with boilerplate at soft cap
-    if (!isDIArgs(rawArgs)) {
-      const budget = await enforceCostBudget(ctx, rawArgs.caseId);
-      if (!budget.allowed && budget.status === "soft_cap") {
-        // Insert boilerplate as a COACH message instead of calling Sonnet
-        await ctx.runMutation(
-          (internal as any).lib.streaming.insertStreamingMessage,
-          {
-            table: "jointMessages",
-            caseId: rawArgs.caseId,
-            authorType: "COACH",
-            isIntervention: false,
-            content: SOFT_CAP_BOILERPLATE,
-            status: "COMPLETE" as const,
-            createdAt: Date.now(),
-          },
-        );
-        return;
-      }
-    }
-
-    // Assemble coach prompt (includes synthesis texts + joint history,
-    // NOT raw private messages)
-    const prompt = assemblePrompt({
-      role: "COACH",
-      caseId: rawArgs.caseId as any,
-      actingUserId: initiatorUserId as any,
-      recentHistory: [
-        { role: "user" as const, content: triggeringMessageContent },
-      ],
-      templateVersion: undefined,
-      partyStates: promptPartyStates as any,
-      jointMessages: promptJointMessages as any,
-    });
-
-    // Determine isIntervention flag
-    const isIntervention = getIsIntervention(classification);
-
-    try {
-      const messageId = await streamAIResponse({
-        ctx,
-        anthropicClient,
-        table: "jointMessages",
-        messageFields: {
-          caseId: rawArgs.caseId,
-          authorType: "COACH",
-          isIntervention,
-        },
-        model: SONNET_MODEL,
-        systemPrompt: prompt.system,
-        userMessages: prompt.messages,
-        caseId: rawArgs.caseId,
-      });
-
-      // Privacy filter (runtime-only — requires runQuery to re-read the
-      // message). DI callers can run their own privacy check.
-      if (!isDIArgs(rawArgs) && allPrivateContents.length > 0) {
-        const completedMsgs = await ctx.runQuery(
-          internal.jointChat._getJointMessages,
-          { caseId: rawArgs.caseId },
-        );
-        const coachMsg = completedMsgs.find(
-          (m: any) => m._id === messageId,
-        );
-        if (coachMsg && coachMsg.status === "COMPLETE") {
-          const violation = checkPrivacyViolation(
-            coachMsg.content,
-            allPrivateContents,
-          );
-          if (violation.isViolation) {
-            // Retry up to MAX_PRIVACY_RETRIES times
-            let retrySuccess = false;
-            for (let retry = 0; retry < MAX_PRIVACY_RETRIES; retry++) {
-              await ctx.runMutation(
-                (internal as any).lib.streaming.updateStreamingMessage,
-                {
-                  messageId,
-                  content: "",
-                  status: "STREAMING" as const,
-                },
-              );
-              await streamAIResponse({
-                ctx,
-                anthropicClient,
-                table: "jointMessages",
-                messageFields: {
-                  caseId: rawArgs.caseId,
-                  authorType: "COACH",
-                  isIntervention,
-                },
-                model: SONNET_MODEL,
-                systemPrompt: prompt.system,
-                userMessages: prompt.messages,
-              });
-              const retryMsgs = await ctx.runQuery(
-                internal.jointChat._getJointMessages,
-                { caseId: rawArgs.caseId },
-              );
-              const retryMsg = retryMsgs.find(
-                (m: any) => m._id === messageId,
-              );
-              if (
-                retryMsg &&
-                !checkPrivacyViolation(retryMsg.content, allPrivateContents)
-                  .isViolation
-              ) {
-                retrySuccess = true;
-                break;
-              }
+        if (violation.isViolation) {
+          // Retry up to MAX_PRIVACY_RETRIES times
+          let retrySuccess = false;
+          for (let retry = 0; retry < MAX_PRIVACY_RETRIES; retry++) {
+            await ctx.runMutation(
+              (internal as any).lib.streaming.updateStreamingMessage,
+              {
+                messageId,
+                content: "",
+                status: "STREAMING" as const,
+              },
+            );
+            await streamAIResponse({
+              ctx,
+              anthropicClient,
+              table: "jointMessages",
+              messageFields: {
+                caseId: rawArgs.caseId,
+                authorType: "COACH",
+                isIntervention,
+              },
+              model: SONNET_MODEL,
+              systemPrompt: prompt.system,
+              userMessages: prompt.messages,
+            });
+            const retryMsgs = await ctx.runQuery(
+              internal.jointChat._getJointMessages,
+              { caseId: rawArgs.caseId },
+            );
+            const retryMsg = retryMsgs.find((m: any) => m._id === messageId);
+            if (
+              retryMsg &&
+              !checkPrivacyViolation(retryMsg.content, allPrivateContents)
+                .isViolation
+            ) {
+              retrySuccess = true;
+              break;
             }
-            if (!retrySuccess) {
-              await ctx.runMutation(
-                (internal as any).lib.streaming.updateStreamingMessage,
-                {
-                  messageId,
-                  content: FALLBACK_TEXT,
-                  status: "COMPLETE" as const,
-                },
-              );
-            }
+          }
+          if (!retrySuccess) {
+            await ctx.runMutation(
+              (internal as any).lib.streaming.updateStreamingMessage,
+              {
+                messageId,
+                content: FALLBACK_TEXT,
+                status: "COMPLETE" as const,
+              },
+            );
           }
         }
       }
-    } catch (err) {
-      console.error(
-        "Coach AI streaming failed for case",
-        rawArgs.caseId,
-        ":",
-        err,
-      );
-      if (!isDIArgs(rawArgs)) {
-        await ctx.runMutation(
-          (internal as any).lib.streaming.insertStreamingMessage,
-          {
-            table: "jointMessages",
-            caseId: rawArgs.caseId,
-            authorType: "COACH",
-            isIntervention: false,
-            content:
-              "Sorry, I encountered an error generating a response. Please try sending your message again.",
-            status: "ERROR" as const,
-            createdAt: Date.now(),
-          },
-        );
-      }
     }
+  } catch (err) {
+    console.error(
+      "Coach AI streaming failed for case",
+      rawArgs.caseId,
+      ":",
+      err,
+    );
+    if (!isDIArgs(rawArgs)) {
+      await ctx.runMutation(
+        (internal as any).lib.streaming.insertStreamingMessage,
+        {
+          table: "jointMessages",
+          caseId: rawArgs.caseId,
+          authorType: "COACH",
+          isIntervention: false,
+          content:
+            "Sorry, I encountered an error generating a response. Please try sending your message again.",
+          status: "ERROR" as const,
+          createdAt: Date.now(),
+        },
+      );
+    }
+  }
 }
 
 /**
@@ -768,7 +765,8 @@ export const generateOpeningMessage = action({
           caseId: args.caseId,
           authorType: "COACH",
           isIntervention: false,
-          content: budget.boilerplate ??
+          content:
+            budget.boilerplate ??
             "Welcome to the joint session. I'm here to help facilitate your conversation.",
           status: "COMPLETE" as const,
           createdAt: Date.now(),
@@ -785,10 +783,9 @@ export const generateOpeningMessage = action({
     }
 
     // Get party states for the case's mainTopic
-    const partyStates = await ctx.runQuery(
-      internal.jointChat._getPartyStates,
-      { caseId: args.caseId },
-    );
+    const partyStates = await ctx.runQuery(internal.jointChat._getPartyStates, {
+      caseId: args.caseId,
+    });
 
     // Use initiator's mainTopic (or first available)
     const initiatorState = partyStates.find(

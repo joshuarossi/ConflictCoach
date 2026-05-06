@@ -20,16 +20,12 @@ test.describe("WOR-31: Landing page", () => {
 
     // The hero tagline should be visible to a logged-out visitor
     await expect(
-      page.getByText(
-        "A calm place to work through a difficult conversation.",
-      ),
+      page.getByText("A calm place to work through a difficult conversation."),
     ).toBeVisible({ timeout: 10_000 });
   });
 
   // ── AC6: Primary CTA routes to /login ───────────────────────────────
-  test('AC6: clicking "Start a case" navigates to /login', async ({
-    page,
-  }) => {
+  test('AC6: clicking "Start a case" navigates to /login', async ({ page }) => {
     await page.goto("/");
 
     const cta = page.getByRole("link", { name: /Start a case/i });

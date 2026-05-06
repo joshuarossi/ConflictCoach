@@ -57,9 +57,7 @@ const EXPECTED_LAYOUTS: Record<string, string> = {
  * This works by tracking the most recent `<Route element={<XxxLayout />}>`
  * and associating subsequent `<Route ... element={<PageName />} />` with it.
  */
-function parseLayoutAssignments(
-  source: string,
-): Record<string, string> {
+function parseLayoutAssignments(source: string): Record<string, string> {
   const assignments: Record<string, string> = {};
 
   // Split into lines and track nesting context
@@ -93,9 +91,7 @@ function parseLayoutAssignments(
     if (pageMatch) {
       const pageName = pageMatch[1];
       const currentLayout =
-        layoutStack.length > 0
-          ? layoutStack[layoutStack.length - 1]
-          : "none";
+        layoutStack.length > 0 ? layoutStack[layoutStack.length - 1] : "none";
       assignments[pageName] = currentLayout;
     }
   }

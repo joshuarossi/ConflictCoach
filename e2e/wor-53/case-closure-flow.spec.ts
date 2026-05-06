@@ -13,14 +13,25 @@
  * - AC: Take a break just closes modal, case stays JOINT_ACTIVE
  */
 import { test, expect } from "@playwright/test";
-import { createTestUser, loginAsUser, createTestCase, advanceCaseToStatus } from "../fixtures";
+import {
+  createTestUser,
+  loginAsUser,
+  createTestCase,
+  advanceCaseToStatus,
+} from "../fixtures";
 import type { TestUser } from "../fixtures";
 
 /**
  * Helper: creates a case and advances it to JOINT_ACTIVE using shared fixtures.
  */
-async function setupJointActiveCase(page: import("@playwright/test").Page, user: TestUser): Promise<string> {
-  const testCase = await createTestCase(page, user, { category: "workplace", isSolo: true });
+async function setupJointActiveCase(
+  page: import("@playwright/test").Page,
+  user: TestUser,
+): Promise<string> {
+  const testCase = await createTestCase(page, user, {
+    category: "workplace",
+    isSolo: true,
+  });
   await advanceCaseToStatus(page, testCase.caseId, "JOINT_ACTIVE");
   return testCase.caseId;
 }
@@ -36,7 +47,9 @@ test.describe("WOR-53: Case closure modal flow", () => {
   // ---------------------------------------------------------------------------
   // AC: Close button opens styled modal
   // ---------------------------------------------------------------------------
-  test("Close button in joint chat header opens closure modal", async ({ page }) => {
+  test("Close button in joint chat header opens closure modal", async ({
+    page,
+  }) => {
     const caseId = await setupJointActiveCase(page, user);
     await page.goto(`/cases/${caseId}/joint`);
     await page.waitForLoadState("networkidle");
@@ -54,7 +67,9 @@ test.describe("WOR-53: Case closure modal flow", () => {
   // ---------------------------------------------------------------------------
   // AC: Three options visible in modal
   // ---------------------------------------------------------------------------
-  test("Modal shows three closure options: Resolved, Not resolved, Take a break", async ({ page }) => {
+  test("Modal shows three closure options: Resolved, Not resolved, Take a break", async ({
+    page,
+  }) => {
     const caseId = await setupJointActiveCase(page, user);
     await page.goto(`/cases/${caseId}/joint`);
     await page.waitForLoadState("networkidle");
@@ -64,7 +79,11 @@ test.describe("WOR-53: Case closure modal flow", () => {
     await expect(dialog).toBeVisible({ timeout: 5000 });
 
     // Verify three options are present
-    await expect(dialog.getByText(/^resolved$/i).or(dialog.getByRole("radio", { name: /resolved/i }))).toBeVisible();
+    await expect(
+      dialog
+        .getByText(/^resolved$/i)
+        .or(dialog.getByRole("radio", { name: /resolved/i })),
+    ).toBeVisible();
     await expect(dialog.getByText(/not resolved/i)).toBeVisible();
     await expect(dialog.getByText(/take a break/i)).toBeVisible();
   });
@@ -72,7 +91,9 @@ test.describe("WOR-53: Case closure modal flow", () => {
   // ---------------------------------------------------------------------------
   // AC: Resolved option with textarea + Propose Resolution
   // ---------------------------------------------------------------------------
-  test("Resolved option shows textarea; Propose Resolution submits with summary", async ({ page }) => {
+  test("Resolved option shows textarea; Propose Resolution submits with summary", async ({
+    page,
+  }) => {
     const caseId = await setupJointActiveCase(page, user);
     await page.goto(`/cases/${caseId}/joint`);
     await page.waitForLoadState("networkidle");
@@ -82,7 +103,10 @@ test.describe("WOR-53: Case closure modal flow", () => {
     await expect(dialog).toBeVisible({ timeout: 5000 });
 
     // Select "Resolved"
-    await dialog.getByText(/^resolved$/i).or(dialog.getByRole("radio", { name: /resolved/i })).click();
+    await dialog
+      .getByText(/^resolved$/i)
+      .or(dialog.getByRole("radio", { name: /resolved/i }))
+      .click();
 
     // Textarea should appear
     const textarea = dialog.getByRole("textbox");
@@ -90,7 +114,9 @@ test.describe("WOR-53: Case closure modal flow", () => {
 
     // Fill summary and submit
     await textarea.fill("We agreed to split the cost 50/50");
-    const proposeButton = dialog.getByRole("button", { name: /propose resolution/i });
+    const proposeButton = dialog.getByRole("button", {
+      name: /propose resolution/i,
+    });
     await expect(proposeButton).toBeVisible();
     await proposeButton.click();
 
@@ -101,7 +127,9 @@ test.describe("WOR-53: Case closure modal flow", () => {
   // ---------------------------------------------------------------------------
   // AC: Resolved validation - empty textarea blocks submission
   // ---------------------------------------------------------------------------
-  test("Resolved option blocks submission when textarea is empty", async ({ page }) => {
+  test("Resolved option blocks submission when textarea is empty", async ({
+    page,
+  }) => {
     const caseId = await setupJointActiveCase(page, user);
     await page.goto(`/cases/${caseId}/joint`);
     await page.waitForLoadState("networkidle");
@@ -111,9 +139,14 @@ test.describe("WOR-53: Case closure modal flow", () => {
     await expect(dialog).toBeVisible({ timeout: 5000 });
 
     // Select "Resolved" without filling textarea
-    await dialog.getByText(/^resolved$/i).or(dialog.getByRole("radio", { name: /resolved/i })).click();
+    await dialog
+      .getByText(/^resolved$/i)
+      .or(dialog.getByRole("radio", { name: /resolved/i }))
+      .click();
 
-    const proposeButton = dialog.getByRole("button", { name: /propose resolution/i });
+    const proposeButton = dialog.getByRole("button", {
+      name: /propose resolution/i,
+    });
     await proposeButton.click();
 
     // Modal should still be visible (submission blocked)
@@ -123,7 +156,9 @@ test.describe("WOR-53: Case closure modal flow", () => {
   // ---------------------------------------------------------------------------
   // AC: Not resolved option triggers unilateral close
   // ---------------------------------------------------------------------------
-  test("Not resolved option shows warning and triggers unilateral close", async ({ page }) => {
+  test("Not resolved option shows warning and triggers unilateral close", async ({
+    page,
+  }) => {
     const caseId = await setupJointActiveCase(page, user);
     await page.goto(`/cases/${caseId}/joint`);
     await page.waitForLoadState("networkidle");
@@ -141,7 +176,9 @@ test.describe("WOR-53: Case closure modal flow", () => {
     ).toBeVisible();
 
     // Click the close-without-resolution button
-    const closeButton = dialog.getByRole("button", { name: /close without resolution/i });
+    const closeButton = dialog.getByRole("button", {
+      name: /close without resolution/i,
+    });
     await closeButton.click();
 
     // Should navigate away from joint chat (case is now CLOSED_UNRESOLVED)
@@ -151,7 +188,9 @@ test.describe("WOR-53: Case closure modal flow", () => {
   // ---------------------------------------------------------------------------
   // AC: Take a break closes modal, case stays active
   // ---------------------------------------------------------------------------
-  test("Take a break closes modal without changing case status", async ({ page }) => {
+  test("Take a break closes modal without changing case status", async ({
+    page,
+  }) => {
     const caseId = await setupJointActiveCase(page, user);
     await page.goto(`/cases/${caseId}/joint`);
     await page.waitForLoadState("networkidle");
@@ -186,7 +225,9 @@ test.describe("WOR-53: Confirmation banner flow", () => {
   // ---------------------------------------------------------------------------
   // AC: Confirmation banner shows after closure proposed
   // ---------------------------------------------------------------------------
-  test("Confirmation banner appears after proposing closure (solo mode)", async ({ page }) => {
+  test("Confirmation banner appears after proposing closure (solo mode)", async ({
+    page,
+  }) => {
     const caseId = await setupJointActiveCase(page, user);
     await page.goto(`/cases/${caseId}/joint`);
     await page.waitForLoadState("networkidle");
@@ -196,16 +237,19 @@ test.describe("WOR-53: Confirmation banner flow", () => {
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: 5000 });
 
-    await dialog.getByText(/^resolved$/i).or(dialog.getByRole("radio", { name: /resolved/i })).click();
+    await dialog
+      .getByText(/^resolved$/i)
+      .or(dialog.getByRole("radio", { name: /resolved/i }))
+      .click();
     const textarea = dialog.getByRole("textbox");
     await textarea.fill("We agreed on the plan");
     await dialog.getByRole("button", { name: /propose resolution/i }).click();
     await expect(dialog).not.toBeVisible({ timeout: 5000 });
 
     // In solo mode, the confirmation banner should appear (viewing as other party)
-    const banner = page.locator('[data-testid="closure-confirmation-banner"]').or(
-      page.getByText(/proposed closing this case/i),
-    );
+    const banner = page
+      .locator('[data-testid="closure-confirmation-banner"]')
+      .or(page.getByText(/proposed closing this case/i));
     await expect(banner.first()).toBeVisible({ timeout: 10000 });
   });
 
@@ -221,7 +265,10 @@ test.describe("WOR-53: Confirmation banner flow", () => {
     await page.getByRole("button", { name: /close/i }).first().click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: 5000 });
-    await dialog.getByText(/^resolved$/i).or(dialog.getByRole("radio", { name: /resolved/i })).click();
+    await dialog
+      .getByText(/^resolved$/i)
+      .or(dialog.getByRole("radio", { name: /resolved/i }))
+      .click();
     await dialog.getByRole("textbox").fill("We agreed on the plan");
     await dialog.getByRole("button", { name: /propose resolution/i }).click();
     await expect(dialog).not.toBeVisible({ timeout: 5000 });
@@ -233,14 +280,18 @@ test.describe("WOR-53: Confirmation banner flow", () => {
     const confirmButton = page.getByRole("button", { name: /confirm/i });
     await expect(confirmButton).toBeVisible();
 
-    const rejectButton = page.getByRole("button", { name: /reject and keep talking/i });
+    const rejectButton = page.getByRole("button", {
+      name: /reject and keep talking/i,
+    });
     await expect(rejectButton).toBeVisible();
   });
 
   // ---------------------------------------------------------------------------
   // AC: Confirm → CLOSED_RESOLVED, redirect to closed view
   // ---------------------------------------------------------------------------
-  test("Confirm button closes case and redirects to closed view", async ({ page }) => {
+  test("Confirm button closes case and redirects to closed view", async ({
+    page,
+  }) => {
     const caseId = await setupJointActiveCase(page, user);
     await page.goto(`/cases/${caseId}/joint`);
     await page.waitForLoadState("networkidle");
@@ -249,7 +300,10 @@ test.describe("WOR-53: Confirmation banner flow", () => {
     await page.getByRole("button", { name: /close/i }).first().click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: 5000 });
-    await dialog.getByText(/^resolved$/i).or(dialog.getByRole("radio", { name: /resolved/i })).click();
+    await dialog
+      .getByText(/^resolved$/i)
+      .or(dialog.getByRole("radio", { name: /resolved/i }))
+      .click();
     await dialog.getByRole("textbox").fill("Agreement reached");
     await dialog.getByRole("button", { name: /propose resolution/i }).click();
     await expect(dialog).not.toBeVisible({ timeout: 5000 });
@@ -266,7 +320,9 @@ test.describe("WOR-53: Confirmation banner flow", () => {
   // ---------------------------------------------------------------------------
   // AC: Reject clears proposal, parties can continue chatting
   // ---------------------------------------------------------------------------
-  test("Reject button clears proposal and allows continued chatting", async ({ page }) => {
+  test("Reject button clears proposal and allows continued chatting", async ({
+    page,
+  }) => {
     const caseId = await setupJointActiveCase(page, user);
     await page.goto(`/cases/${caseId}/joint`);
     await page.waitForLoadState("networkidle");
@@ -275,26 +331,31 @@ test.describe("WOR-53: Confirmation banner flow", () => {
     await page.getByRole("button", { name: /close/i }).first().click();
     const dialog = page.getByRole("dialog");
     await expect(dialog).toBeVisible({ timeout: 5000 });
-    await dialog.getByText(/^resolved$/i).or(dialog.getByRole("radio", { name: /resolved/i })).click();
+    await dialog
+      .getByText(/^resolved$/i)
+      .or(dialog.getByRole("radio", { name: /resolved/i }))
+      .click();
     await dialog.getByRole("textbox").fill("Proposed agreement");
     await dialog.getByRole("button", { name: /propose resolution/i }).click();
     await expect(dialog).not.toBeVisible({ timeout: 5000 });
 
     // Click Reject on the banner
-    const rejectButton = page.getByRole("button", { name: /reject and keep talking/i });
+    const rejectButton = page.getByRole("button", {
+      name: /reject and keep talking/i,
+    });
     await expect(rejectButton).toBeVisible({ timeout: 10000 });
     await rejectButton.click();
 
     // Banner should disappear
-    const banner = page.locator('[data-testid="closure-confirmation-banner"]').or(
-      page.getByText(/proposed closing this case/i),
-    );
+    const banner = page
+      .locator('[data-testid="closure-confirmation-banner"]')
+      .or(page.getByText(/proposed closing this case/i));
     await expect(banner.first()).not.toBeVisible({ timeout: 5000 });
 
     // Chat input should still be available (can continue chatting)
-    const chatInput = page.getByRole("textbox", { name: /message/i }).or(
-      page.locator("#joint-chat-input"),
-    );
+    const chatInput = page
+      .getByRole("textbox", { name: /message/i })
+      .or(page.locator("#joint-chat-input"));
     await expect(chatInput.first()).toBeVisible();
     await expect(page).toHaveURL(new RegExp(`/cases/${caseId}/joint`));
   });

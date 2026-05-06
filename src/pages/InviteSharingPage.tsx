@@ -37,19 +37,16 @@ export function InviteSharingView({
 
   const shortText = `Check out Conflict Coach — it might help us work through things: ${inviteUrl}`;
 
-  const handleCopy = useCallback(
-    async (text: string, buttonId: string) => {
-      try {
-        await navigator.clipboard.writeText(text);
-        setCopiedButton(buttonId);
-        setTimeout(() => setCopiedButton(null), 2000);
-      } catch {
-        // Clipboard API unavailable — the link is already visible in the
-        // readonly input so users can select and copy manually.
-      }
-    },
-    [],
-  );
+  const handleCopy = useCallback(async (text: string, buttonId: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopiedButton(buttonId);
+      setTimeout(() => setCopiedButton(null), 2000);
+    } catch {
+      // Clipboard API unavailable — the link is already visible in the
+      // readonly input so users can select and copy manually.
+    }
+  }, []);
 
   const mailtoSubject = encodeURIComponent(`About our ${mainTopic}`);
   const mailtoBody = encodeURIComponent(suggestedLanguage);
@@ -233,17 +230,12 @@ export function InviteSharingPage() {
 
   // Resolve otherPartyName: Router state > api.cases.get > fallback
   const otherPartyName =
-    state?.otherPartyName ||
-    (caseData.otherPartyName as string) ||
-    "";
+    state?.otherPartyName || (caseData.otherPartyName as string) || "";
 
   // Resolve mainTopic: Router state > partyStates self.mainTopic
   const partyDataAny = partyData as Record<string, unknown>;
   const selfRecord = partyDataAny?.self as Record<string, unknown> | undefined;
-  const mainTopic =
-    state?.mainTopic ||
-    (selfRecord?.mainTopic as string) ||
-    "";
+  const mainTopic = state?.mainTopic || (selfRecord?.mainTopic as string) || "";
 
   return (
     <InviteSharingView

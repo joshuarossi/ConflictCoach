@@ -66,11 +66,15 @@ describe("AC: Design token colors for error/loading/empty states", () => {
     );
 
     // Skeleton elements must be present when useQuery returns undefined (loading state)
-    const skeletons = container.querySelectorAll("[class*='skeleton'], [class*='Skeleton'], [data-testid*='skeleton']");
+    const skeletons = container.querySelectorAll(
+      "[class*='skeleton'], [class*='Skeleton'], [data-testid*='skeleton']",
+    );
     expect(skeletons.length).toBeGreaterThan(0);
 
     // Skeleton elements should use token-based styling, not hardcoded hex colors
-    const skeletonClasses = Array.from(skeletons).map((s) => s.className).join(" ");
+    const skeletonClasses = Array.from(skeletons)
+      .map((s) => s.className)
+      .join(" ");
     expect(skeletonClasses).not.toMatch(/#[0-9a-fA-F]{3,8}/);
   });
 });

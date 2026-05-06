@@ -271,10 +271,9 @@ test.describe("WOR-37: Invite sharing page", () => {
     await expect(cta).toBeVisible({ timeout: 10000 });
     await cta.click();
 
-    await page.waitForURL(
-      new RegExp(`/cases/${testCase.caseId}/private`),
-      { timeout: 10000 },
-    );
+    await page.waitForURL(new RegExp(`/cases/${testCase.caseId}/private`), {
+      timeout: 10000,
+    });
   });
 
   // ---------------------------------------------------------------------------

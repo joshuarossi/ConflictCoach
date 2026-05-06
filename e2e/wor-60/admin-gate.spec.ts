@@ -53,8 +53,6 @@ test.describe("AC8: Admin role gate for template pages", () => {
     await expect(page.getByText("403")).toBeHidden({ timeout: 5000 });
 
     // Should show the template management page
-    await expect(
-      page.getByText(/templates/i),
-    ).toBeVisible({ timeout: 5000 });
+    await expect(page.getByText(/templates/i)).toBeVisible({ timeout: 5000 });
   });
 });

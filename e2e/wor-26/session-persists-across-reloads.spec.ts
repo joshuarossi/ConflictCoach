@@ -25,7 +25,7 @@ test.describe("AC: Session persists across browser reloads (30-day expiry)", () 
 
     // First, verify a login UI is present (magic link or Google OAuth button)
     const loginIndicator = page.locator(
-      'text=/sign in|log in|magic link|continue with google/i',
+      "text=/sign in|log in|magic link|continue with google/i",
     );
     await expect(loginIndicator.first()).toBeVisible({ timeout: 10000 });
 
@@ -45,15 +45,19 @@ test.describe("AC: Session persists across browser reloads (30-day expiry)", () 
     // After authentication, the user should see a dashboard or authenticated view
     // (not a login page). This checks for any indicator of logged-in state.
     const authenticatedIndicator = page.locator(
-      'text=/dashboard|my cases|log out|new case/i',
+      "text=/dashboard|my cases|log out|new case/i",
     );
-    await expect(authenticatedIndicator.first()).toBeVisible({ timeout: 15000 });
+    await expect(authenticatedIndicator.first()).toBeVisible({
+      timeout: 15000,
+    });
 
     // Now reload the page
     await page.reload();
 
     // After reload, the user should still be authenticated (not redirected to login)
-    await expect(authenticatedIndicator.first()).toBeVisible({ timeout: 10000 });
+    await expect(authenticatedIndicator.first()).toBeVisible({
+      timeout: 10000,
+    });
 
     // The login page should NOT be showing
     await expect(loginIndicator.first()).not.toBeVisible({ timeout: 3000 });

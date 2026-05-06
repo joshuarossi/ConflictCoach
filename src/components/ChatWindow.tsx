@@ -12,7 +12,9 @@ interface ChatWindowProps {
   onSendMessage?: (content: string) => void;
   isInputDisabled?: boolean;
   showPrivacyBanner?: boolean;
-  authorColorMap?: Partial<Record<"USER" | "COACH" | "AI" | "SYSTEM" | string, string>>;
+  authorColorMap?: Partial<
+    Record<"USER" | "COACH" | "AI" | "SYSTEM" | string, string>
+  >;
 }
 
 const AT_BOTTOM_TOLERANCE_PX = 8;
@@ -73,7 +75,7 @@ export function ChatWindow({
           (msg.authorType as string | undefined) ??
           (msg.role === "AI" ? "COACH" : msg.role);
         const authorColor = colorKey
-          ? authorColorMap?.[colorKey] ?? msg.authorColor
+          ? (authorColorMap?.[colorKey] ?? msg.authorColor)
           : msg.authorColor;
         return (
           <MessageBubble

@@ -26,7 +26,14 @@ vi.mock("react-router-dom", () => ({
   useNavigate: vi.fn(() => vi.fn()),
   useParams: vi.fn(() => ({})),
   useSearchParams: vi.fn(() => [new URLSearchParams(), vi.fn()]),
-  Link: ({ children, ...props }: { children: React.ReactNode; to: string; className?: string }) => (
+  Link: ({
+    children,
+    ...props
+  }: {
+    children: React.ReactNode;
+    to: string;
+    className?: string;
+  }) => (
     <a href={props.to} {...props}>
       {children}
     </a>

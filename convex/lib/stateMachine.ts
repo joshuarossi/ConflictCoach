@@ -79,9 +79,7 @@ export function canEnterJointChat(partyStates: PartyState[]): boolean {
  */
 export function canProposeClosure(caseDoc: CaseDoc, userId: string): boolean {
   if (caseDoc.status !== "JOINT_ACTIVE") return false;
-  return (
-    caseDoc.initiatorUserId === userId || caseDoc.inviteeUserId === userId
-  );
+  return caseDoc.initiatorUserId === userId || caseDoc.inviteeUserId === userId;
 }
 
 /**

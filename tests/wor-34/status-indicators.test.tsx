@@ -58,10 +58,15 @@ describe("AC: Status indicators use correct glyphs and colors", () => {
   test("your-turn status shows green filled circle ●", () => {
     // DRAFT_PRIVATE_COACHING = your turn (initiator needs to act)
     renderDashboard([
-      makeCaseFixture({ id: "c1", status: "DRAFT_PRIVATE_COACHING", displayName: "YourTurn" }),
+      makeCaseFixture({
+        id: "c1",
+        status: "DRAFT_PRIVATE_COACHING",
+        displayName: "YourTurn",
+      }),
     ]);
 
-    const container = screen.getByText("YourTurn").closest("[data-testid]") ??
+    const container =
+      screen.getByText("YourTurn").closest("[data-testid]") ??
       screen.getByText("YourTurn").parentElement;
     expect(container?.textContent).toContain("●");
   });
@@ -77,24 +82,34 @@ describe("AC: Status indicators use correct glyphs and colors", () => {
       }),
     ]);
 
-    const container = screen.getByText("Waiting").closest("[data-testid]") ??
+    const container =
+      screen.getByText("Waiting").closest("[data-testid]") ??
       screen.getByText("Waiting").parentElement;
     expect(container?.textContent).toContain("○");
   });
 
   test("ready-for-joint status shows amber half circle ◐", () => {
     renderDashboard([
-      makeCaseFixture({ id: "c3", status: "READY_FOR_JOINT", displayName: "ReadyJoint" }),
+      makeCaseFixture({
+        id: "c3",
+        status: "READY_FOR_JOINT",
+        displayName: "ReadyJoint",
+      }),
     ]);
 
-    const container = screen.getByText("ReadyJoint").closest("[data-testid]") ??
+    const container =
+      screen.getByText("ReadyJoint").closest("[data-testid]") ??
       screen.getByText("ReadyJoint").parentElement;
     expect(container?.textContent).toContain("◐");
   });
 
   test("closed status shows neutral filled square ◼", () => {
     renderDashboard([
-      makeCaseFixture({ id: "c4", status: "CLOSED_RESOLVED", displayName: "Closed" }),
+      makeCaseFixture({
+        id: "c4",
+        status: "CLOSED_RESOLVED",
+        displayName: "Closed",
+      }),
     ]);
 
     // Need to expand closed section or look in the DOM
@@ -104,25 +119,38 @@ describe("AC: Status indicators use correct glyphs and colors", () => {
 
   test("green glyph uses --status-active design token color", () => {
     renderDashboard([
-      makeCaseFixture({ id: "c5", status: "DRAFT_PRIVATE_COACHING", displayName: "GreenCheck" }),
+      makeCaseFixture({
+        id: "c5",
+        status: "DRAFT_PRIVATE_COACHING",
+        displayName: "GreenCheck",
+      }),
     ]);
 
     // The green indicator should use the status-active color token
-    const indicator = document.querySelector("[class*='status-active'], [style*='status-active']") ??
-      document.querySelector(".text-\\[var\\(--status-active\\)\\]");
+    const indicator =
+      document.querySelector(
+        "[class*='status-active'], [style*='status-active']",
+      ) ?? document.querySelector(".text-\\[var\\(--status-active\\)\\]");
     // If not using CSS variable class, check for green-associated class
-    const greenIndicator = indicator ??
+    const greenIndicator =
+      indicator ??
       document.querySelector("[class*='green'], [class*='success']");
     expect(greenIndicator).not.toBeNull();
   });
 
   test("amber glyph uses --status-warning design token color", () => {
     renderDashboard([
-      makeCaseFixture({ id: "c6", status: "READY_FOR_JOINT", displayName: "AmberCheck" }),
+      makeCaseFixture({
+        id: "c6",
+        status: "READY_FOR_JOINT",
+        displayName: "AmberCheck",
+      }),
     ]);
 
-    const indicator = document.querySelector("[class*='status-warning'], [style*='status-warning']") ??
-      document.querySelector("[class*='warning'], [class*='amber']");
+    const indicator =
+      document.querySelector(
+        "[class*='status-warning'], [style*='status-warning']",
+      ) ?? document.querySelector("[class*='warning'], [class*='amber']");
     expect(indicator).not.toBeNull();
   });
 });

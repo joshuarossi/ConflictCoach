@@ -8,9 +8,13 @@ describe("AC: Radius tokens (sm/md/lg/xl/full) and shadow tokens (shadow-0 throu
   test("Tailwind config defines borderRadius entries for sm, md, lg, xl, full", async () => {
     const config = await import("../../tailwind.config.ts");
     const borderRadius =
-      (config.default.theme as Record<string, any>)?.extend?.borderRadius ?? (config.default.theme as Record<string, any>)?.borderRadius;
+      (config.default.theme as Record<string, any>)?.extend?.borderRadius ??
+      (config.default.theme as Record<string, any>)?.borderRadius;
 
-    expect(borderRadius, "Tailwind config must define custom borderRadius").toBeDefined();
+    expect(
+      borderRadius,
+      "Tailwind config must define custom borderRadius",
+    ).toBeDefined();
 
     const requiredRadii = ["sm", "md", "lg", "xl", "full"];
     for (const key of requiredRadii) {
@@ -24,7 +28,8 @@ describe("AC: Radius tokens (sm/md/lg/xl/full) and shadow tokens (shadow-0 throu
   test("borderRadius values match StyleGuide §4.2 (sm=6px, md=10px, lg=14px, xl=20px, full=9999px)", async () => {
     const config = await import("../../tailwind.config.ts");
     const borderRadius =
-      (config.default.theme as Record<string, any>)?.extend?.borderRadius ?? (config.default.theme as Record<string, any>)?.borderRadius;
+      (config.default.theme as Record<string, any>)?.extend?.borderRadius ??
+      (config.default.theme as Record<string, any>)?.borderRadius;
 
     expect(borderRadius?.sm).toContain("6");
     expect(borderRadius?.md).toContain("10");
@@ -36,9 +41,13 @@ describe("AC: Radius tokens (sm/md/lg/xl/full) and shadow tokens (shadow-0 throu
   test("Tailwind config defines boxShadow entries for 0, 1, 2, 3", async () => {
     const config = await import("../../tailwind.config.ts");
     const boxShadow =
-      (config.default.theme as Record<string, any>)?.extend?.boxShadow ?? (config.default.theme as Record<string, any>)?.boxShadow;
+      (config.default.theme as Record<string, any>)?.extend?.boxShadow ??
+      (config.default.theme as Record<string, any>)?.boxShadow;
 
-    expect(boxShadow, "Tailwind config must define custom boxShadow").toBeDefined();
+    expect(
+      boxShadow,
+      "Tailwind config must define custom boxShadow",
+    ).toBeDefined();
 
     // Shadow tokens may be keyed as "0"/"1"/"2"/"3" or "shadow-0" etc.
     const keys = Object.keys(boxShadow!);
@@ -55,7 +64,8 @@ describe("AC: Radius tokens (sm/md/lg/xl/full) and shadow tokens (shadow-0 throu
   test("shadow-0 is 'none' (flat/borders only)", async () => {
     const config = await import("../../tailwind.config.ts");
     const boxShadow =
-      (config.default.theme as Record<string, any>)?.extend?.boxShadow ?? (config.default.theme as Record<string, any>)?.boxShadow;
+      (config.default.theme as Record<string, any>)?.extend?.boxShadow ??
+      (config.default.theme as Record<string, any>)?.boxShadow;
 
     const shadow0 = boxShadow?.["0"] ?? boxShadow?.["shadow-0"];
     expect(shadow0).toBe("none");

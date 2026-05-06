@@ -13,15 +13,15 @@ This same context is available to the TopNav component so the user always knows 
 
 ## Status-based routing
 
-| Case status | Sub-view rendered |
-|---|---|
-| `DRAFT_PRIVATE_COACHING` | Private Coaching |
-| `BOTH_PRIVATE_COACHING` | Private Coaching |
-| `READY_FOR_JOINT` | Ready for Joint |
-| `JOINT_ACTIVE` | Joint Chat |
-| `CLOSED_RESOLVED` | Closed Case |
-| `CLOSED_UNRESOLVED` | Closed Case |
-| `CLOSED_ABANDONED` | Closed Case |
+| Case status              | Sub-view rendered |
+| ------------------------ | ----------------- |
+| `DRAFT_PRIVATE_COACHING` | Private Coaching  |
+| `BOTH_PRIVATE_COACHING`  | Private Coaching  |
+| `READY_FOR_JOINT`        | Ready for Joint   |
+| `JOINT_ACTIVE`           | Joint Chat        |
+| `CLOSED_RESOLVED`        | Closed Case       |
+| `CLOSED_UNRESOLVED`      | Closed Case       |
+| `CLOSED_ABANDONED`       | Closed Case       |
 
 ## Loading state
 

@@ -28,9 +28,7 @@ async function requireCaseParty(
     .withIndex("by_case", (q: any) => q.eq("caseId", caseId))
     .collect();
 
-  const partyState = allPartyStates.find(
-    (ps: any) => ps.userId === userId,
-  );
+  const partyState = allPartyStates.find((ps: any) => ps.userId === userId);
 
   if (!partyState) {
     throwAppError("FORBIDDEN", "You are not a party to this case");
@@ -117,10 +115,7 @@ export const confirmClosure = mutation({
 
     // In non-solo mode, confirmer must be a different party from the proposer
     if (!caseDoc.isSolo && proposer.userId === user._id) {
-      throwAppError(
-        "CONFLICT",
-        "Cannot confirm your own closure proposal",
-      );
+      throwAppError("CONFLICT", "Cannot confirm your own closure proposal");
     }
 
     // Validate state machine transition
@@ -146,10 +141,7 @@ export const unilateralClose = mutation({
     caseId: v.id("cases"),
     reason: v.optional(v.string()),
   },
-  handler: async (
-    ctx: any,
-    args: { caseId: string; reason?: string },
-  ) => {
+  handler: async (ctx: any, args: { caseId: string; reason?: string }) => {
     const user = await requireAuth(ctx);
     const { caseDoc } = await requireCaseParty(ctx, args.caseId, user._id);
 

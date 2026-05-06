@@ -15,7 +15,10 @@ export function InviteAcceptPage() {
   const [declining, setDeclining] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const invite = useQuery(api.invites.getByToken.getByToken, token ? { token } : "skip");
+  const invite = useQuery(
+    api.invites.getByToken.getByToken,
+    token ? { token } : "skip",
+  );
   const redeemMutation = useMutation(api.invites.redeem.redeem);
   const declineMutation = useMutation(api.invites.decline.decline);
 
@@ -23,11 +26,19 @@ export function InviteAcceptPage() {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-4">
         <div className="w-full max-w-[480px] rounded-lg border bg-surface p-8 shadow-1 text-center">
-          <h1 className="text-h1 font-medium text-text-primary mb-4">Invalid Invite Link</h1>
-          <p className="text-text-secondary mb-6">This invite link is missing a token.</p>
+          <h1 className="text-h1 font-medium text-text-primary mb-4">
+            Invalid Invite Link
+          </h1>
+          <p className="text-text-secondary mb-6">
+            This invite link is missing a token.
+          </p>
           <div className="flex flex-col gap-3">
-            <Link to="/login" className="text-accent hover:underline">Log in</Link>
-            <Link to="/dashboard" className="text-accent hover:underline">Go to dashboard</Link>
+            <Link to="/login" className="text-accent hover:underline">
+              Log in
+            </Link>
+            <Link to="/dashboard" className="text-accent hover:underline">
+              Go to dashboard
+            </Link>
           </div>
         </div>
       </div>
@@ -47,7 +58,11 @@ export function InviteAcceptPage() {
   // Convex returns `null` from a query if the lookup found nothing (the
   // common shape for "this token doesn't exist or has been consumed").
   // Treat that the same way as an explicit INVALID/CONSUMED status.
-  if (invite === null || invite.status === "INVALID" || invite.status === "CONSUMED") {
+  if (
+    invite === null ||
+    invite.status === "INVALID" ||
+    invite.status === "CONSUMED"
+  ) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-4">
         <div className="w-full max-w-[480px] rounded-lg border bg-surface p-8 shadow-1 text-center">
@@ -58,8 +73,12 @@ export function InviteAcceptPage() {
             This invite link has already been used or is no longer valid.
           </p>
           <div className="flex flex-col gap-3">
-            <Link to="/login" className="text-accent hover:underline">Log in</Link>
-            <Link to="/dashboard" className="text-accent hover:underline">Go to dashboard</Link>
+            <Link to="/login" className="text-accent hover:underline">
+              Log in
+            </Link>
+            <Link to="/dashboard" className="text-accent hover:underline">
+              Go to dashboard
+            </Link>
           </div>
         </div>
       </div>
@@ -77,7 +96,8 @@ export function InviteAcceptPage() {
       <div className="flex flex-col items-center justify-center py-24 px-4">
         <div className="w-full max-w-[480px] rounded-lg border bg-surface p-8 shadow-1 text-center">
           <h1 className="text-h1 font-medium text-text-primary mb-4">
-            {invite.initiatorName} has invited you to work through something together
+            {invite.initiatorName} has invited you to work through something
+            together
           </h1>
           <p className="text-text-secondary mb-6">
             Conflict Coach is a guided space for two people to work through a
@@ -130,18 +150,23 @@ export function InviteAcceptPage() {
     <div className="flex flex-col items-center justify-center py-24 px-4">
       <div className="w-full max-w-[480px] rounded-lg border bg-surface p-8 shadow-1">
         <h1 className="text-h1 font-medium text-text-primary mb-4 text-center">
-          {invite.initiatorName} has invited you to work through something together
+          {invite.initiatorName} has invited you to work through something
+          together
         </h1>
 
         <div className="mb-4 space-y-2">
           {invite.mainTopic && (
             <div>
-              <span className="text-label font-medium text-text-tertiary">Topic</span>
+              <span className="text-label font-medium text-text-tertiary">
+                Topic
+              </span>
               <p className="text-text-primary">{invite.mainTopic}</p>
             </div>
           )}
           <div>
-            <span className="text-label font-medium text-text-tertiary">Category</span>
+            <span className="text-label font-medium text-text-tertiary">
+              Category
+            </span>
             <p className="text-text-primary capitalize">{invite.category}</p>
           </div>
         </div>

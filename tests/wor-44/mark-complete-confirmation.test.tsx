@@ -73,7 +73,7 @@ function renderView(messages = mockMessages) {
   return { ...result, onMarkComplete };
 }
 
-describe('AC 6: Mark Complete opens confirmation dialog showing message count', () => {
+describe("AC 6: Mark Complete opens confirmation dialog showing message count", () => {
   test('Mark Complete opens confirmation dialog showing message count: "You\'ve had {N} messages with the Coach. Ready to move on?"', async () => {
     const user = userEvent.setup();
     renderView(mockMessages);

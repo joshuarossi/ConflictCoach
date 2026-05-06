@@ -49,11 +49,7 @@ export interface MockAuditLogEntry {
   createdAt: number;
 }
 
-type TableName =
-  | "users"
-  | "templates"
-  | "templateVersions"
-  | "auditLog";
+type TableName = "users" | "templates" | "templateVersions" | "auditLog";
 
 type AnyRow = Record<string, unknown> & { _id: string };
 
@@ -114,8 +110,7 @@ export function createMockContext(options: {
         ) => {
           const q = { eq: (_field: string, value: string) => value };
           const filterValue = predicate(q) as string;
-          const matcher =
-            indexLookups[table]?.[indexName];
+          const matcher = indexLookups[table]?.[indexName];
 
           const matched = matcher
             ? tableRows.filter((row) => matcher(row, filterValue))
@@ -185,8 +180,7 @@ export function createMockContext(options: {
           ? {
               email: options.identity.email,
               subject:
-                options.identity.subject ??
-                `subject_${options.identity.email}`,
+                options.identity.subject ?? `subject_${options.identity.email}`,
               tokenIdentifier: `token_${options.identity.email}`,
             }
           : null,

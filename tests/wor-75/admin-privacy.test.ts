@@ -41,7 +41,8 @@ describe("AC2: Admin cannot access either party's private coaching messages", ()
       expect.unreachable("Expected FORBIDDEN error");
     } catch (err) {
       expect(err).toBeInstanceOf(ConvexError);
-      const data = (err as ConvexError<{ code: string; httpStatus: number }>).data;
+      const data = (err as ConvexError<{ code: string; httpStatus: number }>)
+        .data;
       expect(data.code).toBe("FORBIDDEN");
       expect(data.httpStatus).toBe(403);
     }

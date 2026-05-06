@@ -192,10 +192,7 @@ test.describe("WOR-68: Keyboard navigation — critical paths", () => {
       const text = await page.evaluate(
         () => document.activeElement?.textContent?.trim().toLowerCase() ?? "",
       );
-      if (
-        ariaLabel.toLowerCase().includes("draft") ||
-        text.includes("draft")
-      ) {
+      if (ariaLabel.toLowerCase().includes("draft") || text.includes("draft")) {
         foundDraft = true;
         break;
       }

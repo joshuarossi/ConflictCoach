@@ -11,7 +11,7 @@ describe("AC: Running npx convex dev initializes the Convex backend without erro
 
   test("convex package is listed as a dependency", () => {
     const pkg = JSON.parse(
-      readFileSync(resolve(root, "package.json"), "utf-8")
+      readFileSync(resolve(root, "package.json"), "utf-8"),
     );
     const allDeps = {
       ...pkg.dependencies,

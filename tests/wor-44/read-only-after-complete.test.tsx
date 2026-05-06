@@ -89,12 +89,8 @@ describe("AC 7: After marking complete, view becomes read-only with a status mes
     renderCompletedView();
 
     // Messages from the coaching session should still be visible
-    expect(
-      screen.getByText("Thanks for the coaching."),
-    ).toBeInTheDocument();
-    expect(
-      screen.getByText("You're welcome. Good luck!"),
-    ).toBeInTheDocument();
+    expect(screen.getByText("Thanks for the coaching.")).toBeInTheDocument();
+    expect(screen.getByText("You're welcome. Good luck!")).toBeInTheDocument();
   });
 
   test("Mark complete button is not shown in read-only mode", () => {

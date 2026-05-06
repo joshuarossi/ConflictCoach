@@ -24,9 +24,9 @@ test.describe("WOR-57: Consumed/invalid token", () => {
   test('AC7: error state shows "Log in" link', async ({ page }) => {
     await page.goto(`/invite/${CONSUMED_TOKEN}`);
 
-    await expect(
-      page.getByRole("link", { name: /log in/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("link", { name: /log in/i })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test('AC7: error state shows "Go to dashboard" link', async ({ page }) => {

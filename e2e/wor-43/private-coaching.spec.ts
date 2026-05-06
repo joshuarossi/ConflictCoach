@@ -96,9 +96,9 @@ test("sendUserMessage mutation inserts a privateMessages row with role=USER, sta
   // An AI response should appear (streamed from generateAIResponse)
   // Wait for the AI response to appear — it should be a message with
   // a different visual treatment (AI role indicator)
-  await expect(
-    page.locator("[data-testid='ai-message']").first(),
-  ).toBeVisible({ timeout: 15000 });
+  await expect(page.locator("[data-testid='ai-message']").first()).toBeVisible({
+    timeout: 15000,
+  });
 });
 
 // ---------------------------------------------------------------------------

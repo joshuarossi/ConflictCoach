@@ -170,10 +170,7 @@ function createMockContext(options: MockContextOptions = {}) {
               }
               if (table === "inviteTokens") {
                 // by_token index lookup
-                if (
-                  tokenDoc &&
-                  captured["token"] === tokenDoc.token
-                ) {
+                if (tokenDoc && captured["token"] === tokenDoc.token) {
                   return store[tokenDoc._id];
                 }
                 return null;
@@ -185,7 +182,11 @@ function createMockContext(options: MockContextOptions = {}) {
               return null;
             },
             unique: async () => {
-              if (table === "inviteTokens" && tokenDoc && captured["token"] === tokenDoc.token) {
+              if (
+                table === "inviteTokens" &&
+                tokenDoc &&
+                captured["token"] === tokenDoc.token
+              ) {
                 return store[tokenDoc._id];
               }
               return null;
@@ -388,9 +389,7 @@ describe("AC4: Atomic writes on redemption", () => {
     const tokenPatches = patchesFor(patched, TOKEN_ID);
     expect(tokenPatches.length).toBeGreaterThanOrEqual(1);
 
-    const statusPatch = tokenPatches.find(
-      (p) => p.patch.status === "CONSUMED",
-    );
+    const statusPatch = tokenPatches.find((p) => p.patch.status === "CONSUMED");
     expect(statusPatch).toBeDefined();
     expect(statusPatch!.patch.consumedAt).toBeGreaterThanOrEqual(before);
     expect(statusPatch!.patch.consumedAt).toBeLessThanOrEqual(after);
@@ -401,9 +400,7 @@ describe("AC4: Atomic writes on redemption", () => {
     await redeem(ctx, { token: VALID_TOKEN });
 
     const tokenPatches = patchesFor(patched, TOKEN_ID);
-    const statusPatch = tokenPatches.find(
-      (p) => p.patch.status === "CONSUMED",
-    );
+    const statusPatch = tokenPatches.find((p) => p.patch.status === "CONSUMED");
     expect(statusPatch).toBeDefined();
     expect(statusPatch!.patch.consumedByUserId).toBe(USER_B_ID);
   });
@@ -422,9 +419,7 @@ describe("AC5: Case status transition", () => {
     await redeem(ctx, { token: VALID_TOKEN });
 
     const casePatches = patchesFor(patched, CASE_ID);
-    const statusPatch = casePatches.find(
-      (p) => p.patch.status !== undefined,
-    );
+    const statusPatch = casePatches.find((p) => p.patch.status !== undefined);
     expect(statusPatch).toBeDefined();
     expect(statusPatch!.patch.status).toBe("BOTH_PRIVATE_COACHING");
   });
@@ -437,9 +432,7 @@ describe("AC5: Case status transition", () => {
 
     try {
       await redeem(ctx, { token: VALID_TOKEN });
-      expect.fail(
-        "Expected mutation to throw when case is already past DRAFT",
-      );
+      expect.fail("Expected mutation to throw when case is already past DRAFT");
     } catch (e) {
       expect(e).toBeInstanceOf(ConvexError);
       const data = (e as ConvexError<{ code: string }>).data;
@@ -496,9 +489,7 @@ describe("AC7: Re-redemption prevention", () => {
 
     try {
       await redeem(ctx, { token: VALID_TOKEN });
-      expect.fail(
-        "Expected mutation to throw TOKEN_INVALID on re-redemption",
-      );
+      expect.fail("Expected mutation to throw TOKEN_INVALID on re-redemption");
     } catch (e) {
       expect(e).toBeInstanceOf(ConvexError);
       const data = (e as ConvexError<{ code: string }>).data;

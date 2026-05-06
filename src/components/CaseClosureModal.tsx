@@ -37,7 +37,11 @@ export function CaseClosureModal({
   // Focus restore: fires AFTER child effects (FocusScope trap disabled)
   // in React's bottom-up commit order, so the trap is already removed.
   useEffect(() => {
-    if (prevOpenRef.current && !open && triggerRef.current instanceof HTMLElement) {
+    if (
+      prevOpenRef.current &&
+      !open &&
+      triggerRef.current instanceof HTMLElement
+    ) {
       triggerRef.current.focus();
     }
     prevOpenRef.current = open;
@@ -113,7 +117,9 @@ export function CaseClosureModal({
                 }}
                 className="accent-accent"
               />
-              <span className="text-body font-medium text-text-primary">Resolved</span>
+              <span className="text-body font-medium text-text-primary">
+                Resolved
+              </span>
             </label>
 
             <label
@@ -135,7 +141,9 @@ export function CaseClosureModal({
                 }}
                 className="accent-warning"
               />
-              <span className="text-body font-medium text-text-primary">Not resolved</span>
+              <span className="text-body font-medium text-text-primary">
+                Not resolved
+              </span>
             </label>
 
             <label
@@ -156,7 +164,9 @@ export function CaseClosureModal({
                 }}
                 className="accent-accent"
               />
-              <span className="text-body font-medium text-text-primary">Take a break</span>
+              <span className="text-body font-medium text-text-primary">
+                Take a break
+              </span>
             </label>
           </fieldset>
 

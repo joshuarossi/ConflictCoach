@@ -101,7 +101,10 @@ export function SignIn() {
         ) : (
           <>
             <form onSubmit={handleMagicLink} className="space-y-4">
-              <label htmlFor="email" className="block text-label font-medium text-text-secondary">
+              <label
+                htmlFor="email"
+                className="block text-label font-medium text-text-secondary"
+              >
                 Email
               </label>
               <input

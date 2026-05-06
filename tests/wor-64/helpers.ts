@@ -110,8 +110,7 @@ export function createMockActionContext(options?: {
             : tableRows;
 
           return {
-            first: async () =>
-              matched.length > 0 ? { ...matched[0] } : null,
+            first: async () => (matched.length > 0 ? { ...matched[0] } : null),
             collect: async () => matched.map((r) => ({ ...r })),
             order: (dir: "asc" | "desc") => ({
               collect: async () => {
@@ -210,9 +209,7 @@ export function getSeedHandler(seedModule: Record<string, unknown>): unknown {
   const seedFn =
     seedModule.seed ?? seedModule.default ?? Object.values(seedModule)[0];
   if (!seedFn) {
-    throw new Error(
-      "WOR-64: convex/seed.ts has no recognizable seed export",
-    );
+    throw new Error("WOR-64: convex/seed.ts has no recognizable seed export");
   }
   return seedFn;
 }

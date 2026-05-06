@@ -4,13 +4,13 @@ The `cases/create` Convex mutation is the backend entry point for every new conf
 
 ## Input
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `category` | string | Yes | One of `workplace`, `family`, `personal`, `contractual`, or `other`. |
-| `mainTopic` | string | Yes | Short summary of the conflict. |
-| `description` | string | No | Longer description of the situation. |
-| `desiredOutcome` | string | No | What the initiator hopes to achieve. |
-| `isSolo` | boolean | No | When `true`, both sides of the case are assigned to the same user (solo mode). Defaults to `false`. |
+| Field            | Type    | Required | Description                                                                                         |
+| ---------------- | ------- | -------- | --------------------------------------------------------------------------------------------------- |
+| `category`       | string  | Yes      | One of `workplace`, `family`, `personal`, `contractual`, or `other`.                                |
+| `mainTopic`      | string  | Yes      | Short summary of the conflict.                                                                      |
+| `description`    | string  | No       | Longer description of the situation.                                                                |
+| `desiredOutcome` | string  | No       | What the initiator hopes to achieve.                                                                |
+| `isSolo`         | boolean | No       | When `true`, both sides of the case are assigned to the same user (solo mode). Defaults to `false`. |
 
 ## What the mutation does
 
@@ -38,7 +38,7 @@ Pass `isSolo: true` to create a case where a single user plays both roles. This 
 
 The mutation throws structured `ConvexError` responses using `throwAppError`:
 
-| Code | When |
-|---|---|
+| Code            | When                                                         |
+| --------------- | ------------------------------------------------------------ |
 | `INVALID_INPUT` | Category is not in the allowed set, or `mainTopic` is empty. |
-| `NOT_FOUND` | No active template exists for the given category. |
+| `NOT_FOUND`     | No active template exists for the given category.            |

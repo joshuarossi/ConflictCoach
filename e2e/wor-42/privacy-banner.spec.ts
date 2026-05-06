@@ -59,7 +59,7 @@ test.describe("WOR-42: PrivacyBanner E2E", () => {
 
     // The screen reader text should be present in the DOM
     const srText = page.getByText(
-      "Private conversation. Only you and the AI coach see this."
+      "Private conversation. Only you and the AI coach see this.",
     );
     // It may be visually hidden but must be in the DOM
     await expect(srText).toBeAttached();

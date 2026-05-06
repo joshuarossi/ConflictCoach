@@ -48,7 +48,9 @@ function getHandler(fn: any): (ctx: any, args: any) => Promise<any> {
     if (typeof fn[key] === "function") return fn[key];
     if (typeof fn[key]?.handler === "function") return fn[key].handler;
   }
-  throw new Error(`Cannot extract handler from: ${JSON.stringify(Object.keys(fn ?? {}))}`);
+  throw new Error(
+    `Cannot extract handler from: ${JSON.stringify(Object.keys(fn ?? {}))}`,
+  );
 }
 
 function createMockCtx(dbGetMap: Record<string, unknown>) {
@@ -61,7 +63,11 @@ function createMockCtx(dbGetMap: Record<string, unknown>) {
 
 describe("AC: cases/get returns case data for authorized party", () => {
   test("returns the case document with otherPartyName enrichment when user is the initiator", async () => {
-    mockedRequireAuth.mockResolvedValueOnce({ _id: USER_A_ID, email: "a@test.com", role: "USER" });
+    mockedRequireAuth.mockResolvedValueOnce({
+      _id: USER_A_ID,
+      email: "a@test.com",
+      role: "USER",
+    });
     const ctx = createMockCtx({ [CASE_ID]: CASE_DOC });
 
     const handler = getHandler(get);
@@ -74,7 +80,11 @@ describe("AC: cases/get returns case data for authorized party", () => {
   });
 
   test("returns the case document with otherPartyName enrichment when user is the invitee", async () => {
-    mockedRequireAuth.mockResolvedValueOnce({ _id: USER_B_ID, email: "b@test.com", role: "USER" });
+    mockedRequireAuth.mockResolvedValueOnce({
+      _id: USER_B_ID,
+      email: "b@test.com",
+      role: "USER",
+    });
     const ctx = createMockCtx({ [CASE_ID]: CASE_DOC });
 
     const handler = getHandler(get);
@@ -86,7 +96,11 @@ describe("AC: cases/get returns case data for authorized party", () => {
 
 describe("AC: 404/FORBIDDEN if case not found or user is not a party", () => {
   test("returns null when case does not exist", async () => {
-    mockedRequireAuth.mockResolvedValueOnce({ _id: USER_A_ID, email: "a@test.com", role: "USER" });
+    mockedRequireAuth.mockResolvedValueOnce({
+      _id: USER_A_ID,
+      email: "a@test.com",
+      role: "USER",
+    });
     const ctx = createMockCtx({});
 
     const handler = getHandler(get);
@@ -95,10 +109,16 @@ describe("AC: 404/FORBIDDEN if case not found or user is not a party", () => {
   });
 
   test("throws FORBIDDEN when user is not a party to the case", async () => {
-    mockedRequireAuth.mockResolvedValueOnce({ _id: USER_C_ID, email: "c@test.com", role: "USER" });
+    mockedRequireAuth.mockResolvedValueOnce({
+      _id: USER_C_ID,
+      email: "c@test.com",
+      role: "USER",
+    });
     const ctx = createMockCtx({ [CASE_ID]: CASE_DOC });
 
     const handler = getHandler(get);
-    await expect(handler(ctx, { caseId: CASE_ID })).rejects.toThrow(ConvexError);
+    await expect(handler(ctx, { caseId: CASE_ID })).rejects.toThrow(
+      ConvexError,
+    );
   });
 });

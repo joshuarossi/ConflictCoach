@@ -23,12 +23,16 @@ describe("AC: Tailwind utility classes render correctly in a test component", ()
     const { default: App } = await import("@/App");
 
     const { container } = render(
-      createElement(MemoryRouter, { initialEntries: ["/"] }, createElement(App)),
+      createElement(
+        MemoryRouter,
+        { initialEntries: ["/"] },
+        createElement(App),
+      ),
     );
 
     // At least one element should have a Tailwind utility class present in the DOM
     const tailwindElement = container.querySelector(
-      '[class*="bg-"], [class*="text-"], [class*="p-"], [class*="m-"], [class*="flex"], [class*="grid"]'
+      '[class*="bg-"], [class*="text-"], [class*="p-"], [class*="m-"], [class*="flex"], [class*="grid"]',
     );
     expect(tailwindElement).not.toBeNull();
   });

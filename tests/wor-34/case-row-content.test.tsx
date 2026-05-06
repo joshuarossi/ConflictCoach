@@ -61,7 +61,8 @@ describe("AC: Each case row shows required fields", () => {
     renderDashboard();
     // Status should be rendered as human-readable text
     // JOINT_ACTIVE could display as "Joint Session" or similar
-    const container = screen.getByText("Jordan Smith").closest("[data-testid]") ??
+    const container =
+      screen.getByText("Jordan Smith").closest("[data-testid]") ??
       screen.getByText("Jordan Smith").parentElement;
     expect(container?.textContent).toMatch(
       /joint|active|session|coaching|draft|ready|closed/i,
@@ -71,7 +72,8 @@ describe("AC: Each case row shows required fields", () => {
   test("displays last activity time", () => {
     renderDashboard();
     // updatedAt should be rendered in some form (relative or absolute)
-    const container = screen.getByText("Jordan Smith").closest("[data-testid]") ??
+    const container =
+      screen.getByText("Jordan Smith").closest("[data-testid]") ??
       screen.getByText("Jordan Smith").parentElement;
     // The updatedAt timestamp should produce some time indicator
     const dateString = new Date(TEST_CASE.updatedAt).toLocaleDateString();
@@ -82,7 +84,8 @@ describe("AC: Each case row shows required fields", () => {
 
   test("displays an Enter button", () => {
     renderDashboard();
-    const enterButton = screen.queryByRole("link", { name: /enter/i }) ??
+    const enterButton =
+      screen.queryByRole("link", { name: /enter/i }) ??
       screen.getByRole("button", { name: /enter/i });
     expect(enterButton).toBeInTheDocument();
   });

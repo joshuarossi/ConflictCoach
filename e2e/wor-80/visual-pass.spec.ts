@@ -230,10 +230,7 @@ test.describe("WOR-80: Visual pass — admin pages", () => {
     await templateLink.click();
     await page.waitForLoadState("networkidle");
 
-    const screenshotPath = path.join(
-      SCREENSHOT_DIR,
-      "admin-template-edit.png",
-    );
+    const screenshotPath = path.join(SCREENSHOT_DIR, "admin-template-edit.png");
     await page.screenshot({ path: screenshotPath, fullPage: true });
 
     expect(fs.existsSync(screenshotPath)).toBe(true);

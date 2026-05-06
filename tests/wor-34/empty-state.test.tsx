@@ -42,8 +42,6 @@ describe("AC: Empty state message", () => {
 
     // With no cases, the grouping sections should not appear
     // (or if they do, they should be empty - the key thing is the empty state message shows)
-    expect(
-      screen.getByText(/no cases yet/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/no cases yet/i)).toBeInTheDocument();
   });
 });

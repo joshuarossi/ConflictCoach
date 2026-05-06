@@ -90,9 +90,7 @@ export function TemplatesListPage() {
       <div className="px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-h1 font-medium text-text-primary">Templates</h1>
-          <Button
-            onClick={() => setShowCreateForm(true)}
-          >
+          <Button onClick={() => setShowCreateForm(true)}>
             + New Template
           </Button>
         </div>

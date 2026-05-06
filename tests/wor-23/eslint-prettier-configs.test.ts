@@ -22,7 +22,7 @@ describe("AC: ESLint and Prettier configs are present and npm run lint passes", 
     ];
 
     const hasEslintConfig = eslintConfigs.some((file) =>
-      existsSync(resolve(root, file))
+      existsSync(resolve(root, file)),
     );
     expect(hasEslintConfig).toBe(true);
   });
@@ -42,7 +42,7 @@ describe("AC: ESLint and Prettier configs are present and npm run lint passes", 
     ];
 
     const hasPrettierConfig = prettierConfigs.some((file) =>
-      existsSync(resolve(root, file))
+      existsSync(resolve(root, file)),
     );
     expect(hasPrettierConfig).toBe(true);
   });

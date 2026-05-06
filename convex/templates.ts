@@ -74,7 +74,13 @@ export const createTemplate = mutation({
     await ctx.db.patch(templateId, { currentVersionId: versionId });
 
     // Audit log
-    await writeAuditLog(ctx, user._id, "TEMPLATE_CREATED", "template", templateId);
+    await writeAuditLog(
+      ctx,
+      user._id,
+      "TEMPLATE_CREATED",
+      "template",
+      templateId,
+    );
 
     return templateId;
   },
@@ -166,7 +172,13 @@ export const archiveTemplate = mutation({
     await ctx.db.patch(args.templateId, { archivedAt: now });
 
     // Audit log
-    await writeAuditLog(ctx, user._id, "TEMPLATE_ARCHIVED", "template", args.templateId);
+    await writeAuditLog(
+      ctx,
+      user._id,
+      "TEMPLATE_ARCHIVED",
+      "template",
+      args.templateId,
+    );
   },
 });
 
@@ -286,7 +298,8 @@ export const listTemplateVersions = query({
         if (ver.publishedByUserId) {
           const publisher = await ctx.db.get(ver.publishedByUserId);
           if (publisher) {
-            publishedByDisplayName = publisher.displayName || publisher.email || "Unknown";
+            publishedByDisplayName =
+              publisher.displayName || publisher.email || "Unknown";
           }
         }
         return { ...ver, publishedByDisplayName };

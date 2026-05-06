@@ -201,9 +201,7 @@ describe("AC: Expandable suggested language", () => {
   test("collapsible section is collapsed by default", () => {
     renderView();
     // The trigger text should be visible
-    expect(
-      screen.getByText(/what should i tell them/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/what should i tell them/i)).toBeInTheDocument();
     // The suggested language content should NOT be visible.
     // If the Collapsible doesn't use forceMount, the element won't be in
     // the DOM at all (null). If it does use forceMount, it'll be hidden.
@@ -260,7 +258,11 @@ describe("AC: Expandable suggested language", () => {
     await user.click(trigger);
 
     expect(
-      screen.getByText(new RegExp(defaultProps.inviteUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"))),
+      screen.getByText(
+        new RegExp(
+          defaultProps.inviteUrl.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"),
+        ),
+      ),
     ).toBeVisible();
   });
 });
@@ -279,7 +281,9 @@ describe("AC: Secondary CTA to private coaching", () => {
 
   test("CTA links to /cases/:caseId/private", () => {
     renderView();
-    const cta = screen.getByText(/start your private coaching now/i).closest("a");
+    const cta = screen
+      .getByText(/start your private coaching now/i)
+      .closest("a");
     expect(cta).not.toBeNull();
     expect(cta!.getAttribute("href")).toBe("/cases/cases:test1/private");
   });

@@ -26,17 +26,17 @@ AI-powered conflict resolution coaching platform built with React, Convex, and C
 
    Required variables (see `.env.example`):
 
-   | Variable | Description |
-   |---|---|
-   | `VITE_CONVEX_URL` | Convex deployment URL (set automatically by `npx convex dev`) |
-   | `CONVEX_DEPLOYMENT` | Convex deployment identifier |
-   | `ANTHROPIC_API_KEY` | Anthropic API key for Claude |
-   | `AUTH_GOOGLE_ID` | Google OAuth client ID |
-   | `AUTH_GOOGLE_SECRET` | Google OAuth client secret |
-   | `AUTH_SECRET` | Convex Auth session secret (generate with `openssl rand -base64 32`) |
-   | `RESEND_API_KEY` | Resend API key used to send magic-link emails |
-   | `MAGIC_LINK_EMAIL_FROM` | Sender address for magic-link emails |
-   | `SITE_URL` | Public URL of the app |
+   | Variable                | Description                                                          |
+   | ----------------------- | -------------------------------------------------------------------- |
+   | `VITE_CONVEX_URL`       | Convex deployment URL (set automatically by `npx convex dev`)        |
+   | `CONVEX_DEPLOYMENT`     | Convex deployment identifier                                         |
+   | `ANTHROPIC_API_KEY`     | Anthropic API key for Claude                                         |
+   | `AUTH_GOOGLE_ID`        | Google OAuth client ID                                               |
+   | `AUTH_GOOGLE_SECRET`    | Google OAuth client secret                                           |
+   | `AUTH_SECRET`           | Convex Auth session secret (generate with `openssl rand -base64 32`) |
+   | `RESEND_API_KEY`        | Resend API key used to send magic-link emails                        |
+   | `MAGIC_LINK_EMAIL_FROM` | Sender address for magic-link emails                                 |
+   | `SITE_URL`              | Public URL of the app                                                |
 
 3. **Start the Convex backend**
 
@@ -54,15 +54,15 @@ AI-powered conflict resolution coaching platform built with React, Convex, and C
 
 ## Scripts
 
-| Command | Description |
-|---|---|
-| `npm run dev` | Start Vite dev server |
-| `npm run build` | Type-check and build for production |
-| `npm run preview` | Preview the production build |
-| `npm run lint` | Run ESLint |
-| `npm run typecheck` | Run `tsc --noEmit` |
-| `npm test` | Run Vitest unit tests |
-| `npm run test:e2e` | Run Playwright end-to-end tests |
+| Command             | Description                         |
+| ------------------- | ----------------------------------- |
+| `npm run dev`       | Start Vite dev server               |
+| `npm run build`     | Type-check and build for production |
+| `npm run preview`   | Preview the production build        |
+| `npm run lint`      | Run ESLint                          |
+| `npm run typecheck` | Run `tsc --noEmit`                  |
+| `npm test`          | Run Vitest unit tests               |
+| `npm run test:e2e`  | Run Playwright end-to-end tests     |
 
 ## Tech Stack
 

@@ -7,15 +7,15 @@ utilities.
 
 ## Token categories
 
-| Category | Examples | Raw Tailwind to avoid |
-|---|---|---|
-| **Color** | `bg-accent`, `text-text-primary`, `bg-error-subtle`, `text-danger` | `bg-blue-600`, `text-gray-900`, `bg-red-50` |
-| **Typography** | `text-h1`, `text-body`, `text-label`, `text-meta`, `text-timestamp` | `text-2xl`, `text-lg`, `text-xs`, `text-sm` |
-| **Spacing** | Uses the scale defined in STYLE_GUIDE | Arbitrary `mb-4`, `gap-3`, `py-3` |
-| **Radius** | `rounded-sm`, `rounded-md` | `rounded-[var(--radius-sm)]` (CSS-var syntax in classes) |
-| **Shadow** | `shadow-2`, `shadow-3` | `shadow-[var(--shadow-2)]`, `shadow-[0_12px_32px_...]` |
-| **Surfaces** | `bg-surface`, `bg-surface-subtle`, `bg-canvas` | `bg-white`, `bg-gray-50` |
-| **Borders** | `border-border-default`, `border-coach-accent` | `border-gray-200`, `border-[var(--border-default)]` |
+| Category       | Examples                                                            | Raw Tailwind to avoid                                    |
+| -------------- | ------------------------------------------------------------------- | -------------------------------------------------------- |
+| **Color**      | `bg-accent`, `text-text-primary`, `bg-error-subtle`, `text-danger`  | `bg-blue-600`, `text-gray-900`, `bg-red-50`              |
+| **Typography** | `text-h1`, `text-body`, `text-label`, `text-meta`, `text-timestamp` | `text-2xl`, `text-lg`, `text-xs`, `text-sm`              |
+| **Spacing**    | Uses the scale defined in STYLE_GUIDE                               | Arbitrary `mb-4`, `gap-3`, `py-3`                        |
+| **Radius**     | `rounded-sm`, `rounded-md`                                          | `rounded-[var(--radius-sm)]` (CSS-var syntax in classes) |
+| **Shadow**     | `shadow-2`, `shadow-3`                                              | `shadow-[var(--shadow-2)]`, `shadow-[0_12px_32px_...]`   |
+| **Surfaces**   | `bg-surface`, `bg-surface-subtle`, `bg-canvas`                      | `bg-white`, `bg-gray-50`                                 |
+| **Borders**    | `border-border-default`, `border-coach-accent`                      | `border-gray-200`, `border-[var(--border-default)]`      |
 
 ## Buttons
 

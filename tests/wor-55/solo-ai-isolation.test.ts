@@ -8,16 +8,15 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-import {
-  myMessages,
-  sendUserMessage,
-} from "../../convex/privateCoaching";
+import { myMessages, sendUserMessage } from "../../convex/privateCoaching";
 
 // ---------------------------------------------------------------------------
 // Convex handler resolution utility
 // ---------------------------------------------------------------------------
 
-function asCallable(fn: unknown): { handler: (ctx: any, args: any) => Promise<any> } {
+function asCallable(fn: unknown): {
+  handler: (ctx: any, args: any) => Promise<any>;
+} {
   const anyFn = fn as any;
   if (typeof anyFn === "function") {
     return { handler: anyFn };
@@ -112,10 +111,20 @@ function createMockQueryCtx(options: {
   dbData?: Record<string, any[]>;
 }) {
   const { authenticatedUserId = null, dbData = {} } = options;
-  const email = authenticatedUserId ? `${authenticatedUserId}@test.local` : null;
+  const email = authenticatedUserId
+    ? `${authenticatedUserId}@test.local`
+    : null;
   const seededUsers = [...(dbData.users ?? [])];
-  if (authenticatedUserId && !seededUsers.some((u) => u._id === authenticatedUserId)) {
-    seededUsers.push({ _id: authenticatedUserId, email, role: "USER", createdAt: 0 });
+  if (
+    authenticatedUserId &&
+    !seededUsers.some((u) => u._id === authenticatedUserId)
+  ) {
+    seededUsers.push({
+      _id: authenticatedUserId,
+      email,
+      role: "USER",
+      createdAt: 0,
+    });
   }
   const effectiveDb: Record<string, any[]> = { ...dbData, users: seededUsers };
 
@@ -150,7 +159,11 @@ function createMockQueryCtx(options: {
     auth: {
       getUserIdentity: vi.fn(async () =>
         authenticatedUserId
-          ? { subject: authenticatedUserId, email, tokenIdentifier: `token:${authenticatedUserId}` }
+          ? {
+              subject: authenticatedUserId,
+              email,
+              tokenIdentifier: `token:${authenticatedUserId}`,
+            }
           : null,
       ),
     },
@@ -228,7 +241,9 @@ describe("AC 6: AI generates separate private coaching responses for each party 
     const initiatorIds = (initiatorResult as any[]).map((m: any) => m._id);
     const inviteeIds = (inviteeResult as any[]).map((m: any) => m._id);
 
-    const overlap = initiatorIds.filter((id: string) => inviteeIds.includes(id));
+    const overlap = initiatorIds.filter((id: string) =>
+      inviteeIds.includes(id),
+    );
     expect(overlap).toHaveLength(0);
 
     // Each set should contain only messages for its respective party role

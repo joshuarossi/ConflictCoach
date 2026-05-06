@@ -32,19 +32,19 @@ beforeAll(async () => {
 // ---------------------------------------------------------------------------
 
 describe("AC4: Readiness detection — positive signals", () => {
-  test("\"i'm ready\" triggers readiness", () => {
+  test('"i\'m ready" triggers readiness', () => {
     expect(detectReadiness("i'm ready")).toBe(true);
   });
 
-  test("\"draft it\" triggers readiness", () => {
+  test('"draft it" triggers readiness', () => {
     expect(detectReadiness("draft it")).toBe(true);
   });
 
-  test("\"write the message\" triggers readiness", () => {
+  test('"write the message" triggers readiness', () => {
     expect(detectReadiness("write the message")).toBe(true);
   });
 
-  test("\"looks good, write it\" triggers readiness", () => {
+  test('"looks good, write it" triggers readiness', () => {
     expect(detectReadiness("looks good, write it")).toBe(true);
   });
 
@@ -71,19 +71,19 @@ describe("AC4: Readiness detection — positive signals", () => {
 // ---------------------------------------------------------------------------
 
 describe("AC4: Readiness detection — negative signals", () => {
-  test("\"what do you think?\" does NOT trigger readiness", () => {
+  test('"what do you think?" does NOT trigger readiness', () => {
     expect(detectReadiness("what do you think?")).toBe(false);
   });
 
-  test("\"can you help me?\" does NOT trigger readiness", () => {
+  test('"can you help me?" does NOT trigger readiness', () => {
     expect(detectReadiness("can you help me?")).toBe(false);
   });
 
-  test("\"I want to express my frustration\" does NOT trigger readiness", () => {
+  test('"I want to express my frustration" does NOT trigger readiness', () => {
     expect(detectReadiness("I want to express my frustration")).toBe(false);
   });
 
-  test("\"how should I phrase this?\" does NOT trigger readiness", () => {
+  test('"how should I phrase this?" does NOT trigger readiness', () => {
     expect(detectReadiness("how should I phrase this?")).toBe(false);
   });
 
@@ -91,7 +91,7 @@ describe("AC4: Readiness detection — negative signals", () => {
     expect(detectReadiness("")).toBe(false);
   });
 
-  test("\"let me think about it more\" does NOT trigger readiness", () => {
+  test('"let me think about it more" does NOT trigger readiness', () => {
     expect(detectReadiness("let me think about it more")).toBe(false);
   });
 });

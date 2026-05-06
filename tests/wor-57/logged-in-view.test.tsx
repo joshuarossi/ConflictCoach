@@ -58,9 +58,7 @@ describe("WOR-57: Logged-in unredeemed invite view", () => {
   test("AC4: privacy callout shows initiator name and shared summary message", () => {
     renderPage();
     expect(
-      screen.getByText(
-        /Alex wrote this in the shared summary/i,
-      ),
+      screen.getByText(/Alex wrote this in the shared summary/i),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -71,9 +69,7 @@ describe("WOR-57: Logged-in unredeemed invite view", () => {
 
   test("AC3/AC4: Accept and Decline buttons are visible", () => {
     renderPage();
-    expect(
-      screen.getByRole("button", { name: /accept/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: /accept/i })).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /decline/i }),
     ).toBeInTheDocument();

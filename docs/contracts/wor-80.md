@@ -304,38 +304,49 @@ No Convex queries or mutations are called by this work. This is a purely present
 ## Invariants
 
 ### No hardcoded color literals
+
 After this work, `grep -rE 'bg-(blue|red|green|gray|white|black|amber|slate|zinc|neutral|stone)-' src/` must return zero matches (excluding CSS var definitions in globals.css/index.css). The only acceptable color classes are the design-token-mapped ones: `bg-canvas`, `bg-surface`, `bg-surface-subtle`, `bg-accent`, `bg-accent-hover`, `bg-accent-subtle`, `bg-danger`, `bg-danger-subtle`, `bg-warning`, `bg-warning-subtle`, `bg-coach-subtle`, `bg-private-tint`, `bg-party-initiator-subtle`, `bg-party-invitee-subtle`, plus opacity modifiers on these tokens.
 
 ### No hardcoded shadows
+
 Only `shadow-0`, `shadow-1`, `shadow-2`, `shadow-3` are allowed. No `shadow-sm`, `shadow-md`, `shadow-lg`, `shadow-xl`.
 
 ### No hardcoded text sizes
+
 Only the named scale is allowed: `text-display`, `text-h1`, `text-h2`, `text-h3`, `text-body`, `text-chat`, `text-label`, `text-meta`, `text-timestamp`. No `text-xs`, `text-sm`, `text-base`, `text-lg`, `text-xl`, `text-2xl`, `text-3xl`, `text-4xl`.
 
 ### No arbitrary CSS var bracket syntax where a token exists
+
 `bg-[var(--bg-surface)]` must become `bg-surface`. The bracket syntax is only acceptable for tokens not yet mapped in the `@theme` block of `index.css`.
 
 ### Spacing grid
+
 All spacing values must come from the 8px grid (Tailwind values: 1, 2, 3, 4, 5, 6, 8, 10, 12, 16). Odd Tailwind spacing values like `p-7`, `gap-9`, `m-11` are not allowed.
 
 ### No behavioral changes
+
 Component props, hook return values, route definitions, event handlers, and Convex function calls must remain unchanged. Only `className` strings are modified.
 
 ## Edge cases
 
 ### Loading states
+
 Loading spinners and skeleton screens in AuthGuard, AdminGuard, and other loading states must use `bg-canvas` for background and `text-tertiary` for loading text. The `skeleton.tsx` component should use `bg-surface-subtle` for its shimmer.
 
 ### Empty states
+
 Dashboard empty state ("No cases yet") and any other empty states must use `text-secondary` for the message and `bg-canvas` for the background.
 
 ### Error states
+
 ConvexErrorBoundary and inline error messages must use `text-danger` for error text and `bg-danger-subtle` for error backgrounds. The Forbidden page uses `text-primary` for the 403 code and `text-secondary` for the description.
 
 ### Overlay backgrounds
+
 Dialog and AlertDialog overlays currently use `bg-black/80`. This should remain a dark overlay but can be kept as `bg-black/80` since no semantic overlay token exists in the design system. This is an acceptable exception since overlays are not part of the themed surface hierarchy. Alternatively, a CSS var `--overlay` could be introduced, but that is out of scope for this ticket.
 
 ### Font weight
+
 STYLE_GUIDE §3.2 says **never use 700 (bold)**. Headings use `font-medium` (500). Any `font-bold` or `font-semibold` on headings must be replaced with `font-medium`. `font-bold` is acceptable only on non-heading emphasis text within body copy.
 
 ## Non-goals
@@ -351,22 +362,27 @@ STYLE_GUIDE §3.2 says **never use 700 (bold)**. Headings use `font-medium` (500
 ## Test coverage
 
 ### AC: Hardcoded color/shadow/typography literals replaced
+
 **Layer:** unit | **File:** `tests/wor-80/token-usage.test.ts`
 This test reads every `.tsx` file under `src/` and checks that no hardcoded Tailwind color classes, shadow classes, or text-size classes appear. It maintains an allowlist of design-token-mapped classes and a denylist of raw Tailwind classes. Any file containing a denied class fails the test with a message identifying the file and the offending class.
 
 ### AC: Cards, buttons, inputs use consistent spec'd styles
+
 **Layer:** unit | **File:** `tests/wor-80/token-usage.test.ts`
 Covered by the same denylist approach — if a button uses `bg-blue-600` instead of `bg-accent`, the test catches it.
 
 ### AC: Spacing scale matches DesignDoc
+
 **Layer:** unit | **File:** `tests/wor-80/token-usage.test.ts`
 The test checks for spacing values outside the 8px grid (p-7, gap-9, m-11, etc.).
 
 ### AC: All pages render correctly under both layout widths
+
 **Layer:** unit | **File:** `tests/wor-80/layout-width.test.ts`
 This test imports the App route definitions and verifies that each page component is nested under the correct layout (ReadingLayout or ChatLayout) per the DesignDoc §2.3 spec.
 
 ### AC: Verified pages are visually consistent + screenshots saved
+
 **Layer:** e2e | **File:** `e2e/wor-80/visual-pass.spec.ts`
 Playwright navigates to each verified page (with appropriate auth and test data), captures a screenshot, and saves it to `docs/visual-pass/<page>.png`. The test asserts that the screenshot file exists and is non-empty. No pixel-diff comparison — the ticket explicitly says snapshot diffs are too brittle; existence of the screenshot is sufficient.
 

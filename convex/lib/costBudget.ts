@@ -15,7 +15,7 @@ export const SONNET_INPUT_RATE = 3 / 1_000_000;
 /** Sonnet output price: $15 per 1M tokens */
 export const SONNET_OUTPUT_RATE = 15 / 1_000_000;
 /** Haiku input price: $0.80 per 1M tokens */
-export const HAIKU_INPUT_RATE = 0.80 / 1_000_000;
+export const HAIKU_INPUT_RATE = 0.8 / 1_000_000;
 /** Haiku output price: $4 per 1M tokens */
 export const HAIKU_OUTPUT_RATE = 4 / 1_000_000;
 
@@ -59,9 +59,11 @@ export const DEFAULT_AI_USAGE: AiUsage = {
  * Calculate the dollar cost for a given number of input/output tokens
  * using model-specific pricing.
  */
-export function calculateCost(
-  entry: { inputTokens: number; outputTokens: number; model: "sonnet" | "haiku" },
-): number;
+export function calculateCost(entry: {
+  inputTokens: number;
+  outputTokens: number;
+  model: "sonnet" | "haiku";
+}): number;
 export function calculateCost(
   inputTokens: number,
   outputTokens: number,
@@ -83,9 +85,7 @@ export function calculateCost(
       ? outputTokens!
       : inputTokensOrEntry.outputTokens;
   const mdl =
-    typeof inputTokensOrEntry === "number"
-      ? model!
-      : inputTokensOrEntry.model;
+    typeof inputTokensOrEntry === "number" ? model! : inputTokensOrEntry.model;
   const inputRate = mdl === "sonnet" ? SONNET_INPUT_RATE : HAIKU_INPUT_RATE;
   const outputRate = mdl === "sonnet" ? SONNET_OUTPUT_RATE : HAIKU_OUTPUT_RATE;
   return inTok * inputRate + outTok * outputRate;
@@ -100,7 +100,11 @@ export function calculateCost(
  *    { inputTokens, outputTokens, model } objects
  */
 export function accumulateUsage(
-  entries: Array<{ inputTokens: number; outputTokens: number; model: "sonnet" | "haiku" }>,
+  entries: Array<{
+    inputTokens: number;
+    outputTokens: number;
+    model: "sonnet" | "haiku";
+  }>,
 ): AiUsage;
 export function accumulateUsage(
   current: AiUsage,
@@ -111,7 +115,11 @@ export function accumulateUsage(
 export function accumulateUsage(
   currentOrEntries:
     | AiUsage
-    | Array<{ inputTokens: number; outputTokens: number; model: "sonnet" | "haiku" }>,
+    | Array<{
+        inputTokens: number;
+        outputTokens: number;
+        model: "sonnet" | "haiku";
+      }>,
   inputTokens?: number,
   outputTokens?: number,
   model?: "sonnet" | "haiku",
@@ -124,7 +132,11 @@ export function accumulateUsage(
     for (const entry of currentOrEntries) {
       totalIn += entry.inputTokens;
       totalOut += entry.outputTokens;
-      totalCost += calculateCost(entry.inputTokens, entry.outputTokens, entry.model);
+      totalCost += calculateCost(
+        entry.inputTokens,
+        entry.outputTokens,
+        entry.model,
+      );
     }
     return {
       totalInputTokens: totalIn,
@@ -181,12 +193,11 @@ export function getModelType(modelId: string): "sonnet" | "haiku" {
 // Internal function references (resolved at load time, safe in test stubs)
 // ---------------------------------------------------------------------------
 
-const getCaseAiUsageRef: any =
-  (internal as any)?.lib?.costBudget?.getCaseAiUsageQuery;
-const recordAiUsageRef: any =
-  (internal as any)?.lib?.costBudget?.recordAiUsage;
-const writeSoftCapAuditLogRef: any =
-  (internal as any)?.lib?.costBudget?.writeSoftCapAuditLog;
+const getCaseAiUsageRef: any = (internal as any)?.lib?.costBudget
+  ?.getCaseAiUsageQuery;
+const recordAiUsageRef: any = (internal as any)?.lib?.costBudget?.recordAiUsage;
+const writeSoftCapAuditLogRef: any = (internal as any)?.lib?.costBudget
+  ?.writeSoftCapAuditLog;
 
 // ---------------------------------------------------------------------------
 // Internal query — read accumulated AI usage for a case
@@ -305,9 +316,13 @@ export async function enforceCostBudget(
       ? caseIdOrOptions
       : caseIdOrOptions.caseId;
   const actionType =
-    typeof caseIdOrOptions === "string" ? undefined : caseIdOrOptions.actionType;
+    typeof caseIdOrOptions === "string"
+      ? undefined
+      : caseIdOrOptions.actionType;
   const providedCost =
-    typeof caseIdOrOptions === "string" ? undefined : caseIdOrOptions.currentCost;
+    typeof caseIdOrOptions === "string"
+      ? undefined
+      : caseIdOrOptions.currentCost;
 
   let currentCost: number;
   let usage: AiUsage | null = null;
@@ -328,7 +343,10 @@ export async function enforceCostBudget(
   if (status === "soft_cap") {
     // Write audit log if this is the first time hitting soft cap
     if (!usage?.softCapReachedAt) {
-      await ctx.runMutation(writeSoftCapAuditLogRef, { caseId, action: "COST_SOFT_CAP_REACHED" });
+      await ctx.runMutation(writeSoftCapAuditLogRef, {
+        caseId,
+        action: "COST_SOFT_CAP_REACHED",
+      });
     }
     return { allowed: false, status, boilerplate: SOFT_CAP_BOILERPLATE };
   }

@@ -13,7 +13,13 @@ import {
   REGULAR_USER,
 } from "./helpers";
 
-import { createTemplate, publishNewVersion, archiveTemplate, listAllTemplates, listTemplateVersions } from "../../convex/templates";
+import {
+  createTemplate,
+  publishNewVersion,
+  archiveTemplate,
+  listAllTemplates,
+  listTemplateVersions,
+} from "../../convex/templates";
 
 // ---------------------------------------------------------------------------
 // Helper to assert FORBIDDEN error
@@ -24,7 +30,8 @@ async function expectForbidden(fn: () => Promise<unknown>) {
     expect.fail("Expected FORBIDDEN error but call succeeded");
   } catch (err) {
     expect(err).toBeInstanceOf(ConvexError);
-    const data = (err as ConvexError<{ code: string; httpStatus: number }>).data;
+    const data = (err as ConvexError<{ code: string; httpStatus: number }>)
+      .data;
     expect(data.code).toBe("FORBIDDEN");
     expect(data.httpStatus).toBe(403);
   }

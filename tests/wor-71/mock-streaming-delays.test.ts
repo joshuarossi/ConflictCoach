@@ -36,9 +36,7 @@ describe("AC: Stub simulates streaming with configurable delays", () => {
     });
 
     // Should have at least one STREAMING update and one COMPLETE update
-    const statuses = ctx.mutations.map(
-      (m) => m.args.status as string,
-    );
+    const statuses = ctx.mutations.map((m) => m.args.status as string);
     expect(statuses).toContain("STREAMING");
     expect(statuses[statuses.length - 1]).toBe("COMPLETE");
   });
@@ -93,7 +91,9 @@ describe("AC: Stub simulates streaming with configurable delays", () => {
     );
     expect(completeMutation).toBeDefined();
     expect(typeof completeMutation!.args.content).toBe("string");
-    expect((completeMutation!.args.content as string).length).toBeGreaterThan(0);
+    expect((completeMutation!.args.content as string).length).toBeGreaterThan(
+      0,
+    );
   });
 
   test("final COMPLETE mutation includes a deterministic token count", async () => {

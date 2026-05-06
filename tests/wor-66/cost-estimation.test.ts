@@ -7,7 +7,13 @@
  */
 import { describe, test, expect } from "vitest";
 
-import { calculateCost, SONNET_INPUT_RATE, SONNET_OUTPUT_RATE, HAIKU_INPUT_RATE, HAIKU_OUTPUT_RATE } from "../../convex/lib/costBudget";
+import {
+  calculateCost,
+  SONNET_INPUT_RATE,
+  SONNET_OUTPUT_RATE,
+  HAIKU_INPUT_RATE,
+  HAIKU_OUTPUT_RATE,
+} from "../../convex/lib/costBudget";
 
 describe("WOR-66: Cost estimation using token count × model pricing", () => {
   test("exports Sonnet input/output rates as positive numbers", () => {

@@ -8,7 +8,14 @@
 import { describe, test, expect } from "vitest";
 
 // @ts-expect-error WOR-66 red-state import: implementation is created by task-implement.
-import { accumulateUsage, SONNET_INPUT_RATE, SONNET_OUTPUT_RATE, HAIKU_INPUT_RATE, HAIKU_OUTPUT_RATE, type AiUsageEntry } from "../../convex/lib/costBudget";
+import {
+  accumulateUsage,
+  SONNET_INPUT_RATE,
+  SONNET_OUTPUT_RATE,
+  HAIKU_INPUT_RATE,
+  HAIKU_OUTPUT_RATE,
+  type AiUsageEntry,
+} from "../../convex/lib/costBudget";
 
 describe("WOR-66: Token counts recorded and accumulated per case", () => {
   test("accumulates token counts from a single AI call", () => {

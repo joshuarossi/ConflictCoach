@@ -9,19 +9,27 @@ import { test, expect } from "@playwright/test";
  * set on the html element globally.
  */
 test.describe("AC: Font smoothing is set globally per StyleGuide §3.4", () => {
-  test("-webkit-font-smoothing is set to antialiased on the html element", async ({ page }) => {
+  test("-webkit-font-smoothing is set to antialiased on the html element", async ({
+    page,
+  }) => {
     await page.goto("/");
 
     const smoothing = await page.evaluate(() => {
       // @ts-expect-error -- webkitFontSmoothing is a non-standard property
-      return getComputedStyle(document.documentElement).webkitFontSmoothing
-        || getComputedStyle(document.documentElement).getPropertyValue("-webkit-font-smoothing");
+      return (
+        getComputedStyle(document.documentElement).webkitFontSmoothing ||
+        getComputedStyle(document.documentElement).getPropertyValue(
+          "-webkit-font-smoothing",
+        )
+      );
     });
 
     expect(smoothing).toBe("antialiased");
   });
 
-  test("font-smoothing styles are present in the loaded CSS", async ({ page }) => {
+  test("font-smoothing styles are present in the loaded CSS", async ({
+    page,
+  }) => {
     await page.goto("/");
 
     // Verify that the CSS contains font-smoothing declarations
@@ -42,6 +50,8 @@ test.describe("AC: Font smoothing is set globally per StyleGuide §3.4", () => {
       return false;
     });
 
-    expect(hasSmoothing, "CSS must include font-smoothing declarations").toBe(true);
+    expect(hasSmoothing, "CSS must include font-smoothing declarations").toBe(
+      true,
+    );
   });
 });

@@ -104,7 +104,8 @@ describe("Reusable streamAIResponse helper handles the insert -> stream -> updat
 
       await streamAIResponse({
         ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-        anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+        anthropicClient:
+          client as unknown as StreamAIResponseOptions["anthropicClient"],
         table: tableName,
         messageFields: { caseId: "fake_case_id" as never },
         model: "claude-sonnet-4-5-20250514",
@@ -129,9 +130,13 @@ describe("A message row is inserted with status=STREAMING and empty content befo
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
-      messageFields: { caseId: "fake_case_id" as never, userId: "fake_user_id" as never },
+      messageFields: {
+        caseId: "fake_case_id" as never,
+        userId: "fake_user_id" as never,
+      },
       model: "claude-sonnet-4-5-20250514",
       systemPrompt: "You are a coach.",
       userMessages: [{ role: "user" as const, content: "Hi" }],
@@ -148,13 +153,15 @@ describe("A message row is inserted with status=STREAMING and empty content befo
   test("insert mutation occurs before the Anthropic stream is consumed", async () => {
     const callOrder: string[] = [];
     const ctx = createMockCtx();
-    ctx.runMutation = vi.fn(async (name: string, args: Record<string, unknown>) => {
-      if (ctx.mutations.length === 0) {
-        callOrder.push("insert");
-      }
-      ctx.mutations.push({ name, args });
-      return "mock_message_id";
-    });
+    ctx.runMutation = vi.fn(
+      async (name: string, args: Record<string, unknown>) => {
+        if (ctx.mutations.length === 0) {
+          callOrder.push("insert");
+        }
+        ctx.mutations.push({ name, args });
+        return "mock_message_id";
+      },
+    );
 
     const streamFn = vi.fn(() => {
       callOrder.push("stream_created");
@@ -165,7 +172,8 @@ describe("A message row is inserted with status=STREAMING and empty content befo
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -200,7 +208,8 @@ describe("Streaming tokens are batched and flushed via Convex mutation calls at 
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -233,7 +242,8 @@ describe("On completion, a final mutation sets status=COMPLETE and records the t
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -254,7 +264,8 @@ describe("On completion, a final mutation sets status=COMPLETE and records the t
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -275,7 +286,8 @@ describe("On completion, a final mutation sets status=COMPLETE and records the t
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -313,7 +325,8 @@ describe("On error, status is set to ERROR with error details stored in the cont
     // streamAIResponse should not throw — it should handle the error gracefully
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -342,7 +355,8 @@ describe("On error, status is set to ERROR with error details stored in the cont
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -389,7 +403,8 @@ describe("AI error handling matches TechSpec section 6.5: retry once on HTTP 429
     const start = Date.now();
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -424,7 +439,8 @@ describe("AI error handling matches TechSpec section 6.5: retry once on HTTP 429
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -447,7 +463,7 @@ describe("AI error handling matches TechSpec section 6.5: retry once on HTTP 429
           // Simulate a stream that never yields any tokens and times out
           async function* hangingStream() {
             // This simulates the helper's internal timeout detection
-            yield* ([] as never[]);
+            yield* [] as never[];
             await new Promise((_, reject) =>
               setTimeout(() => reject(new Error("Timeout")), 31000),
             );
@@ -461,7 +477,8 @@ describe("AI error handling matches TechSpec section 6.5: retry once on HTTP 429
     // stream's own timeout. We verify it marks ERROR.
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -481,7 +498,8 @@ describe("AI error handling matches TechSpec section 6.5: retry once on HTTP 429
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -553,7 +571,8 @@ describe("CLAUDE_MOCK=true environment variable short-circuits the real API call
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
       // Pass null/undefined client — mock mode should not use it
-      anthropicClient: null as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        null as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -571,7 +590,8 @@ describe("CLAUDE_MOCK=true environment variable short-circuits the real API call
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: null as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        null as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -588,7 +608,8 @@ describe("CLAUDE_MOCK=true environment variable short-circuits the real API call
     const ctx2 = createMockCtx();
     await streamAIResponse({
       ctx: ctx2 as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: null as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        null as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -606,7 +627,8 @@ describe("CLAUDE_MOCK=true environment variable short-circuits the real API call
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: null as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        null as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "privateMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-sonnet-4-5-20250514",
@@ -627,14 +649,14 @@ describe("The helper accepts a model parameter for choosing between Sonnet and H
   test("model parameter is passed to the Anthropic client", async () => {
     const ctx = createMockCtx();
     const streamFn = vi.fn(() => ({
-      [Symbol.asyncIterator]: () =>
-        createMockAnthropicStream(["ok"]),
+      [Symbol.asyncIterator]: () => createMockAnthropicStream(["ok"]),
     }));
     const client = { messages: { stream: streamFn } };
 
     await streamAIResponse({
       ctx: ctx as unknown as StreamAIResponseOptions["ctx"],
-      anthropicClient: client as unknown as StreamAIResponseOptions["anthropicClient"],
+      anthropicClient:
+        client as unknown as StreamAIResponseOptions["anthropicClient"],
       table: "jointMessages",
       messageFields: { caseId: "fake_case_id" as never },
       model: "claude-haiku-4-5-20251001",
@@ -643,7 +665,9 @@ describe("The helper accepts a model parameter for choosing between Sonnet and H
     });
 
     expect(streamFn).toHaveBeenCalled();
-    const callArgs = (streamFn.mock.calls as unknown[][])[0][0] as Record<string, unknown> | undefined;
+    const callArgs = (streamFn.mock.calls as unknown[][])[0][0] as
+      | Record<string, unknown>
+      | undefined;
     expect(callArgs).toHaveProperty("model", "claude-haiku-4-5-20251001");
   });
 });

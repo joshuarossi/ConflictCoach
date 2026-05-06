@@ -30,7 +30,10 @@ vi.mock("convex/react", () => ({
 
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -51,7 +54,8 @@ describe("AC: Click on case row routes to /cases/:caseId", () => {
     );
 
     // Click on the case row (identified by the other party's name)
-    const caseRow = screen.getByText("Taylor").closest("a, [role='link'], [data-testid]") ??
+    const caseRow =
+      screen.getByText("Taylor").closest("a, [role='link'], [data-testid]") ??
       screen.getByText("Taylor");
     await user.click(caseRow);
 
@@ -59,7 +63,8 @@ describe("AC: Click on case row routes to /cases/:caseId", () => {
     // Either via navigate() or via an <a> / <Link> href
     const navigatedToCase =
       mockNavigate.mock.calls.some(
-        (call: unknown[]) => typeof call[0] === "string" && call[0].includes("case-nav-test"),
+        (call: unknown[]) =>
+          typeof call[0] === "string" && call[0].includes("case-nav-test"),
       ) ||
       caseRow.closest("a")?.getAttribute("href")?.includes("case-nav-test");
 
@@ -73,7 +78,8 @@ describe("AC: Click on case row routes to /cases/:caseId", () => {
       </MemoryRouter>,
     );
 
-    const enterButton = screen.queryByRole("link", { name: /enter/i }) ??
+    const enterButton =
+      screen.queryByRole("link", { name: /enter/i }) ??
       screen.getByRole("button", { name: /enter/i });
 
     // If it's a link, check href; if button, it should trigger navigation

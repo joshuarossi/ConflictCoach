@@ -46,11 +46,27 @@ function makeCaseFixture(
 }
 
 const MIXED_CASES = [
-  makeCaseFixture({ id: "case-1", status: "DRAFT_PRIVATE_COACHING", displayName: "Alice" }),
+  makeCaseFixture({
+    id: "case-1",
+    status: "DRAFT_PRIVATE_COACHING",
+    displayName: "Alice",
+  }),
   makeCaseFixture({ id: "case-2", status: "JOINT_ACTIVE", displayName: "Bob" }),
-  makeCaseFixture({ id: "case-3", status: "CLOSED_RESOLVED", displayName: "Carol" }),
-  makeCaseFixture({ id: "case-4", status: "CLOSED_UNRESOLVED", displayName: "Dave" }),
-  makeCaseFixture({ id: "case-5", status: "READY_FOR_JOINT", displayName: "Eve" }),
+  makeCaseFixture({
+    id: "case-3",
+    status: "CLOSED_RESOLVED",
+    displayName: "Carol",
+  }),
+  makeCaseFixture({
+    id: "case-4",
+    status: "CLOSED_UNRESOLVED",
+    displayName: "Dave",
+  }),
+  makeCaseFixture({
+    id: "case-5",
+    status: "READY_FOR_JOINT",
+    displayName: "Eve",
+  }),
 ];
 
 vi.mock("@convex-dev/auth/react", () => ({
@@ -63,7 +79,10 @@ let mockCases: ReturnType<typeof makeCaseFixture>[] = [];
 vi.mock("convex/react", () => ({
   useQuery: (queryRef: unknown) => {
     // Return cases for cases.list, user info for users.me
-    if (typeof queryRef === "function" || (queryRef && typeof queryRef === "object")) {
+    if (
+      typeof queryRef === "function" ||
+      (queryRef && typeof queryRef === "object")
+    ) {
       return mockCases;
     }
     return { role: "USER", displayName: "Test User" };
@@ -106,7 +125,9 @@ describe("AC: Dashboard lists cases grouped by Active and Closed sections", () =
   test.each(ACTIVE_STATUSES)(
     "case with status %s appears in the Active section, not Closed",
     (status) => {
-      const singleCase = [makeCaseFixture({ id: "test-case", status, displayName: "TestParty" })];
+      const singleCase = [
+        makeCaseFixture({ id: "test-case", status, displayName: "TestParty" }),
+      ];
       renderDashboard(singleCase);
       expect(screen.getByText("TestParty")).toBeInTheDocument();
     },
@@ -116,8 +137,16 @@ describe("AC: Dashboard lists cases grouped by Active and Closed sections", () =
     "case with status %s appears in the Closed section",
     (status) => {
       const cases = [
-        makeCaseFixture({ id: "active-case", status: "DRAFT_PRIVATE_COACHING", displayName: "ActiveParty" }),
-        makeCaseFixture({ id: "closed-case", status, displayName: "ClosedParty" }),
+        makeCaseFixture({
+          id: "active-case",
+          status: "DRAFT_PRIVATE_COACHING",
+          displayName: "ActiveParty",
+        }),
+        makeCaseFixture({
+          id: "closed-case",
+          status,
+          displayName: "ClosedParty",
+        }),
       ];
       renderDashboard(cases);
 
@@ -125,8 +154,9 @@ describe("AC: Dashboard lists cases grouped by Active and Closed sections", () =
       // dashboard renders the section header as an aria-expanded button so
       // the closed list collapses by default; it is not a real heading.
       const closedToggle = screen.getByRole("button", { name: /closed/i });
-      const closedSection = (closedToggle.closest("section, [role='region'], details") ??
-        closedToggle.parentElement!) as HTMLElement;
+      const closedSection = (closedToggle.closest(
+        "section, [role='region'], details",
+      ) ?? closedToggle.parentElement!) as HTMLElement;
       const closedScope = within(closedSection);
 
       // The closed party name must appear within the Closed section specifically

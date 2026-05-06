@@ -10,13 +10,13 @@ npm run test:unit
 
 ### Modules Under Test
 
-| Module | Location | What It Covers |
-|---|---|---|
-| State machine | `convex/lib/stateMachine.ts` | Case lifecycle transitions, `canEnterJointChat`, `canProposeClosure`, `canConfirmClosure` |
-| [Prompt assembly](./components/prompt-assembly.md) | `convex/lib/prompts.ts` | System prompt generation for all 4 AI roles (PRIVATE_COACH, SYNTHESIS, COACH, DRAFT_COACH) with privacy isolation |
-| Privacy filter | `convex/lib/privacyFilter.ts` | Verbatim token-matching (≥8 consecutive tokens) to prevent AI from leaking private content |
-| Compression | `convex/lib/compression.ts` | Token estimation, message selection, Haiku-based summarization, budget enforcement |
-| Error mapping | `convex/lib/errors.ts` | `throwAppError` and error-code-to-HTTP-status mapping |
+| Module                                             | Location                      | What It Covers                                                                                                    |
+| -------------------------------------------------- | ----------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| State machine                                      | `convex/lib/stateMachine.ts`  | Case lifecycle transitions, `canEnterJointChat`, `canProposeClosure`, `canConfirmClosure`                         |
+| [Prompt assembly](./components/prompt-assembly.md) | `convex/lib/prompts.ts`       | System prompt generation for all 4 AI roles (PRIVATE_COACH, SYNTHESIS, COACH, DRAFT_COACH) with privacy isolation |
+| Privacy filter                                     | `convex/lib/privacyFilter.ts` | Verbatim token-matching (≥8 consecutive tokens) to prevent AI from leaking private content                        |
+| Compression                                        | `convex/lib/compression.ts`   | Token estimation, message selection, Haiku-based summarization, budget enforcement                                |
+| Error mapping                                      | `convex/lib/errors.ts`        | `throwAppError` and error-code-to-HTTP-status mapping                                                             |
 
 ### Writing New Tests
 
@@ -62,13 +62,13 @@ Like the solo flow, the invite flow runs with `CLAUDE_MOCK=true` for determinist
 
 The `e2e/wor-75/privacy.spec.ts` suite validates the application's core privacy guarantees at the browser level:
 
-| Test | What It Validates |
-|---|---|
-| Cross-party message isolation (AC1) | User B cannot access User A's private coaching messages — server returns `FORBIDDEN` |
-| Admin access denial (AC2) | Admin users cannot read either party's private coaching content |
-| Coach AI leak prevention (AC3) | Coach responses in joint chat contain no 8-consecutive-token substring from either party's private messages |
-| Party state redaction (AC4) | The `partyStates` query exposes only phase-level booleans (e.g. `hasCompletedPC`) for the other party, never form fields |
-| Loud failure (AC5) | All authorization violations produce explicit `FORBIDDEN` errors, not empty results or silent failures |
+| Test                                | What It Validates                                                                                                        |
+| ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| Cross-party message isolation (AC1) | User B cannot access User A's private coaching messages — server returns `FORBIDDEN`                                     |
+| Admin access denial (AC2)           | Admin users cannot read either party's private coaching content                                                          |
+| Coach AI leak prevention (AC3)      | Coach responses in joint chat contain no 8-consecutive-token substring from either party's private messages              |
+| Party state redaction (AC4)         | The `partyStates` query exposes only phase-level booleans (e.g. `hasCompletedPC`) for the other party, never form fields |
+| Loud failure (AC5)                  | All authorization violations produce explicit `FORBIDDEN` errors, not empty results or silent failures                   |
 
 These tests are currently marked `fixme` pending the full E2E auth infrastructure (T49).
 
@@ -95,12 +95,12 @@ The GitHub Actions workflow at `.github/workflows/ci.yml` runs automatically on 
 
 ### Job structure
 
-| Job | What it runs | Depends on |
-|---|---|---|
-| `lint` | ESLint + Prettier check | — |
-| `typecheck` | `tsc --noEmit` | — |
-| `unit` | Vitest (`npm run test:unit`) | — |
-| `e2e` | Playwright against a Convex dev deployment | `lint`, `typecheck`, `unit` |
+| Job         | What it runs                               | Depends on                  |
+| ----------- | ------------------------------------------ | --------------------------- |
+| `lint`      | ESLint + Prettier check                    | —                           |
+| `typecheck` | `tsc --noEmit`                             | —                           |
+| `unit`      | Vitest (`npm run test:unit`)               | —                           |
+| `e2e`       | Playwright against a Convex dev deployment | `lint`, `typecheck`, `unit` |
 
 The `lint`, `typecheck`, and `unit` jobs run in parallel. The `e2e` job is gated behind all three.
 
@@ -115,7 +115,7 @@ The E2E job:
 
 ### Required secrets
 
-| Secret | Purpose |
-|---|---|
-| `CONVEX_DEPLOY_KEY` | Deploys the Convex schema in the E2E job |
+| Secret              | Purpose                                                          |
+| ------------------- | ---------------------------------------------------------------- |
+| `CONVEX_DEPLOY_KEY` | Deploys the Convex schema in the E2E job                         |
 | `ANTHROPIC_API_KEY` | Must be present as an env var (not used when `CLAUDE_MOCK=true`) |

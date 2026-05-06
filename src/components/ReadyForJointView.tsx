@@ -18,7 +18,10 @@ export interface ReadyForJointViewProps {
   otherPartyName?: string;
 }
 
-export function ReadyForJointView({ caseId, otherPartyName: otherPartyNameProp }: ReadyForJointViewProps) {
+export function ReadyForJointView({
+  caseId,
+  otherPartyName: otherPartyNameProp,
+}: ReadyForJointViewProps) {
   const navigate = useNavigate();
   const typedCaseId = caseId as Id<"cases">;
 
@@ -48,7 +51,13 @@ export function ReadyForJointView({ caseId, otherPartyName: otherPartyNameProp }
       );
       setIsEntering(false);
     }
-  }, [enterJointSessionMutation, typedCaseId, caseId, navigate, showNetworkError]);
+  }, [
+    enterJointSessionMutation,
+    typedCaseId,
+    caseId,
+    navigate,
+    showNetworkError,
+  ]);
 
   // Loading state
   if (synthesisData === undefined) {
@@ -64,7 +73,8 @@ export function ReadyForJointView({ caseId, otherPartyName: otherPartyNameProp }
   const synthesisText = synthesisData?.synthesisText ?? null;
   const otherPartyName =
     otherPartyNameProp ??
-    (caseData as { otherPartyName?: string } | null | undefined)?.otherPartyName ??
+    (caseData as { otherPartyName?: string } | null | undefined)
+      ?.otherPartyName ??
     synthesisData?.otherPartyName ??
     "the other party";
 

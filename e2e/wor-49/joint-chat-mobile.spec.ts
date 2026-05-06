@@ -39,9 +39,7 @@ test.describe("Joint Chat — mobile responsive", () => {
     await page.waitForLoadState("networkidle");
 
     // The page should render without horizontal overflow
-    const bodyWidth = await page.evaluate(
-      () => document.body.scrollWidth,
-    );
+    const bodyWidth = await page.evaluate(() => document.body.scrollWidth);
     expect(bodyWidth).toBeLessThanOrEqual(375);
 
     // Top nav should have a hamburger menu or collapsed nav on mobile

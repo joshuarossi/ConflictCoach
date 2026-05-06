@@ -32,7 +32,8 @@ describe("JointChatView — input area", () => {
   it("renders a text input field", () => {
     render(<JointChatView {...baseProps} />);
 
-    const input = screen.getByRole("textbox") ?? screen.getByLabelText(/message/i);
+    const input =
+      screen.getByRole("textbox") ?? screen.getByLabelText(/message/i);
     expect(input).toBeTruthy();
   });
 

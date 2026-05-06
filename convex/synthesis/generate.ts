@@ -57,7 +57,8 @@ export async function writeSynthesisResultsHandler(
   }
 
   // Resolve partyState IDs: prefer explicit args, fall back to case document
-  const initiatorPSId = args.initiatorPartyStateId ?? caseDoc.initiatorPartyStateId;
+  const initiatorPSId =
+    args.initiatorPartyStateId ?? caseDoc.initiatorPartyStateId;
   const inviteePSId = args.inviteePartyStateId ?? caseDoc.inviteePartyStateId;
 
   if (!initiatorPSId || !inviteePSId) {
@@ -226,17 +227,15 @@ export async function generateSynthesisHandler(
   const Anthropic = (await import("@anthropic-ai/sdk")).default;
   const anthropicClient = new Anthropic();
 
-  const partyStatesRaw = await ctx.runQuery(
-    _getPartyStates,
-    { caseId: args.caseId },
-  );
+  const partyStatesRaw = await ctx.runQuery(_getPartyStates, {
+    caseId: args.caseId,
+  });
   const partyStates = Array.isArray(partyStatesRaw) ? partyStatesRaw : [];
 
   // 2. Read ALL private messages for both parties
-  const allPrivateMessagesRaw = await ctx.runQuery(
-    _getAllPrivateMessages,
-    { caseId: args.caseId },
-  );
+  const allPrivateMessagesRaw = await ctx.runQuery(_getAllPrivateMessages, {
+    caseId: args.caseId,
+  });
   const allPrivateMessages = Array.isArray(allPrivateMessagesRaw)
     ? allPrivateMessagesRaw
     : [];
@@ -263,9 +262,7 @@ export async function generateSynthesisHandler(
     : [];
   const inviteeMessages = inviteePS
     ? allPrivateMessages
-        .filter(
-          (m: any) => m.userId === inviteePS.userId && m.role === "USER",
-        )
+        .filter((m: any) => m.userId === inviteePS.userId && m.role === "USER")
         .map((m: any) => m.content)
         .filter(
           (content: unknown): content is string =>
@@ -331,7 +328,9 @@ export async function generateSynthesisHandler(
       });
     } catch (err: any) {
       if (err?.message === "AI_TIMEOUT") {
-        const timeoutErr = new Error("Synthesis generation timed out after 30s");
+        const timeoutErr = new Error(
+          "Synthesis generation timed out after 30s",
+        );
         (timeoutErr as any).cause = err;
         throw timeoutErr;
       }
@@ -363,9 +362,7 @@ export async function generateSynthesisHandler(
     }
 
     // Extract text content
-    const textBlock = response.content.find(
-      (b: any) => b.type === "text",
-    );
+    const textBlock = response.content.find((b: any) => b.type === "text");
     if (!textBlock || textBlock.type !== "text") {
       console.error(
         `Synthesis attempt ${attempt + 1}/${totalAttempts} for case ${args.caseId}: no text block in response. stop_reason=${response.stop_reason}`,
@@ -410,33 +407,27 @@ export async function generateSynthesisHandler(
       forInvitee: FALLBACK_TEXT,
     };
 
-    await ctx.runMutation(
-      _insertAuditLog,
-      {
-        caseId: args.caseId,
-        actorUserId: initiatorPS.userId,
-        metadata: {
-          reason: lastFailureReason,
-          attempts: totalAttempts,
-        },
+    await ctx.runMutation(_insertAuditLog, {
+      caseId: args.caseId,
+      actorUserId: initiatorPS.userId,
+      metadata: {
+        reason: lastFailureReason,
+        attempts: totalAttempts,
       },
-    );
+    });
   }
 
   // 7. Atomically write synthesis texts + advance case to READY_FOR_JOINT
   if (!initiatorPS?._id || !inviteePS?._id) {
     throw new Error("Could not find both party states for case");
   }
-  await ctx.runMutation(
-    writeSynthesisResults,
-    {
-      caseId: args.caseId,
-      initiatorPartyStateId: initiatorPS._id,
-      inviteePartyStateId: inviteePS._id,
-      forInitiator: synthesisResult.forInitiator,
-      forInvitee: synthesisResult.forInvitee,
-    },
-  );
+  await ctx.runMutation(writeSynthesisResults, {
+    caseId: args.caseId,
+    initiatorPartyStateId: initiatorPS._id,
+    inviteePartyStateId: inviteePS._id,
+    forInitiator: synthesisResult.forInitiator,
+    forInvitee: synthesisResult.forInvitee,
+  });
 }
 
 /**

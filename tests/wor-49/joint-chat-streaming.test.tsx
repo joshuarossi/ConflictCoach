@@ -25,9 +25,7 @@ const baseProps = {
 
 describe("JointChatView — coach is thinking indicator", () => {
   it("shows streaming indicator when isStreaming is true", () => {
-    render(
-      <JointChatView {...baseProps} messages={[]} isStreaming={true} />,
-    );
+    render(<JointChatView {...baseProps} messages={[]} isStreaming={true} />);
 
     // The indicator should contain "thinking" or "replying" text
     // (may be in sr-only span for accessibility)

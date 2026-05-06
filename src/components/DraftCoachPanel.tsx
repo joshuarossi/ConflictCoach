@@ -55,7 +55,10 @@ export function DraftCoachPanel({
   );
 
   useEffect(() => {
-    if (typeof window === "undefined" || typeof window.matchMedia !== "function") {
+    if (
+      typeof window === "undefined" ||
+      typeof window.matchMedia !== "function"
+    ) {
       return;
     }
     const mql = window.matchMedia("(max-width: 767px)");
@@ -131,9 +134,7 @@ export function DraftCoachPanel({
         <span title={tooltipText} className="shrink-0 cursor-help">
           <Lock size={16} strokeWidth={1.5} aria-label="Lock icon" />
         </span>
-        <span className="text-meta text-text-secondary">
-          {privacyText}
-        </span>
+        <span className="text-meta text-text-secondary">{privacyText}</span>
       </div>
 
       {/* Chat area */}
@@ -217,13 +218,15 @@ export function ConnectedDraftCoachPanel({
 
   const messages: DraftCoachMessage[] = useMemo(
     () =>
-      ((sessionData?.messages ?? []) as Array<{
-        _id: unknown;
-        role: unknown;
-        content: unknown;
-        status: unknown;
-        createdAt: unknown;
-      }>).map((m) => ({
+      (
+        (sessionData?.messages ?? []) as Array<{
+          _id: unknown;
+          role: unknown;
+          content: unknown;
+          status: unknown;
+          createdAt: unknown;
+        }>
+      ).map((m) => ({
         _id: m._id as string,
         role: m.role as "USER" | "AI",
         content: m.content as string,

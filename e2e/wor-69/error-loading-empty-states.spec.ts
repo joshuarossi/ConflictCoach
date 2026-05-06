@@ -11,7 +11,9 @@ import { test, expect } from "@playwright/test";
 import { createTestUser, loginAsUser } from "../fixtures";
 
 test.describe("WOR-69: Empty states", () => {
-  test("Dashboard shows empty state copy for a new user with no cases", async ({ page }) => {
+  test("Dashboard shows empty state copy for a new user with no cases", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
 
@@ -27,7 +29,9 @@ test.describe("WOR-69: Empty states", () => {
 });
 
 test.describe("WOR-69: Loading states (skeleton screens)", () => {
-  test("Dashboard shows skeleton placeholders before data loads", async ({ page }) => {
+  test("Dashboard shows skeleton placeholders before data loads", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
 
@@ -41,7 +45,9 @@ test.describe("WOR-69: Loading states (skeleton screens)", () => {
     await page.goto("/dashboard");
 
     // Look for skeleton elements during loading
-    const skeletons = page.locator("[data-testid*='skeleton'], [class*='skeleton'], [class*='Skeleton']");
+    const skeletons = page.locator(
+      "[data-testid*='skeleton'], [class*='skeleton'], [class*='Skeleton']",
+    );
     await expect(skeletons.first()).toBeVisible({ timeout: 3000 });
 
     // After data loads, skeletons should disappear
@@ -52,7 +58,9 @@ test.describe("WOR-69: Loading states (skeleton screens)", () => {
 test.describe("WOR-69: AI error with retry", () => {
   // WOR-69: Requires an active case with private coaching to trigger AI error.
   // Skipped until the full case creation + coaching flow is wired end-to-end.
-  test.fixme("AI error message shows inline bubble with Retry button", async ({ page }) => {
+  test.fixme("AI error message shows inline bubble with Retry button", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
 
@@ -82,7 +90,9 @@ test.describe("WOR-69: AI error with retry", () => {
 test.describe("WOR-69: Network error toast", () => {
   // WOR-69: Requires a guaranteed UI element that triggers a network-dependent mutation.
   // Skipped until the dashboard "new case" button or equivalent action is reliably present.
-  test.fixme("network failure shows a transient toast notification", async ({ page }) => {
+  test.fixme("network failure shows a transient toast notification", async ({
+    page,
+  }) => {
     const user = await createTestUser(page);
     await loginAsUser(page, user);
 
@@ -98,7 +108,9 @@ test.describe("WOR-69: Network error toast", () => {
     await newCaseButton.click();
 
     // Toast should appear
-    const toast = page.locator("[role='status'], [data-testid='toast'], [class*='toast']");
+    const toast = page.locator(
+      "[role='status'], [data-testid='toast'], [class*='toast']",
+    );
     await expect(toast.first()).toBeVisible({ timeout: 5000 });
   });
 });

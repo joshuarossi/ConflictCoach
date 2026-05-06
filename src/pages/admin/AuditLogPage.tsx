@@ -51,8 +51,7 @@ class AuditLogErrorBoundary extends Component<
   state: ErrorBoundaryState = { hasError: false, isAuthError: false };
 
   static getDerivedStateFromError(error: unknown): ErrorBoundaryState {
-    const message =
-      error instanceof Error ? error.message.toLowerCase() : "";
+    const message = error instanceof Error ? error.message.toLowerCase() : "";
     const isAuthError =
       message.includes("unauthorized") ||
       message.includes("forbidden") ||
@@ -67,7 +66,9 @@ class AuditLogErrorBoundary extends Component<
       }
       return (
         <div className="min-h-screen flex items-center justify-center">
-          <p className="text-danger">Something went wrong loading the audit log.</p>
+          <p className="text-danger">
+            Something went wrong loading the audit log.
+          </p>
         </div>
       );
     }
@@ -106,12 +107,17 @@ function AuditLogPageContent() {
   return (
     <div className="min-h-screen bg-canvas">
       <div className="px-4 py-6">
-        <h1 className="text-h1 font-medium text-text-primary mb-6">Audit Log</h1>
+        <h1 className="text-h1 font-medium text-text-primary mb-6">
+          Audit Log
+        </h1>
 
         {/* Filters */}
         <div className="flex gap-4 mb-6">
           <div>
-            <label htmlFor="actor-filter" className="block text-meta font-medium text-text-secondary mb-1">
+            <label
+              htmlFor="actor-filter"
+              className="block text-meta font-medium text-text-secondary mb-1"
+            >
               Actor
             </label>
             <select
@@ -130,7 +136,10 @@ function AuditLogPageContent() {
           </div>
 
           <div>
-            <label htmlFor="action-filter" className="block text-meta font-medium text-text-secondary mb-1">
+            <label
+              htmlFor="action-filter"
+              className="block text-meta font-medium text-text-secondary mb-1"
+            >
               Action
             </label>
             <select
@@ -158,10 +167,18 @@ function AuditLogPageContent() {
           <table aria-label="Audit log" className="w-full border-collapse">
             <thead>
               <tr className="border-b border-border-default">
-                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">Actor</th>
-                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">Action</th>
-                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">Target</th>
-                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">Timestamp</th>
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">
+                  Actor
+                </th>
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">
+                  Action
+                </th>
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">
+                  Target
+                </th>
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">
+                  Timestamp
+                </th>
               </tr>
             </thead>
             <tbody>
@@ -203,11 +220,15 @@ function AuditLogPageContent() {
             aria-label="Audit entry details"
             data-testid="audit-detail-drawer"
             className="relative w-full max-w-md bg-surface h-full overflow-y-auto p-6"
-            style={{ boxShadow: "var(--shadow-3, -4px 0 24px rgba(0,0,0,0.15))" }}
+            style={{
+              boxShadow: "var(--shadow-3, -4px 0 24px rgba(0,0,0,0.15))",
+            }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-h2 font-medium text-text-primary">Entry Details</h2>
+              <h2 className="text-h2 font-medium text-text-primary">
+                Entry Details
+              </h2>
               <button
                 onClick={() => setSelectedEntry(null)}
                 className="text-text-tertiary hover:text-text-secondary text-h2 leading-none"

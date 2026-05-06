@@ -63,22 +63,34 @@ const otherPrivateMessages: PrivateMessage[] = [
   },
 ];
 
-const allPrivateMessages = [
-  ...drafterPrivateMessages,
-  ...otherPrivateMessages,
-];
+const allPrivateMessages = [...drafterPrivateMessages, ...otherPrivateMessages];
 
 const jointHistory: JointMessage[] = [
-  { authorType: "USER", authorUserId: DRAFTER_ID as JointMessage["authorUserId"], content: "Let's discuss the budget" },
-  { authorType: "USER", authorUserId: OTHER_ID as JointMessage["authorUserId"], content: "Agreed, we need to sort this out" },
-  { authorType: "COACH", content: "Great, let's explore what fiscal responsibility means to each of you." },
+  {
+    authorType: "USER",
+    authorUserId: DRAFTER_ID as JointMessage["authorUserId"],
+    content: "Let's discuss the budget",
+  },
+  {
+    authorType: "USER",
+    authorUserId: OTHER_ID as JointMessage["authorUserId"],
+    content: "Agreed, we need to sort this out",
+  },
+  {
+    authorType: "COACH",
+    content:
+      "Great, let's explore what fiscal responsibility means to each of you.",
+  },
 ];
 
 // ---------------------------------------------------------------------------
 // Helper to collect all text from prompt result
 // ---------------------------------------------------------------------------
 
-function allOutputContent(result: { system: string; messages: Array<{ content: string }> }): string {
+function allOutputContent(result: {
+  system: string;
+  messages: Array<{ content: string }>;
+}): string {
   return [result.system, ...result.messages.map((m) => m.content)].join("\n");
 }
 

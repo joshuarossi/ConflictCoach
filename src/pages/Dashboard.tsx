@@ -47,7 +47,11 @@ function statusIndicator(
     case "JOINT_ACTIVE":
       return { glyph: "●", colorClass: "text-success", label: "Your turn" };
     case "READY_FOR_JOINT":
-      return { glyph: "◐", colorClass: "text-warning", label: "Ready for joint session" };
+      return {
+        glyph: "◐",
+        colorClass: "text-warning",
+        label: "Ready for joint session",
+      };
     case "CLOSED_RESOLVED":
     case "CLOSED_UNRESOLVED":
     case "CLOSED_ABANDONED":
@@ -221,9 +225,7 @@ export function Dashboard() {
 
       {activeCases.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-h2 font-medium text-text-primary mb-3">
-            Active
-          </h2>
+          <h2 className="text-h2 font-medium text-text-primary mb-3">Active</h2>
           <div className="flex flex-col gap-2">
             {activeCases.map((c: CaseRow) => (
               <CaseRowItem key={c.id} caseItem={c} />

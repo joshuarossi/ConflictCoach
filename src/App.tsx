@@ -41,7 +41,10 @@ export function App() {
 
         {/* Chat-width layout (1080px) */}
         <Route element={<ChatLayout />}>
-          <Route path="/cases/:caseId/private" element={<PrivateCoachingPage />} />
+          <Route
+            path="/cases/:caseId/private"
+            element={<PrivateCoachingPage />}
+          />
           <Route path="/cases/:caseId/joint" element={<JointChatPage />} />
         </Route>
 

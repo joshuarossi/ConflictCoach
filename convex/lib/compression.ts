@@ -154,7 +154,11 @@ export function compressContext(
     result.reduce((sum, m) => sum + estimateTokens(m.content), 0) +
     estimateTokens(systemPrompt);
 
-  while (totalTokens() > budget && result.length > 1 && iterations < maxIterations) {
+  while (
+    totalTokens() > budget &&
+    result.length > 1 &&
+    iterations < maxIterations
+  ) {
     iterations++;
     const toCompress = selectMessagesForCompression(result);
     if (toCompress.length === 0) break;

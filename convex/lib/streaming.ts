@@ -9,8 +9,10 @@ import { getModelType } from "./costBudget";
 // Resolve mutation references with optional chaining so the module is safe to
 // import in test environments where `internal` is a stub/empty object.
 /* eslint-disable @typescript-eslint/no-explicit-any */
-const insertRef: any = (internal as any)?.lib?.streaming?.insertStreamingMessage;
-const updateRef: any = (internal as any)?.lib?.streaming?.updateStreamingMessage;
+const insertRef: any = (internal as any)?.lib?.streaming
+  ?.insertStreamingMessage;
+const updateRef: any = (internal as any)?.lib?.streaming
+  ?.updateStreamingMessage;
 const recordAiUsageRef: any = (internal as any)?.lib?.costBudget?.recordAiUsage;
 
 // ---------------------------------------------------------------------------
@@ -201,16 +203,13 @@ export async function streamAIResponse(
   // Strip transient fields (aiRole, partyRole) — these are used by streaming
   // infrastructure (mock-mode branching) but not persisted on message rows.
   const persistedFields = stripTransientFields(messageFields);
-  const messageId: string = await ctx.runMutation(
-    insertRef,
-    {
-      table,
-      ...persistedFields,
-      content: "",
-      status: "STREAMING" as const,
-      createdAt: Date.now(),
-    },
-  );
+  const messageId: string = await ctx.runMutation(insertRef, {
+    table,
+    ...persistedFields,
+    content: "",
+    status: "STREAMING" as const,
+    createdAt: Date.now(),
+  });
 
   // 2. Mock mode short-circuit (role-specific canned responses via claudeMock)
   if (process.env.CLAUDE_MOCK === "true") {
@@ -364,9 +363,7 @@ async function executeStream(
       new Promise<never>((_, reject) =>
         setTimeout(
           () =>
-            reject(
-              new Error("Network timeout: no tokens received for 30s"),
-            ),
+            reject(new Error("Network timeout: no tokens received for 30s")),
           remainingMs,
         ),
       ),
@@ -386,14 +383,11 @@ async function executeStream(
       // Batch flush at ~50ms intervals
       const now = Date.now();
       if (now - lastFlush >= BATCH_INTERVAL_MS) {
-        await ctx.runMutation(
-          updateRef,
-          {
-            messageId,
-            content: buffer,
-            status: "STREAMING" as const,
-          },
-        );
+        await ctx.runMutation(updateRef, {
+          messageId,
+          content: buffer,
+          status: "STREAMING" as const,
+        });
         lastFlush = now;
       }
     } else if (event.type === "message_delta") {

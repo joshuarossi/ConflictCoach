@@ -105,9 +105,7 @@ test.describe("AC5: Submission routes to private coaching", () => {
     await page
       .getByLabel(/Description/i)
       .fill("I feel overwhelmed with the current distribution.");
-    await page
-      .getByLabel(/Desired Outcome/i)
-      .fill("A fairer task allocation.");
+    await page.getByLabel(/Desired Outcome/i).fill("A fairer task allocation.");
 
     // Submit the form
     await page.getByRole("button", { name: /submit/i }).click();

@@ -25,7 +25,10 @@ export const decline = mutation({
     }
 
     if (tokenDoc.status !== "ACTIVE") {
-      throwAppError("TOKEN_INVALID", "Invite token has already been used or revoked");
+      throwAppError(
+        "TOKEN_INVALID",
+        "Invite token has already been used or revoked",
+      );
     }
 
     const caseDoc = await ctx.db.get(tokenDoc.caseId);

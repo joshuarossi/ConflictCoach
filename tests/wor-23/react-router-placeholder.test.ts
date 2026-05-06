@@ -19,7 +19,11 @@ describe("AC: React Router v6 is configured with a placeholder route at /", () =
     const { default: App } = await import("@/App");
 
     const { container } = render(
-      createElement(MemoryRouter, { initialEntries: ["/"] }, createElement(App))
+      createElement(
+        MemoryRouter,
+        { initialEntries: ["/"] },
+        createElement(App),
+      ),
     );
 
     // The placeholder route at / should render some content

@@ -10,8 +10,8 @@ Reactive query that returns all joint messages for a given case, sorted by `crea
 
 **Args:**
 
-| Field | Type | Description |
-|---|---|---|
+| Field    | Type          | Description                    |
+| -------- | ------------- | ------------------------------ |
 | `caseId` | `Id<"cases">` | The case to fetch messages for |
 
 **Access rules:**
@@ -26,10 +26,10 @@ Inserts a new joint message with `authorType=USER` and `status=COMPLETE`, then s
 
 **Args:**
 
-| Field | Type | Description |
-|---|---|---|
-| `caseId` | `Id<"cases">` | The case to post in |
-| `content` | `string` | The message body |
+| Field     | Type          | Description         |
+| --------- | ------------- | ------------------- |
+| `caseId`  | `Id<"cases">` | The case to post in |
+| `content` | `string`      | The message body    |
 
 **Access rules:**
 
@@ -43,8 +43,8 @@ Reactive query that returns the authenticated caller's own `synthesisText` from 
 
 **Args:**
 
-| Field | Type | Description |
-|---|---|---|
+| Field    | Type          | Description         |
+| -------- | ------------- | ------------------- |
 | `caseId` | `Id<"cases">` | The case to look up |
 
 **Access rules:**
@@ -74,11 +74,11 @@ The joint chat view includes an embedded Draft Coach panel that lets participant
 
 The joint chat header includes a **Close** button that opens a styled modal for ending the case. The modal offers three options:
 
-| Option | Behaviour |
-|---|---|
-| **Resolved** | Requires a summary textarea ("Briefly describe what you agreed to."). Calls `proposeClosure`; the other party must confirm before the case closes. |
-| **Not resolved** | Warning-styled option with an optional note. Calls `unilateralClose`; case transitions to `CLOSED_UNRESOLVED` immediately. |
-| **Take a break** | Closes the modal with no backend call. Case stays `JOINT_ACTIVE`. |
+| Option           | Behaviour                                                                                                                                          |
+| ---------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Resolved**     | Requires a summary textarea ("Briefly describe what you agreed to."). Calls `proposeClosure`; the other party must confirm before the case closes. |
+| **Not resolved** | Warning-styled option with an optional note. Calls `unilateralClose`; case transitions to `CLOSED_UNRESOLVED` immediately.                         |
+| **Take a break** | Closes the modal with no backend call. Case stays `JOINT_ACTIVE`.                                                                                  |
 
 ### Confirmation banner
 
@@ -95,13 +95,13 @@ When one party proposes a resolution, the other party sees a `ClosureConfirmatio
 
 ## Key Files
 
-| File | Purpose |
-|---|---|
-| `convex/jointChat.ts` | All joint chat queries and mutations |
-| `convex/lib/auth.ts` | `requireAuth()` authentication helper |
-| `convex/lib/errors.ts` | `throwAppError()` standardised error codes |
-| `convex/lib/stateMachine.ts` | Case status definitions and transitions |
-| `src/components/CaseClosureModal.tsx` | Closure modal with Resolved / Not resolved / Take a break options |
-| `src/components/ClosureConfirmationBanner.tsx` | Banner shown to the other party when closure is proposed |
-| `src/components/DraftCoachPanel.tsx` | Draft Coach panel and connected wrapper |
-| `src/components/DraftReadyCard.tsx` | Draft-ready card with send/edit/refine/discard actions |
+| File                                           | Purpose                                                           |
+| ---------------------------------------------- | ----------------------------------------------------------------- |
+| `convex/jointChat.ts`                          | All joint chat queries and mutations                              |
+| `convex/lib/auth.ts`                           | `requireAuth()` authentication helper                             |
+| `convex/lib/errors.ts`                         | `throwAppError()` standardised error codes                        |
+| `convex/lib/stateMachine.ts`                   | Case status definitions and transitions                           |
+| `src/components/CaseClosureModal.tsx`          | Closure modal with Resolved / Not resolved / Take a break options |
+| `src/components/ClosureConfirmationBanner.tsx` | Banner shown to the other party when closure is proposed          |
+| `src/components/DraftCoachPanel.tsx`           | Draft Coach panel and connected wrapper                           |
+| `src/components/DraftReadyCard.tsx`            | Draft-ready card with send/edit/refine/discard actions            |

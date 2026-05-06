@@ -35,15 +35,14 @@ describe("AC 2: PartyToggle appears in top nav for solo cases only", () => {
 
   test("PartyToggle renders when isSolo is true", () => {
     // Will fail until PartyToggle is a real component
-    const Component = PartyToggle as unknown as React.ComponentType<{ isSolo: boolean }>;
+    const Component = PartyToggle as unknown as React.ComponentType<{
+      isSolo: boolean;
+    }>;
 
     render(
       <MemoryRouter initialEntries={["/cases/test-id?as=initiator"]}>
         <Routes>
-          <Route
-            path="/cases/:caseId"
-            element={<Component isSolo={true} />}
-          />
+          <Route path="/cases/:caseId" element={<Component isSolo={true} />} />
         </Routes>
       </MemoryRouter>,
     );
@@ -55,15 +54,14 @@ describe("AC 2: PartyToggle appears in top nav for solo cases only", () => {
   });
 
   test("PartyToggle does NOT render when isSolo is false", () => {
-    const Component = PartyToggle as unknown as React.ComponentType<{ isSolo: boolean }>;
+    const Component = PartyToggle as unknown as React.ComponentType<{
+      isSolo: boolean;
+    }>;
 
     render(
       <MemoryRouter initialEntries={["/cases/test-id"]}>
         <Routes>
-          <Route
-            path="/cases/:caseId"
-            element={<Component isSolo={false} />}
-          />
+          <Route path="/cases/:caseId" element={<Component isSolo={false} />} />
         </Routes>
       </MemoryRouter>,
     );
@@ -74,15 +72,14 @@ describe("AC 2: PartyToggle appears in top nav for solo cases only", () => {
   });
 
   test("PartyToggle shows two segments for initiator and invitee", () => {
-    const Component = PartyToggle as unknown as React.ComponentType<{ isSolo: boolean }>;
+    const Component = PartyToggle as unknown as React.ComponentType<{
+      isSolo: boolean;
+    }>;
 
     render(
       <MemoryRouter initialEntries={["/cases/test-id?as=initiator"]}>
         <Routes>
-          <Route
-            path="/cases/:caseId"
-            element={<Component isSolo={true} />}
-          />
+          <Route path="/cases/:caseId" element={<Component isSolo={true} />} />
         </Routes>
       </MemoryRouter>,
     );

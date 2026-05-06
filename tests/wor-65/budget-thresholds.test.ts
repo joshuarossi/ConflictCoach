@@ -20,7 +20,9 @@ import type { Message } from "../../convex/lib/prompts";
 function makeMessageWithTokens(approxTokens: number): Message {
   // Using word-based estimation (word * 1.3 ≈ tokens), generate enough words
   const wordCount = Math.ceil(approxTokens / 1.3);
-  const content = Array.from({ length: wordCount }, (_, i) => `word${i}`).join(" ");
+  const content = Array.from({ length: wordCount }, (_, i) => `word${i}`).join(
+    " ",
+  );
   return { role: "user", content };
 }
 

@@ -44,15 +44,9 @@ describe("ChatWindow auto-scroll behavior", () => {
   }
 
   it("ChatWindow renders a scrollable message list with auto-scroll to the latest message", () => {
-    const messages = [
-      makeMessage("1", "Hello"),
-      makeMessage("2", "World"),
-    ];
+    const messages = [makeMessage("1", "Hello"), makeMessage("2", "World")];
     const { container } = render(
-      <ChatWindow
-        messages={messages}
-        onSendMessage={vi.fn()}
-      />
+      <ChatWindow messages={messages} onSendMessage={vi.fn()} />,
     );
     const log = container.querySelector('[role="log"]');
     expect(log).not.toBeNull();
@@ -60,14 +54,11 @@ describe("ChatWindow auto-scroll behavior", () => {
 
   it("auto-scroll is disabled when the user scrolls up and re-enabled when they scroll back to the bottom", () => {
     const messages = Array.from({ length: 20 }, (_, i) =>
-      makeMessage(String(i), `Message ${i}`)
+      makeMessage(String(i), `Message ${i}`),
     );
 
     const { container, rerender } = render(
-      <ChatWindow
-        messages={messages}
-        onSendMessage={vi.fn()}
-      />
+      <ChatWindow messages={messages} onSendMessage={vi.fn()} />,
     );
 
     const log = container.querySelector('[role="log"]') as HTMLElement;
@@ -86,12 +77,7 @@ describe("ChatWindow auto-scroll behavior", () => {
       ...messages,
       makeMessage("new-1", "New message while scrolled up"),
     ];
-    rerender(
-      <ChatWindow
-        messages={newMessages}
-        onSendMessage={vi.fn()}
-      />
-    );
+    rerender(<ChatWindow messages={newMessages} onSendMessage={vi.fn()} />);
 
     // Should NOT have auto-scrolled — scrollTop should remain where the user put it
     expect(scroll.getScrollTop()).toBeLessThan(500);
@@ -107,12 +93,7 @@ describe("ChatWindow auto-scroll behavior", () => {
       ...newMessages,
       makeMessage("new-2", "Another new message"),
     ];
-    rerender(
-      <ChatWindow
-        messages={moreMessages}
-        onSendMessage={vi.fn()}
-      />
-    );
+    rerender(<ChatWindow messages={moreMessages} onSendMessage={vi.fn()} />);
 
     // scrollTo should have been called to scroll to bottom
     expect(log.scrollTo).toHaveBeenCalled();

@@ -44,9 +44,7 @@ describe("AC: Admin templates empty state", () => {
       </MemoryRouter>,
     );
 
-    const message = screen.getByText(
-      /no templates yet/i,
-    );
+    const message = screen.getByText(/no templates yet/i);
     expect(message).toBeVisible();
   });
 });

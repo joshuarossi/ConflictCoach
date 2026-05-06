@@ -202,9 +202,7 @@ describe("WOR-68: Modal focus trap — AlertDialog (mark-complete confirmation)"
 describe("WOR-68: Modal focus trap — PrivacyBanner dialog", () => {
   it("PrivacyBanner dialog traps focus when open", async () => {
     const user = userEvent.setup();
-    render(
-      <PrivacyBanner text="This conversation is private to you." />,
-    );
+    render(<PrivacyBanner text="This conversation is private to you." />);
 
     // Open the privacy dialog by clicking the lock button
     const lockButton = screen.getByLabelText(/lock/i);

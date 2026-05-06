@@ -37,14 +37,16 @@ test.describe("WOR-57: Invite page — logged-in", () => {
     await page.goto(`/invite/${VALID_TOKEN}`);
 
     // Wait for the view to load
-    await expect(
-      page.getByRole("button", { name: /accept/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("button", { name: /accept/i })).toBeVisible({
+      timeout: 10_000,
+    });
 
     // The page body should not contain the initiator's private description
     // or desiredOutcome content. We snapshot the page text and verify absence
     // of section headings that would indicate private fields are rendered.
-    const bodyText = await page.locator("main, [role='main'], body").innerText();
+    const bodyText = await page
+      .locator("main, [role='main'], body")
+      .innerText();
     expect(bodyText).not.toMatch(/desired\s*outcome/i);
   });
 
@@ -62,9 +64,7 @@ test.describe("WOR-57: Invite page — logged-in", () => {
     ).toBeVisible();
   });
 
-  test("AC5: clicking Accept routes to invitee case form", async ({
-    page,
-  }) => {
+  test("AC5: clicking Accept routes to invitee case form", async ({ page }) => {
     await page.goto(`/invite/${VALID_TOKEN}`);
 
     const acceptBtn = page.getByRole("button", { name: /accept/i });
@@ -90,9 +90,9 @@ test.describe("WOR-57: Invite page — logged-in", () => {
     await page.waitForURL(/\/(dashboard|invite)/, { timeout: 15_000 });
 
     // Verify the decline resulted in a closed/abandoned state visible to the user
-    await expect(
-      page.getByText(/declined|closed|abandoned/i),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(/declined|closed|abandoned/i)).toBeVisible({
+      timeout: 5_000,
+    });
   });
 
   test("AC8: after accepting, invitee case form has mainTopic, description, and desiredOutcome fields", async ({
@@ -108,9 +108,7 @@ test.describe("WOR-57: Invite page — logged-in", () => {
     await page.waitForURL(/\/case\/.*/, { timeout: 15_000 });
 
     // The invitee case form should have the required fields
-    await expect(
-      page.getByLabel(/topic/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByLabel(/topic/i)).toBeVisible({ timeout: 10_000 });
     await expect(page.getByLabel(/description/i)).toBeVisible();
     await expect(page.getByLabel(/desired outcome/i)).toBeVisible();
   });

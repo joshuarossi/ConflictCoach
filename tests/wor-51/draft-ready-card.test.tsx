@@ -28,9 +28,7 @@ describe("AC5: DraftReadyCard renders when finalDraft is set", () => {
     render(<DraftReadyCard {...defaultProps} />);
 
     // The draft text should be visible
-    expect(
-      screen.getByText(defaultProps.draftText),
-    ).toBeInTheDocument();
+    expect(screen.getByText(defaultProps.draftText)).toBeInTheDocument();
   });
 
   it("visually highlights the card (distinct styling from regular messages)", () => {

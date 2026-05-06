@@ -99,9 +99,7 @@ test.describe("AC7: Send calls sendFinalDraft — ONLY path to joint chat", () =
     await openPanelAndGetDraft(page);
 
     // Click "Send this message"
-    await page
-      .getByRole("button", { name: /send this message/i })
-      .click();
+    await page.getByRole("button", { name: /send this message/i }).click();
 
     // Draft Coach panel should close
     await expect(
@@ -142,9 +140,7 @@ test.describe("AC8: Edit drops draft text into joint chat input", () => {
     await openPanelAndGetDraft(page);
 
     // Click "Edit before sending"
-    await page
-      .getByRole("button", { name: /edit before sending/i })
-      .click();
+    await page.getByRole("button", { name: /edit before sending/i }).click();
 
     // Panel should close
     await expect(

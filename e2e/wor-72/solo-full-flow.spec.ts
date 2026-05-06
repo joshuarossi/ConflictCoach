@@ -66,7 +66,9 @@ test.describe("WOR-72: Solo full flow E2E", () => {
     const outcomeInput = page
       .getByRole("textbox", { name: /outcome/i })
       .or(page.getByPlaceholder(/outcome|hope to achieve/i));
-    await outcomeInput.fill("Agree on realistic deadlines we can both commit to.");
+    await outcomeInput.fill(
+      "Agree on realistic deadlines we can both commit to.",
+    );
 
     // Expand Advanced section and enable solo mode
     const advancedToggle = page
@@ -105,9 +107,7 @@ test.describe("WOR-72: Solo full flow E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Verify privacy banner is visible
-    const privacyBanner = page
-      .getByText(/private|confidential/i)
-      .first();
+    const privacyBanner = page.getByText(/private|confidential/i).first();
     await expect(privacyBanner).toBeVisible({ timeout: 10_000 });
 
     // Send a message as initiator
@@ -121,9 +121,9 @@ test.describe("WOR-72: Solo full flow E2E", () => {
     await initiatorInput.press("Enter");
 
     // Wait for the user message to appear
-    await expect(
-      page.getByText(/deadlines keep changing/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/deadlines keep changing/i)).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Wait for mock AI response to complete
     // The AI response message appearing is the authoritative signal;
@@ -170,12 +170,14 @@ test.describe("WOR-72: Solo full flow E2E", () => {
           .getByRole("textbox", { name: /message/i })
           .or(page.getByPlaceholder(/type|message/i)),
       ),
-    ).toBeDisabled({ timeout: 5_000 }).catch(async () => {
-      // Input may be removed entirely rather than disabled
-      await expect(
-        page.getByText(/completed|read.only|coaching complete/i),
-      ).toBeVisible({ timeout: 5_000 });
-    });
+    )
+      .toBeDisabled({ timeout: 5_000 })
+      .catch(async () => {
+        // Input may be removed entirely rather than disabled
+        await expect(
+          page.getByText(/completed|read.only|coaching complete/i),
+        ).toBeVisible({ timeout: 5_000 });
+      });
 
     // -----------------------------------------------------------------------
     // AC 3: Toggles to Invitee — sends private coaching messages, marks complete
@@ -184,14 +186,12 @@ test.describe("WOR-72: Solo full flow E2E", () => {
     await page.waitForLoadState("networkidle");
 
     // Verify privacy banner visible for invitee too
-    await expect(
-      page.getByText(/private|confidential/i).first(),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/private|confidential/i).first()).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Verify initiator's message is NOT visible (data isolation)
-    await expect(
-      page.getByText(/deadlines keep changing/i),
-    ).not.toBeVisible();
+    await expect(page.getByText(/deadlines keep changing/i)).not.toBeVisible();
 
     // Send a message as invitee
     const inviteeInput = page
@@ -204,9 +204,9 @@ test.describe("WOR-72: Solo full flow E2E", () => {
     await inviteeInput.press("Enter");
 
     // Wait for user message
-    await expect(
-      page.getByText(/overwhelmed by the volume/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByText(/overwhelmed by the volume/i)).toBeVisible({
+      timeout: 10_000,
+    });
 
     // Wait for AI response
     await streamingIndicator
@@ -322,9 +322,9 @@ test.describe("WOR-72: Solo full flow E2E", () => {
     await expect(draftPanel).toBeVisible({ timeout: 5_000 });
 
     // Verify privacy banner in draft panel
-    await expect(
-      draftPanel.getByText(/private|only you/i).first(),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(draftPanel.getByText(/private|only you/i).first()).toBeVisible(
+      { timeout: 5_000 },
+    );
 
     // Send a message in the draft coach conversation
     const draftInput = draftPanel.getByRole("textbox");
@@ -373,7 +373,9 @@ test.describe("WOR-72: Solo full flow E2E", () => {
     // The draft was about weekly check-ins / priorities — or any new user message
     // that wasn't there before the draft send. Also accept the message count increasing.
     await expect(
-      jointChatMessages.locator('[data-author-type="USER"], [data-role="user"]').last(),
+      jointChatMessages
+        .locator('[data-author-type="USER"], [data-role="user"]')
+        .last(),
     ).toBeVisible({ timeout: 10_000 });
 
     // -----------------------------------------------------------------------
@@ -430,9 +432,9 @@ test.describe("WOR-72: Solo full flow E2E", () => {
     await expect(confirmationBanner.first()).toBeVisible({ timeout: 10_000 });
 
     // Verify summary text is shown
-    await expect(
-      page.getByText(/weekly priority check-ins/i),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(page.getByText(/weekly priority check-ins/i)).toBeVisible({
+      timeout: 5_000,
+    });
 
     // Click "Confirm" to accept the closure
     const confirmClosureButton = page.getByRole("button", {
@@ -458,9 +460,7 @@ test.describe("WOR-72: Solo full flow E2E", () => {
 
     // Confirm the case topic is inside the Closed section, not elsewhere
     await expect(
-      closedSection
-        .first()
-        .getByText(/disagreement about project deadlines/i),
+      closedSection.first().getByText(/disagreement about project deadlines/i),
     ).toBeVisible({ timeout: 10_000 });
   });
 });

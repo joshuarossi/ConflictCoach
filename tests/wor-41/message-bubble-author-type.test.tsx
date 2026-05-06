@@ -13,7 +13,7 @@ describe("MessageBubble renders differently by author type", () => {
 
   it("user messages are right-aligned with --bg-surface background", () => {
     const { container } = render(
-      <MessageBubble {...baseProps} authorType="USER" />
+      <MessageBubble {...baseProps} authorType="USER" />,
     );
 
     const bubble = container.firstElementChild as HTMLElement;
@@ -23,16 +23,16 @@ describe("MessageBubble renders differently by author type", () => {
     // The bubble or its parent should indicate right alignment
     expect(
       classes.includes("self-end") ||
-      classes.includes("ml-auto") ||
-      classes.includes("items-end") ||
-      styles.justifyContent === "flex-end" ||
-      styles.alignSelf === "flex-end"
+        classes.includes("ml-auto") ||
+        classes.includes("items-end") ||
+        styles.justifyContent === "flex-end" ||
+        styles.alignSelf === "flex-end",
     ).toBe(true);
   });
 
   it("coach messages are left-aligned with --accent-subtle background and a Sparkles icon", () => {
     const { container } = render(
-      <MessageBubble {...baseProps} authorType="COACH" />
+      <MessageBubble {...baseProps} authorType="COACH" />,
     );
 
     const bubble = container.firstElementChild as HTMLElement;
@@ -40,21 +40,21 @@ describe("MessageBubble renders differently by author type", () => {
     // Should be left-aligned (default or explicit)
     expect(
       classes.includes("self-start") ||
-      classes.includes("mr-auto") ||
-      classes.includes("items-start") ||
-      !classes.includes("self-end")
+        classes.includes("mr-auto") ||
+        classes.includes("items-start") ||
+        !classes.includes("self-end"),
     ).toBe(true);
 
     // Should have Sparkles icon — look for svg or an element with an accessible name
     const sparkles = container.querySelector(
-      '[data-testid="sparkles-icon"], [aria-label*="coach"], svg'
+      '[data-testid="sparkles-icon"], [aria-label*="coach"], svg',
     );
     expect(sparkles).not.toBeNull();
   });
 
   it("system messages have a distinct style", () => {
     const { container } = render(
-      <MessageBubble {...baseProps} authorType="SYSTEM" />
+      <MessageBubble {...baseProps} authorType="SYSTEM" />,
     );
 
     const bubble = container.firstElementChild as HTMLElement;

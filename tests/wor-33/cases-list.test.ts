@@ -178,9 +178,7 @@ function createMockCtx(config: {
 }) {
   return {
     auth: {
-      getUserIdentity: vi
-        .fn()
-        .mockResolvedValue(config.identity),
+      getUserIdentity: vi.fn().mockResolvedValue(config.identity),
     },
     db: {
       get: vi
@@ -191,30 +189,26 @@ function createMockCtx(config: {
       query: vi.fn().mockImplementation((table: string) => ({
         withIndex: vi
           .fn()
-          .mockImplementation(
-            (_name: string, pred?: (q: any) => any) => {
-              let rows = config.tables[table] ?? [];
-              if (pred) {
-                const eqs: Record<string, any> = {};
-                const qb: any = {
-                  eq(field: string, value: any) {
-                    eqs[field] = value;
-                    return qb;
-                  },
-                };
-                pred(qb);
-                rows = rows.filter((doc: any) =>
-                  Object.entries(eqs).every(
-                    ([f, val]) => doc[f] === val,
-                  ),
-                );
-              }
-              return {
-                first: vi.fn().mockResolvedValue(rows[0] ?? null),
-                collect: vi.fn().mockResolvedValue([...rows]),
+          .mockImplementation((_name: string, pred?: (q: any) => any) => {
+            let rows = config.tables[table] ?? [];
+            if (pred) {
+              const eqs: Record<string, any> = {};
+              const qb: any = {
+                eq(field: string, value: any) {
+                  eqs[field] = value;
+                  return qb;
+                },
               };
-            },
-          ),
+              pred(qb);
+              rows = rows.filter((doc: any) =>
+                Object.entries(eqs).every(([f, val]) => doc[f] === val),
+              );
+            }
+            return {
+              first: vi.fn().mockResolvedValue(rows[0] ?? null),
+              collect: vi.fn().mockResolvedValue([...rows]),
+            };
+          }),
       })),
     },
   };
@@ -224,9 +218,7 @@ function createMockCtx(config: {
 function getHandler(fn: any): (...args: any[]) => Promise<any> {
   if (typeof fn === "function") return fn;
   if (fn?.handler) return fn.handler;
-  throw new Error(
-    "Cannot extract handler — list query is not yet implemented",
-  );
+  throw new Error("Cannot extract handler — list query is not yet implemented");
 }
 
 /** Standard context: userA is authenticated, all test data present. */
@@ -368,9 +360,7 @@ describe("AC2: Each case includes required fields", () => {
 
       // Other party's display name (flexible field name)
       const displayName =
-        item.otherPartyDisplayName ??
-        item.otherPartyName ??
-        item.displayName;
+        item.otherPartyDisplayName ?? item.otherPartyName ?? item.displayName;
       expect(typeof displayName).toBe("string");
       expect(displayName.length).toBeGreaterThan(0);
     }
@@ -382,9 +372,7 @@ describe("AC2: Each case includes required fields", () => {
     const result = await handler(ctx, {});
 
     // For case1: userA is initiator, other party is Bob
-    const case1Item = result.find(
-      (r: any) => (r._id ?? r.id) === CASE_1_ID,
-    );
+    const case1Item = result.find((r: any) => (r._id ?? r.id) === CASE_1_ID);
     const case1Name =
       case1Item.otherPartyDisplayName ??
       case1Item.otherPartyName ??
@@ -392,9 +380,7 @@ describe("AC2: Each case includes required fields", () => {
     expect(case1Name).toBe("Bob");
 
     // For case2: userA is invitee, other party is also Bob (initiator)
-    const case2Item = result.find(
-      (r: any) => (r._id ?? r.id) === CASE_2_ID,
-    );
+    const case2Item = result.find((r: any) => (r._id ?? r.id) === CASE_2_ID);
     const case2Name =
       case2Item.otherPartyDisplayName ??
       case2Item.otherPartyName ??
@@ -452,9 +438,7 @@ describe("AC3: No private content exposed — only hasCompletedPC", () => {
     const result = await handler(ctx, {});
 
     // Case1: Bob has privateCoachingCompletedAt=2800 → hasCompletedPC=true
-    const case1Item = result.find(
-      (r: any) => (r._id ?? r.id) === CASE_1_ID,
-    );
+    const case1Item = result.find((r: any) => (r._id ?? r.id) === CASE_1_ID);
     expect(case1Item).toBeDefined();
     const pc1 =
       case1Item.hasCompletedPC ??
@@ -469,9 +453,7 @@ describe("AC3: No private content exposed — only hasCompletedPC", () => {
     const result = await handler(ctx, {});
 
     // Case2: Bob has privateCoachingCompletedAt=undefined → hasCompletedPC=false
-    const case2Item = result.find(
-      (r: any) => (r._id ?? r.id) === CASE_2_ID,
-    );
+    const case2Item = result.find((r: any) => (r._id ?? r.id) === CASE_2_ID);
     expect(case2Item).toBeDefined();
     const pc2 =
       case2Item.hasCompletedPC ??
