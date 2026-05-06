@@ -11,7 +11,7 @@ export function NewCasePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
-  async function handleSubmit(values: NewCaseFormValues, isSolo: boolean) {
+  async function handleSubmit(values: NewCaseFormValues) {
     setIsSubmitting(true);
     setSubmitError(null);
     try {
@@ -20,9 +20,9 @@ export function NewCasePage() {
         mainTopic: values.mainTopic.trim(),
         description: values.description.trim() || undefined,
         desiredOutcome: values.desiredOutcome.trim() || undefined,
-        isSolo,
+        isSolo: values.isSolo,
       });
-      navigate(`/cases/${result.caseId}`);
+      navigate(`/cases/${result.caseId}/invite`);
     } catch (err) {
       setSubmitError(
         err instanceof Error ? err.message : "Failed to create case",
@@ -35,11 +35,7 @@ export function NewCasePage() {
   return (
     <div>
       <h1 className="text-h1 font-bold text-text-primary mb-6">New Case</h1>
-      <NewCaseForm
-        onSubmit={(values) => handleSubmit(values, false)}
-        onSubmitSolo={(values) => handleSubmit(values, true)}
-        disabled={isSubmitting}
-      />
+      <NewCaseForm onSubmit={handleSubmit} disabled={isSubmitting} />
       {submitError && (
         <p className="mt-4 text-meta text-danger" role="alert">
           {submitError}
