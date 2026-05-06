@@ -13,7 +13,6 @@ import { describe, test, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// @ts-expect-error WOR-53 red-state import: CaseClosureModal is created by task-implement.
 import { CaseClosureModal } from "../../src/components/CaseClosureModal";
 
 describe("WOR-53: CaseClosureModal", () => {

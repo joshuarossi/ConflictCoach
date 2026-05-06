@@ -13,7 +13,6 @@ import { describe, test, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// @ts-expect-error WOR-53 red-state import: ClosureConfirmationBanner is created by task-implement.
 import { ClosureConfirmationBanner } from "../../src/components/ClosureConfirmationBanner";
 
 describe("WOR-53: ClosureConfirmationBanner", () => {
