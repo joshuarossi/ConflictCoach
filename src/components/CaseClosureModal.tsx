@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,14 @@ export function CaseClosureModal({
   const [summary, setSummary] = useState("");
   const [reason, setReason] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
+  const triggerRef = useRef<Element | null>(null);
+
+  // Capture the element that had focus when the dialog opens
+  useEffect(() => {
+    if (open) {
+      triggerRef.current = document.activeElement;
+    }
+  }, [open]);
 
   const handleClose = () => {
     setSelected("resolved");
@@ -66,6 +74,12 @@ export function CaseClosureModal({
       <DialogContent
         role="dialog"
         aria-modal="true"
+        onCloseAutoFocus={(e) => {
+          e.preventDefault();
+          if (triggerRef.current instanceof HTMLElement) {
+            triggerRef.current.focus();
+          }
+        }}
       >
         <DialogHeader>
           <DialogTitle>Close this case</DialogTitle>
