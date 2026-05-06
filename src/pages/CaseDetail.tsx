@@ -5,6 +5,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { ConvexErrorBoundary } from "@/components/layout/ConvexErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 import { SoloBanner } from "@/components/SoloBanner";
+import { usePhaseChangeFocus } from "@/hooks/usePhaseChangeFocus";
 
 /**
  * Maps a case status to a human-readable phase name for display.
@@ -136,6 +137,10 @@ function CaseDetailContent() {
 
   const caseData = useQuery(api.cases.get, { caseId });
 
+  // Move focus to the primary heading when the case phase changes
+  const status = caseData?.status as string | undefined;
+  usePhaseChangeFocus(status);
+
   // Loading state
   if (caseData === undefined) {
     return <CaseDetailSkeleton />;
@@ -146,11 +151,12 @@ function CaseDetailContent() {
     return <NotFoundView />;
   }
 
-  const status = caseData.status as string;
+  // After guards, status is guaranteed to be a string
+  const caseStatus = caseData.status as string;
 
   // Route to the correct sub-view based on case status
   function renderSubView() {
-    switch (status) {
+    switch (caseStatus) {
       case "DRAFT_PRIVATE_COACHING":
       case "BOTH_PRIVATE_COACHING":
         return <PrivateCoachingSubView caseId={caseIdParam!} />;
@@ -161,10 +167,10 @@ function CaseDetailContent() {
       case "CLOSED_RESOLVED":
       case "CLOSED_UNRESOLVED":
       case "CLOSED_ABANDONED":
-        return <ClosedCaseSubView status={status} />;
+        return <ClosedCaseSubView status={caseStatus} />;
       default:
         return (
-          <p className="text-gray-600">Unknown case status: {status}</p>
+          <p className="text-gray-600">Unknown case status: {caseStatus}</p>
         );
     }
   }
@@ -180,7 +186,7 @@ function CaseDetailContent() {
           {isSolo ? "Solo Case" : `Case with ${caseData.otherPartyName || "the other party"}`}
         </h1>
         <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
-          {getPhaseLabel(status)}
+          {getPhaseLabel(caseStatus)}
         </span>
       </header>
       {renderSubView()}

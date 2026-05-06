@@ -133,7 +133,7 @@ export function TopNav({ children }: TopNavProps) {
       ? `Case with ${otherPartyName}`
       : `Case ${params.caseId}`;
     return (
-      <nav className="border-b bg-white px-4 py-3">
+      <nav aria-label="Case navigation" className="border-b bg-white px-4 py-3">
         <div className="flex items-center gap-3">
           <Link
             to="/dashboard"
@@ -159,7 +159,7 @@ export function TopNav({ children }: TopNavProps) {
 
   // Dashboard / non-case mode
   return (
-    <nav className="border-b bg-white px-4 py-3">
+    <nav aria-label="Main navigation" className="border-b bg-white px-4 py-3">
       <div className="flex items-center justify-between">
         <Link to="/dashboard" className="text-lg font-bold text-gray-900">
           Conflict Coach
