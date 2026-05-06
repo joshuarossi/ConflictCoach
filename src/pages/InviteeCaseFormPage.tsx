@@ -33,11 +33,11 @@ function NotFoundView() {
       className="flex flex-col items-center justify-center py-24 px-4"
       data-testid="case-not-found"
     >
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">404</h1>
-      <p className="text-lg text-gray-600">Case not found.</p>
+      <h1 className="text-h1 font-medium text-text-primary mb-2">404</h1>
+      <p className="text-h3 text-text-secondary">Case not found.</p>
       <Link
         to="/dashboard"
-        className="mt-4 text-blue-600 hover:text-blue-800 underline"
+        className="mt-4 text-accent hover:text-accent-hover underline"
       >
         Back to Dashboard
       </Link>

@@ -203,8 +203,11 @@ describe("WOR-46: ReadyForJointView", () => {
     test("the Enter Joint Session button is the only primary-styled button", () => {
       const { container } = renderView();
       const enterBtn = screen.getByRole("button", { name: /enter joint session/i });
-      // shadcn/ui default (primary) variant uses "bg-primary" class
-      expect(enterBtn.className).toMatch(/bg-primary/);
+      // The design system's primary action uses bg-accent (token-driven,
+      // theme-aware) — see src/components/ui/button.tsx default variant.
+      // bg-primary is the shadcn/ui out-of-box class but Conflict Coach
+      // overrides it with the accent token. Test against the actual class.
+      expect(enterBtn.className).toMatch(/bg-accent/);
       // Non-primary variant classes should be absent
       const nonPrimaryClasses = ["bg-secondary", "bg-destructive", "border-input"];
       for (const cls of nonPrimaryClasses) {
@@ -213,7 +216,7 @@ describe("WOR-46: ReadyForJointView", () => {
       // No other button on the page should have the primary variant class
       const allButtons = container.querySelectorAll("button");
       const otherPrimaryButtons = Array.from(allButtons).filter(
-        (btn) => btn !== enterBtn && btn.className.match(/bg-primary/),
+        (btn) => btn !== enterBtn && btn.className.match(/bg-accent/),
       );
       expect(otherPrimaryButtons).toHaveLength(0);
     });
