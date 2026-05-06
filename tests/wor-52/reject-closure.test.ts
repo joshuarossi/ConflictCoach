@@ -65,9 +65,7 @@ describe("AC4: rejectClosure clears closureProposed flag", () => {
     const patchCalls = ctx.db.patch.mock.calls as unknown[][];
     const casePatch = patchCalls.find((call) => call[0] === CASE_ID);
     if (casePatch) {
-      expect(
-        (casePatch[1] as Record<string, unknown>).status,
-      ).toBeUndefined();
+      expect((casePatch[1] as Record<string, unknown>).status).toBeUndefined();
     }
   });
 

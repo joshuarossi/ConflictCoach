@@ -12,7 +12,11 @@
  * ../../convex/admin/templates.
  */
 import { describe, test, expect, vi } from "vitest";
-import { createTemplate, publishVersion, archiveTemplate } from "./__stubs__/admin-templates";
+import {
+  createTemplate,
+  publishVersion,
+  archiveTemplate,
+} from "./__stubs__/admin-templates";
 
 // ---------------------------------------------------------------------------
 // Mock context with audit log tracking

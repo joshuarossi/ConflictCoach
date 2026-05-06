@@ -21,7 +21,8 @@ const EXPECTED_COMPRESSION_PROMPT =
 
 const EXPECTED_MODEL_PREFIX = /^claude-haiku-/;
 
-const CANNED_SUMMARY = "Both parties discussed communication issues. Key facts: disagreement over decision-making process. Emotional tone: frustrated but willing.";
+const CANNED_SUMMARY =
+  "Both parties discussed communication issues. Key facts: disagreement over decision-making process. Emotional tone: frustrated but willing.";
 
 function createMockAnthropicClient() {
   const createFn = vi.fn().mockResolvedValue({
@@ -44,7 +45,10 @@ describe("Haiku is called with compression prompt", () => {
   test("compressMessages calls Haiku with the exact compression prompt from the spec", async () => {
     const mockClient = createMockAnthropicClient();
 
-    await compressMessages(testMessages, mockClient as unknown as import("@anthropic-ai/sdk").default);
+    await compressMessages(
+      testMessages,
+      mockClient as unknown as import("@anthropic-ai/sdk").default,
+    );
 
     const call = mockClient._createFn.mock.calls[0][0];
     // System prompt must contain the exact compression instruction
@@ -54,7 +58,10 @@ describe("Haiku is called with compression prompt", () => {
   test("compressMessages uses a Haiku-family model", async () => {
     const mockClient = createMockAnthropicClient();
 
-    await compressMessages(testMessages, mockClient as unknown as import("@anthropic-ai/sdk").default);
+    await compressMessages(
+      testMessages,
+      mockClient as unknown as import("@anthropic-ai/sdk").default,
+    );
 
     const call = mockClient._createFn.mock.calls[0][0];
     expect(call.model).toMatch(EXPECTED_MODEL_PREFIX);
@@ -63,7 +70,10 @@ describe("Haiku is called with compression prompt", () => {
   test("compressMessages returns the Haiku response as the summary text", async () => {
     const mockClient = createMockAnthropicClient();
 
-    const summary = await compressMessages(testMessages, mockClient as unknown as import("@anthropic-ai/sdk").default);
+    const summary = await compressMessages(
+      testMessages,
+      mockClient as unknown as import("@anthropic-ai/sdk").default,
+    );
 
     expect(summary).toBe(CANNED_SUMMARY);
   });
@@ -71,7 +81,10 @@ describe("Haiku is called with compression prompt", () => {
   test("compressMessages is a one-shot non-streaming call", async () => {
     const mockClient = createMockAnthropicClient();
 
-    await compressMessages(testMessages, mockClient as unknown as import("@anthropic-ai/sdk").default);
+    await compressMessages(
+      testMessages,
+      mockClient as unknown as import("@anthropic-ai/sdk").default,
+    );
 
     // Should call messages.create (not messages.stream)
     expect(mockClient._createFn).toHaveBeenCalledTimes(1);
@@ -83,7 +96,10 @@ describe("Haiku is called with compression prompt", () => {
   test("compressMessages passes the conversation content to Haiku", async () => {
     const mockClient = createMockAnthropicClient();
 
-    await compressMessages(testMessages, mockClient as unknown as import("@anthropic-ai/sdk").default);
+    await compressMessages(
+      testMessages,
+      mockClient as unknown as import("@anthropic-ai/sdk").default,
+    );
 
     const call = mockClient._createFn.mock.calls[0][0];
     // The messages content should include the conversation being compressed

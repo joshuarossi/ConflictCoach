@@ -55,7 +55,14 @@ vi.mock("react-router-dom", () => ({
   useLocation: vi.fn(() => ({ pathname: "/dashboard" })),
   useNavigate: vi.fn(() => vi.fn()),
   useSearchParams: vi.fn(() => [new URLSearchParams(), vi.fn()]),
-  Link: ({ children, ...props }: { children: React.ReactNode; to: string; className?: string }) => (
+  Link: ({
+    children,
+    ...props
+  }: {
+    children: React.ReactNode;
+    to: string;
+    className?: string;
+  }) => (
     <a href={props.to} {...props}>
       {children}
     </a>
@@ -105,9 +112,7 @@ describe("WOR-68: Button labels — all buttons have visible labels or aria-labe
   });
 
   it("MessageInput buttons are all labelled", () => {
-    const { container } = render(
-      <MessageInput onSend={vi.fn()} />,
-    );
+    const { container } = render(<MessageInput onSend={vi.fn()} />);
     assertAllButtonsLabelled(container);
   });
 

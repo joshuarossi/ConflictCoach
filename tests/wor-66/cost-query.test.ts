@@ -7,7 +7,11 @@
 import { describe, test, expect, vi } from "vitest";
 
 // @ts-expect-error WOR-66 red-state import: implementation is created by task-implement.
-import { calculateCost, accumulateUsage, type AiUsageEntry } from "../../convex/lib/costBudget";
+import {
+  calculateCost,
+  accumulateUsage,
+  type AiUsageEntry,
+} from "../../convex/lib/costBudget";
 import { getCaseCost } from "../../convex/cases";
 
 describe("WOR-66: Per-case cost queryable", () => {
@@ -53,9 +57,17 @@ describe("WOR-66: Per-case cost queryable", () => {
     test("getCaseCost returns totalCost, totalInputTokens, totalOutputTokens", async () => {
       const mockCase = {
         _id: "case-123" as any,
-        aiUsage: { totalInputTokens: 5000, totalOutputTokens: 2000, totalCostUsd: 0.05 },
+        aiUsage: {
+          totalInputTokens: 5000,
+          totalOutputTokens: 2000,
+          totalCostUsd: 0.05,
+        },
       };
-      const mockAdminUser = { _id: "admin-user", role: "ADMIN", email: "admin@test" };
+      const mockAdminUser = {
+        _id: "admin-user",
+        role: "ADMIN",
+        email: "admin@test",
+      };
       // db.get is called twice: once with caseId (return case doc), once with
       // userId from `subject` (return admin user record). Convex Auth's
       // identity.subject is "<userId>|<sessionId>", so requireAuth/getCaseCost
@@ -75,7 +87,9 @@ describe("WOR-66: Per-case cost queryable", () => {
         },
       };
 
-      const result = await getCaseCost(mockCtx as any, { caseId: mockCase._id });
+      const result = await getCaseCost(mockCtx as any, {
+        caseId: mockCase._id,
+      });
 
       expect(result).toHaveProperty("totalCost");
       expect(result).toHaveProperty("totalInputTokens");
@@ -90,10 +104,18 @@ describe("WOR-66: Per-case cost queryable", () => {
         _id: "case-456" as any,
         partyAUserId: "other-user-a",
         partyBUserId: "other-user-b",
-        aiUsage: { totalInputTokens: 100, totalOutputTokens: 50, totalCost: 0.01 },
+        aiUsage: {
+          totalInputTokens: 100,
+          totalOutputTokens: 50,
+          totalCost: 0.01,
+        },
       };
       const mockCtx = {
-        auth: { getUserIdentity: vi.fn().mockResolvedValue({ subject: "non-participant-user" }) },
+        auth: {
+          getUserIdentity: vi
+            .fn()
+            .mockResolvedValue({ subject: "non-participant-user" }),
+        },
         db: { get: vi.fn().mockResolvedValue(mockCase) },
       };
 

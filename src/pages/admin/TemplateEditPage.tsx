@@ -35,7 +35,9 @@ const listVersionsQuery: FunctionReference<"query"> = (() => {
 })();
 
 const publishMutation: FunctionReference<"mutation"> = (() => {
-  const ref = makeFunctionReference<"mutation">("admin/templates:publishNewVersion");
+  const ref = makeFunctionReference<"mutation">(
+    "admin/templates:publishNewVersion",
+  );
   Object.defineProperty(ref, "toString", {
     value: () => "admin/templates:publishNewVersion",
     configurable: true,
@@ -102,8 +104,12 @@ export function TemplateEditPage() {
   const [category, setCategory] = useState<string | null>(null);
   const [name, setName] = useState<string | null>(null);
   const [globalGuidance, setGlobalGuidance] = useState<string | null>(null);
-  const [coachInstructions, setCoachInstructions] = useState<string | null>(null);
-  const [draftCoachInstructions, setDraftCoachInstructions] = useState<string | null>(null);
+  const [coachInstructions, setCoachInstructions] = useState<string | null>(
+    null,
+  );
+  const [draftCoachInstructions, setDraftCoachInstructions] = useState<
+    string | null
+  >(null);
   const [notes, setNotes] = useState("");
 
   const [publishing, setPublishing] = useState(false);
@@ -111,16 +117,21 @@ export function TemplateEditPage() {
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [archiving, setArchiving] = useState(false);
   const [archiveError, setArchiveError] = useState<string | null>(null);
-  const [viewingVersion, setViewingVersion] = useState<TemplateVersion | null>(null);
+  const [viewingVersion, setViewingVersion] = useState<TemplateVersion | null>(
+    null,
+  );
 
   // Derive current values from latest version when form hasn't been touched
   const latestVersion = versions?.[0];
 
   const formCategory = category ?? template?.category ?? "workplace";
   const formName = name ?? template?.name ?? "";
-  const formGlobalGuidance = globalGuidance ?? latestVersion?.globalGuidance ?? "";
-  const formCoachInstructions = coachInstructions ?? latestVersion?.coachInstructions ?? "";
-  const formDraftCoachInstructions = draftCoachInstructions ?? latestVersion?.draftCoachInstructions ?? "";
+  const formGlobalGuidance =
+    globalGuidance ?? latestVersion?.globalGuidance ?? "";
+  const formCoachInstructions =
+    coachInstructions ?? latestVersion?.coachInstructions ?? "";
+  const formDraftCoachInstructions =
+    draftCoachInstructions ?? latestVersion?.draftCoachInstructions ?? "";
 
   if (template === undefined || versions === undefined) {
     return (
@@ -162,7 +173,9 @@ export function TemplateEditPage() {
       setCoachInstructions(null);
       setDraftCoachInstructions(null);
     } catch (err) {
-      setPublishError(err instanceof Error ? err.message : "Failed to publish version");
+      setPublishError(
+        err instanceof Error ? err.message : "Failed to publish version",
+      );
     } finally {
       setPublishing(false);
     }
@@ -177,7 +190,9 @@ export function TemplateEditPage() {
       setShowArchiveModal(false);
       navigate("/admin/templates");
     } catch (err) {
-      setArchiveError(err instanceof Error ? err.message : "Failed to archive template");
+      setArchiveError(
+        err instanceof Error ? err.message : "Failed to archive template",
+      );
     } finally {
       setArchiving(false);
     }
@@ -188,7 +203,9 @@ export function TemplateEditPage() {
       <div className="px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-h1 font-medium text-text-primary">Edit Template</h1>
+            <h1 className="text-h1 font-medium text-text-primary">
+              Edit Template
+            </h1>
             <p className="text-text-secondary mt-1">{template.name}</p>
           </div>
           <Button
@@ -355,7 +372,9 @@ export function TemplateEditPage() {
                 Version History
               </h2>
               {versions.length === 0 ? (
-                <p className="text-text-tertiary text-label">No versions yet.</p>
+                <p className="text-text-tertiary text-label">
+                  No versions yet.
+                </p>
               ) : (
                 <div className="space-y-4">
                   {versions.map((ver) => (
@@ -444,8 +463,8 @@ export function TemplateEditPage() {
                 Version {viewingVersion.version} (Read-Only)
               </DialogTitle>
               <DialogDescription>
-                Published {formatAuditTimestamp(viewingVersion.publishedAt)}{" "}
-                by {viewingVersion.publishedByName || "Unknown"}
+                Published {formatAuditTimestamp(viewingVersion.publishedAt)} by{" "}
+                {viewingVersion.publishedByName || "Unknown"}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-2">

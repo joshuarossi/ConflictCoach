@@ -65,8 +65,8 @@ export function TestHooksMount(): null {
 
     window.__TEST_CREATE_CASE__ = async ({ email, category, isSolo }) => {
       const caseId = await convex.mutation(
-        (api as unknown as Record<string, Record<string, unknown>>)
-          .testSupport.createCaseForEmail as never,
+        (api as unknown as Record<string, Record<string, unknown>>).testSupport
+          .createCaseForEmail as never,
         { email, category, isSolo } as never,
       );
       return caseId as unknown as string;
@@ -84,15 +84,10 @@ export function TestHooksMount(): null {
       const moduleName = path.slice(0, colonIdx);
       const funcName = path.slice(colonIdx + 1);
 
-      const apiAny = api as unknown as Record<
-        string,
-        Record<string, unknown>
-      >;
+      const apiAny = api as unknown as Record<string, Record<string, unknown>>;
       const mod = apiAny[moduleName];
       if (!mod) {
-        throw new Error(
-          `Module "${moduleName}" not found in Convex API`,
-        );
+        throw new Error(`Module "${moduleName}" not found in Convex API`);
       }
       const funcRef = mod[funcName];
       if (!funcRef) {

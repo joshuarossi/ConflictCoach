@@ -3,12 +3,7 @@
  * with CLAUDE_MOCK=true
  */
 import { describe, test, expect } from "vitest";
-import {
-  loadCiWorkflow,
-  getJobs,
-  flattenRunSteps,
-  getSteps,
-} from "./helpers";
+import { loadCiWorkflow, getJobs, flattenRunSteps, getSteps } from "./helpers";
 
 describe("AC5: e2e job runs Playwright with CLAUDE_MOCK=true", () => {
   const workflow = loadCiWorkflow();
@@ -35,7 +30,7 @@ describe("AC5: e2e job runs Playwright with CLAUDE_MOCK=true", () => {
     const e2eJob = jobs.e2e;
 
     // CLAUDE_MOCK may be set as a job-level env, step-level env, or inline
-    const jobEnv = ((e2eJob?.env as Record<string, unknown>) ?? {});
+    const jobEnv = (e2eJob?.env as Record<string, unknown>) ?? {};
     const steps = getSteps(e2eJob);
     const stepEnvs = steps.flatMap((s) =>
       Object.entries((s.env ?? {}) as Record<string, unknown>),

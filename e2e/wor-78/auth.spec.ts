@@ -26,7 +26,9 @@ async function requestAndCaptureMagicLink(
   await page.getByRole("button", { name: /magic link/i }).click();
 
   // Confirmation UI should appear after sending
-  await expect(page.getByText(/check your email|link sent|magic link sent/i)).toBeVisible();
+  await expect(
+    page.getByText(/check your email|link sent|magic link sent/i),
+  ).toBeVisible();
 
   // Capture token from the mocked email system (CLAUDE_MOCK=true)
   const token = await page.evaluate(async () => {
@@ -116,7 +118,9 @@ test.describe("WOR-78: Auth lifecycle", () => {
     await expect(page).toHaveURL(/\/dashboard/);
 
     // Open user menu and click logout
-    await page.getByRole("button", { name: /user menu|account|profile/i }).click();
+    await page
+      .getByRole("button", { name: /user menu|account|profile/i })
+      .click();
     await page.getByRole("menuitem", { name: /log\s?out|sign\s?out/i }).click();
 
     // Should redirect to /login
@@ -140,7 +144,9 @@ test.describe("WOR-78: Auth lifecycle", () => {
     await expect(page).toHaveURL(/\/dashboard/);
 
     // Logout
-    await page.getByRole("button", { name: /user menu|account|profile/i }).click();
+    await page
+      .getByRole("button", { name: /user menu|account|profile/i })
+      .click();
     await page.getByRole("menuitem", { name: /log\s?out|sign\s?out/i }).click();
     await expect(page).toHaveURL(/\/login/);
 
@@ -207,13 +213,17 @@ test.describe("WOR-78: Auth lifecycle", () => {
 
     // Confirm we are on the dashboard
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByRole("heading", { name: /dashboard/i })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /dashboard/i }),
+    ).toBeVisible();
 
     // Reload the page
     await page.reload();
 
     // Should remain on the dashboard — not redirected to /login
     await expect(page).toHaveURL(/\/dashboard/);
-    await expect(page.getByRole("heading", { name: /dashboard/i })).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: /dashboard/i }),
+    ).toBeVisible();
   });
 });

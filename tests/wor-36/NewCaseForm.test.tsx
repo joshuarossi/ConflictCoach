@@ -328,9 +328,7 @@ describe("AC5: Solo mode under Advanced expandable section", () => {
     await progressToStep(user, "submit");
 
     // Look for a details/summary or equivalent disclosure element
-    expect(
-      screen.getByText(/Advanced/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Advanced/i)).toBeInTheDocument();
   });
 
   it("Advanced section is collapsed by default", async () => {

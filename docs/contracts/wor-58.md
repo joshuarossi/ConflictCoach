@@ -144,6 +144,7 @@ A **presentational** form component that mirrors steps 2–4 of `NewCaseForm.tsx
 - Its validation is simpler (only mainTopic required).
 
 Reuses the same UI patterns from `NewCaseForm.tsx`:
+
 - `PrivateFieldLabel` pattern (lock icon + "Private to you" helper text) for description and desiredOutcome fields.
 - 140-char soft limit character counter on mainTopic.
 - `autoGrow` textarea behavior for description and desiredOutcome.
@@ -153,6 +154,7 @@ Reuses the same UI patterns from `NewCaseForm.tsx`:
 Note: Rather than importing `PrivateFieldLabel` from NewCaseForm (which doesn't export it), this component should define its own identical copy or the implementation author may choose to extract it to a shared location. The contract does not mandate extraction — either approach is acceptable as long as the visual and accessibility behavior matches.
 
 Props interface:
+
 - `onSubmit(values: InviteeCaseFormValues)` — called with validated form values on submit.
 - `disabled?: boolean` — disables all inputs and the submit button (used during mutation in-flight).
 - `initialMainTopic?: string` — optional pre-fill hint. The invitee sees the initiator's mainTopic on the invite page but writes their own; this prop is available if the page wants to suggest it but is NOT required.
@@ -187,6 +189,7 @@ This matches the navigation target already established in `InviteAcceptPage.tsx`
 ### `api.cases.get` (existing query, read-only)
 
 Called with `{ caseId }`. Returns the case document including `status`, `category`, `isSolo`, `otherPartyName`, or `null` if not found. The form page uses this to:
+
 - Verify the user is a party (the query itself throws FORBIDDEN if not).
 - Display contextual information (e.g., "Case with {otherPartyName}") in the page header.
 - Potentially guard against rendering the form if the case is in a wrong state (though the mutation is the authoritative guard).
@@ -194,6 +197,7 @@ Called with `{ caseId }`. Returns the case document including `status`, `categor
 ### `api.cases.updateMyForm.updateMyForm` (new mutation)
 
 Called with `{ caseId: Id<"cases">, mainTopic: string, description?: string, desiredOutcome?: string }`. Writes to the caller's `partyStates` row. Fields consumed:
+
 - `mainTopic` — required, rendered in the main topic input.
 - `description` — optional, rendered in the private description textarea.
 - `desiredOutcome` — optional, rendered in the private desired outcome textarea.
@@ -202,38 +206,49 @@ Called with `{ caseId: Id<"cases">, mainTopic: string, description?: string, des
 ## Invariants
 
 ### Authentication required
+
 The `updateMyForm` mutation calls `requireAuth(ctx)` as its first operation. Unauthenticated callers receive an `UNAUTHENTICATED` error. This matches the pattern in `cases/create.ts`.
 
 ### Party authorization
+
 The mutation looks up the caller's `partyStates` row via `db.query("partyStates").withIndex("by_case_and_user", q => q.eq("caseId", caseId).eq("userId", user._id))`. If no row exists, the caller is not a party and receives a `FORBIDDEN` error. This is stricter than checking `cases.initiatorUserId / inviteeUserId` — it verifies the partyStates row was actually created (which happens during invite redemption).
 
 ### Form lock after coaching starts
+
 If the caller's `partyStates.privateCoachingCompletedAt` is set (not null/undefined), the mutation throws `FORBIDDEN` with a message like "Form is locked after private coaching completion." This prevents retroactive edits to form fields that the AI coach has already used as context.
 
 ### mainTopic validation
+
 `mainTopic` must be a non-empty string after `.trim()`. If empty, the mutation throws `INVALID_INPUT` with "mainTopic is required". The frontend enforces this with an inline error message before submission, but the backend is the authoritative validator.
 
 ### Privacy of description and desiredOutcome
+
 These fields are private to the filling party per the PRD visibility matrix (§6.1). The UI must display the lock icon (lucide `Lock`, 16px, `text-text-secondary`, `strokeWidth={1.5}`) and "**Private to you** — Only you and the AI coach will see this." helper text on both fields, matching the existing `PrivateFieldLabel` pattern in `NewCaseForm.tsx`.
 
 ### No cross-party data fetching
+
 The page calls `api.cases.get` which returns case-level metadata (status, category, otherPartyName) but never the other party's private form fields. The `partyStates` query is NOT called from this page — the form only writes, it does not read any party state data.
 
 ## Edge cases
 
 ### Loading state
+
 While `useQuery(api.cases.get)` returns `undefined`, the page renders a skeleton matching the `CaseDetailSkeleton` pattern — a few `<Skeleton>` blocks for the heading and form area.
 
 ### Not found / not authorized
+
 If `api.cases.get` returns `null` (case not found or user not a party), the page renders a not-found view with a link back to `/dashboard`, matching the `NotFoundView` pattern in `CaseDetail.tsx`.
 
 ### Mutation error
+
 If `updateMyForm` throws (e.g., `FORBIDDEN` because coaching already started, or a transient error), the page displays the error inline above the submit button using `parseConvexError`, and re-enables the form so the user can retry. The page does NOT navigate on error.
 
 ### Empty mainTopic submission
+
 If the user clicks submit with an empty mainTopic, the frontend shows an inline error "Please describe the main topic." (matching the copy from `NewCaseForm.tsx`) and prevents the form submission. The backend also validates, so even if the frontend guard is bypassed, the mutation rejects it.
 
 ### Character counter over limit
+
 The mainTopic character counter turns `text-danger` when over 140 characters (soft limit, not a hard block). This matches the existing `NewCaseForm.tsx` behavior — the form still submits, but the counter provides visual feedback.
 
 ## Non-goals
@@ -247,23 +262,29 @@ The mainTopic character counter turns `text-danger` when over 140 characters (so
 ## Test coverage
 
 ### AC: updateMyForm mutation updates partyStates — `tests/wor-58/updateMyForm.test.ts` (unit)
+
 Call the mutation with valid `{ caseId, mainTopic, description, desiredOutcome }` as an authenticated user who has a partyStates row. Verify the partyStates row is patched with the new values and `formCompletedAt` is set.
 
 ### AC: Mutation enforces party authorization — `tests/wor-58/updateMyForm.test.ts` (unit)
+
 - Call `updateMyForm` as an unauthenticated user → assert `UNAUTHENTICATED` error.
 - Call `updateMyForm` as a user who is NOT a party to the case (no partyStates row) → assert `FORBIDDEN` error.
 - Call `updateMyForm` when `privateCoachingCompletedAt` is set → assert `FORBIDDEN` error.
 
 ### AC: Form UI matches case creation steps 2–4 — `tests/wor-58/InviteeCaseForm.test.tsx` (unit) + `e2e/wor-58/invitee-form.spec.ts` (e2e)
+
 - Unit: render `<InviteeCaseForm>`, verify mainTopic input with character counter text `0/140` is present, verify description textarea exists, verify desiredOutcome textarea exists.
 - E2E: navigate to `/cases/:id/form` after invite acceptance, verify all three fields render with expected labels and placeholders.
 
 ### AC: Privacy lock icons and helper text — `tests/wor-58/InviteeCaseForm.test.tsx` (unit)
+
 Render the form and assert that lock icons (svg elements) and "Private to you" text are present adjacent to description and desiredOutcome fields. Check via `screen.getAllByText(/Private to you/)` and verify two instances (one per private field).
 
 ### AC: On submit routes to /cases/:id/private — `e2e/wor-58/invitee-form.spec.ts` (e2e)
+
 Fill mainTopic and submit the form. Assert `page.url()` changes to match `/cases/.*/private`. This requires the full stack (Convex backend, React Router) so it is e2e-only.
 
 ### AC: mainTopic required + inline errors — `tests/wor-58/InviteeCaseForm.test.tsx` (unit) + `tests/wor-58/updateMyForm.test.ts` (unit)
+
 - Frontend unit: click submit with empty mainTopic, assert `role="alert"` error message appears and `onSubmit` was NOT called.
 - Backend unit: call mutation with empty mainTopic, assert `INVALID_INPUT` error.

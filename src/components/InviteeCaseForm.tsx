@@ -46,7 +46,9 @@ function PrivateFieldLabel({
             className="h-4 w-4 text-text-secondary"
             strokeWidth={1.5}
             aria-hidden="true"
-            {...({ title: "Only you and the AI coach will see this." } as Record<string, string>)}
+            {...({
+              title: "Only you and the AI coach will see this.",
+            } as Record<string, string>)}
           />
           {children}
         </span>

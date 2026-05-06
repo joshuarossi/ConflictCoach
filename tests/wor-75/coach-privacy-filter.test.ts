@@ -109,7 +109,8 @@ describe("AC3: Coach response does not leak private content via 8-token substrin
 
   test("short private messages (< 8 tokens) are skipped safely", () => {
     const shortMessages = ["Hello there", "I agree"];
-    const coachResponse = "Hello there, I agree with the approach. Let's proceed.";
+    const coachResponse =
+      "Hello there, I agree with the approach. Let's proceed.";
 
     const result = checkPrivacyViolation(coachResponse, shortMessages);
 

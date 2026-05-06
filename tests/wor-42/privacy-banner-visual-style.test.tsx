@@ -28,8 +28,7 @@ describe("AC 5: Visual style matches DesignDoc §4.7: persistent banner, lock ic
     const bannerButtons = banner.querySelectorAll("button");
     for (const btn of bannerButtons) {
       // None of the banner-level buttons should be a "dismiss" or "close" for the banner
-      const label =
-        btn.getAttribute("aria-label") || btn.textContent || "";
+      const label = btn.getAttribute("aria-label") || btn.textContent || "";
       expect(label.toLowerCase()).not.toMatch(/dismiss|close|hide/);
     }
   });
@@ -39,7 +38,7 @@ describe("AC 5: Visual style matches DesignDoc §4.7: persistent banner, lock ic
       <PrivacyBanner
         text="This conversation is private to you."
         otherPartyName="Jordan"
-      />
+      />,
     );
 
     // Snapshot test to catch unintended visual regressions

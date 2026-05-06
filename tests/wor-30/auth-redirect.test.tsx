@@ -38,12 +38,12 @@ describe("AC: Authenticated routes redirect to /login when not logged in", () =>
       render(
         <MemoryRouter initialEntries={[path]}>
           <AppRoutes />
-        </MemoryRouter>
+        </MemoryRouter>,
       );
       // After redirect, the login page should render. Use queryAllByText
       // because "sign in" appears in both the heading and the submit button.
       const signInMatches = screen.queryAllByText(/sign in|log in/i);
       expect(signInMatches.length).toBeGreaterThan(0);
-    }
+    },
   );
 });

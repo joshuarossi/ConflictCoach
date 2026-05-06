@@ -10,7 +10,7 @@ describe("AC 1: PrivacyBanner renders with a lock icon, --private-tint backgroun
   test("renders the configurable text passed via prop", () => {
     render(<PrivacyBanner text="This conversation is private to you." />);
     expect(
-      screen.getByText("This conversation is private to you.")
+      screen.getByText("This conversation is private to you."),
     ).toBeInTheDocument();
   });
 

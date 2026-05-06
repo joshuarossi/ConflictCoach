@@ -18,7 +18,9 @@ import { create } from "../../convex/cases/create";
  * Convex mutation()/query() wrappers expose the handler via different
  * properties depending on version. Resolve to a callable.
  */
-function asCallable(fn: unknown): { handler: (ctx: any, args: any) => Promise<any> } {
+function asCallable(fn: unknown): {
+  handler: (ctx: any, args: any) => Promise<any>;
+} {
   const anyFn = fn as any;
   if (typeof anyFn === "function") {
     return { handler: anyFn };
@@ -49,9 +51,14 @@ function createMockMutationCtx(options: {
 }) {
   const { authenticatedUserId = null, dbData = {} } = options;
 
-  const email = authenticatedUserId ? `${authenticatedUserId}@test.local` : null;
+  const email = authenticatedUserId
+    ? `${authenticatedUserId}@test.local`
+    : null;
   const seededUsers = [...(dbData.users ?? [])];
-  if (authenticatedUserId && !seededUsers.some((u) => u._id === authenticatedUserId)) {
+  if (
+    authenticatedUserId &&
+    !seededUsers.some((u) => u._id === authenticatedUserId)
+  ) {
     seededUsers.push({
       _id: authenticatedUserId,
       email,
@@ -212,7 +219,9 @@ describe("AC 1: 'New Solo Case' creates a case with isSolo=true", () => {
       isSolo: true,
     });
 
-    const partyStates = ctx.insertedRows.filter((r) => r.table === "partyStates");
+    const partyStates = ctx.insertedRows.filter(
+      (r) => r.table === "partyStates",
+    );
     expect(partyStates).toHaveLength(2);
 
     const roles = partyStates.map((ps) => ps.doc.role).sort();
@@ -237,7 +246,9 @@ describe("AC 1: 'New Solo Case' creates a case with isSolo=true", () => {
       isSolo: true,
     });
 
-    const inviteTokens = ctx.insertedRows.filter((r) => r.table === "inviteTokens");
+    const inviteTokens = ctx.insertedRows.filter(
+      (r) => r.table === "inviteTokens",
+    );
     expect(inviteTokens).toHaveLength(0);
   });
 });

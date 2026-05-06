@@ -8,7 +8,12 @@
  */
 import { test, expect } from "@playwright/test";
 
-import { createTestUser, loginAsUser, createTestCase, callMutation } from "../fixtures";
+import {
+  createTestUser,
+  loginAsUser,
+  createTestCase,
+  callMutation,
+} from "../fixtures";
 
 test.describe("WOR-77: State machine enforcement", () => {
   test("AC1: Sending a joint message when case is in DRAFT_PRIVATE_COACHING fails with CONFLICT", async ({
@@ -45,15 +50,23 @@ test.describe("WOR-77: State machine enforcement", () => {
     expect(sendResult.ok).toBe(true);
 
     // First mark-complete call should succeed
-    const firstComplete = await callMutation(page, "privateCoaching:markComplete", {
-      caseId: caseData.caseId,
-    });
+    const firstComplete = await callMutation(
+      page,
+      "privateCoaching:markComplete",
+      {
+        caseId: caseData.caseId,
+      },
+    );
     expect(firstComplete.ok).toBe(true);
 
     // Second mark-complete call should also succeed (idempotent)
-    const secondComplete = await callMutation(page, "privateCoaching:markComplete", {
-      caseId: caseData.caseId,
-    });
+    const secondComplete = await callMutation(
+      page,
+      "privateCoaching:markComplete",
+      {
+        caseId: caseData.caseId,
+      },
+    );
     expect(secondComplete.ok).toBe(true);
   });
 
@@ -110,9 +123,13 @@ test.describe("WOR-77: State machine enforcement", () => {
       caseId: caseData.caseId,
       content: "Working through my perspective",
     });
-    const markResult = await callMutation(page, "privateCoaching:markComplete", {
-      caseId: caseData.caseId,
-    });
+    const markResult = await callMutation(
+      page,
+      "privateCoaching:markComplete",
+      {
+        caseId: caseData.caseId,
+      },
+    );
     expect(markResult.ok).toBe(true);
 
     // Attempt to send a joint message — should fail because user B hasn't completed PC

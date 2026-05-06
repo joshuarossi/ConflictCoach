@@ -93,10 +93,7 @@ export function InviteeCaseFormPage() {
       </h1>
       <p className="text-body text-text-secondary mb-6">
         Share your view of the conflict before starting private coaching
-        {caseData.otherPartyName
-          ? ` with ${caseData.otherPartyName}`
-          : ""}
-        .
+        {caseData.otherPartyName ? ` with ${caseData.otherPartyName}` : ""}.
       </p>
       {submitError && (
         <p className="mb-4 text-meta text-danger" role="alert">

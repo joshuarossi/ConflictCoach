@@ -2,10 +2,7 @@ import { readFileSync } from "fs";
 import { resolve } from "path";
 import { parse } from "yaml";
 
-const CI_WORKFLOW_PATH = resolve(
-  __dirname,
-  "../../.github/workflows/ci.yml",
-);
+const CI_WORKFLOW_PATH = resolve(__dirname, "../../.github/workflows/ci.yml");
 
 export function loadCiWorkflow(): Record<string, unknown> {
   const raw = readFileSync(CI_WORKFLOW_PATH, "utf-8");
@@ -27,9 +24,7 @@ export function flattenRunSteps(
 ): string {
   if (!job) return "";
   const steps = (job.steps ?? []) as Array<Record<string, unknown>>;
-  return steps
-    .map((s) => (typeof s.run === "string" ? s.run : ""))
-    .join("\n");
+  return steps.map((s) => (typeof s.run === "string" ? s.run : "")).join("\n");
 }
 
 /**

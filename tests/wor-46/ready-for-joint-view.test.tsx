@@ -82,9 +82,10 @@ vi.mock("convex/react", () => ({
 }));
 
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>(
-    "react-router-dom",
-  );
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -144,9 +145,7 @@ describe("WOR-46: ReadyForJointView", () => {
   describe('AC: Label reads "Private to you — Jordan has their own version"', () => {
     test("displays privacy label with other party name", () => {
       renderView();
-      expect(
-        screen.getByText(/private to you/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/private to you/i)).toBeInTheDocument();
       expect(
         screen.getByText(/Jordan has their own version/i),
       ).toBeInTheDocument();
@@ -186,9 +185,7 @@ describe("WOR-46: ReadyForJointView", () => {
 
     test("renders 'Suggested approach' section heading", () => {
       renderView();
-      expect(
-        screen.getByText(/suggested approach/i),
-      ).toBeInTheDocument();
+      expect(screen.getByText(/suggested approach/i)).toBeInTheDocument();
     });
   });
 
@@ -202,14 +199,20 @@ describe("WOR-46: ReadyForJointView", () => {
 
     test("the Enter Joint Session button is the only primary-styled button", () => {
       const { container } = renderView();
-      const enterBtn = screen.getByRole("button", { name: /enter joint session/i });
+      const enterBtn = screen.getByRole("button", {
+        name: /enter joint session/i,
+      });
       // The design system's primary action uses bg-accent (token-driven,
       // theme-aware) — see src/components/ui/button.tsx default variant.
       // bg-primary is the shadcn/ui out-of-box class but Conflict Coach
       // overrides it with the accent token. Test against the actual class.
       expect(enterBtn.className).toMatch(/bg-accent/);
       // Non-primary variant classes should be absent
-      const nonPrimaryClasses = ["bg-secondary", "bg-destructive", "border-input"];
+      const nonPrimaryClasses = [
+        "bg-secondary",
+        "bg-destructive",
+        "border-input",
+      ];
       for (const cls of nonPrimaryClasses) {
         expect(enterBtn.className).not.toMatch(new RegExp(cls));
       }
@@ -260,9 +263,7 @@ describe("WOR-46: ReadyForJointView", () => {
 
     test("note includes the other party name (Jordan)", () => {
       renderView();
-      const noteText = screen.getByText(
-        /jordan will see you've entered/i,
-      );
+      const noteText = screen.getByText(/jordan will see you've entered/i);
       expect(noteText).toBeInTheDocument();
     });
   });

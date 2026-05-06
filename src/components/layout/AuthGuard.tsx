@@ -15,7 +15,12 @@ export function AuthGuard() {
 
   if (!isAuthenticated) {
     const returnTo = location.pathname + location.search;
-    return <Navigate to={`/login?returnTo=${encodeURIComponent(returnTo)}`} replace />;
+    return (
+      <Navigate
+        to={`/login?returnTo=${encodeURIComponent(returnTo)}`}
+        replace
+      />
+    );
   }
 
   return <Outlet />;

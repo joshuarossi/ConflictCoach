@@ -14,7 +14,9 @@ import { MemoryRouter, Routes, Route } from "react-router-dom";
 // ---------------------------------------------------------------------------
 
 const queryResults = vi.hoisted(() => ({
-  me: { role: "ADMIN", displayName: "Riley Admin" } as Record<string, unknown> | undefined,
+  me: { role: "ADMIN", displayName: "Riley Admin" } as
+    | Record<string, unknown>
+    | undefined,
   template: null as Record<string, unknown> | null,
   versions: [] as Record<string, unknown>[],
 }));
@@ -148,8 +150,9 @@ describe("AC6: Archive Template with danger confirmation", () => {
 
     // Find and click the confirm button inside the dialog
     const dialog = screen.getByRole("dialog");
-    const confirmBtn =
-      screen.getByRole("button", { name: /confirm|yes|archive/i });
+    const confirmBtn = screen.getByRole("button", {
+      name: /confirm|yes|archive/i,
+    });
     expect(dialog).toContainElement(confirmBtn);
     await user.click(confirmBtn);
 

@@ -37,7 +37,10 @@ describe("AC4: Privacy filter runs on each synthesis against the OTHER party's m
     // the INVITEE's private messages to prevent leaking invitee's words.
     const quotingInvitee =
       "They micromanage every technical choice and it slows us down significantly on every sprint — consider this perspective.";
-    const result = checkPrivacyViolation(quotingInvitee, INVITEE_PRIVATE_MESSAGES);
+    const result = checkPrivacyViolation(
+      quotingInvitee,
+      INVITEE_PRIVATE_MESSAGES,
+    );
     expect(result.isViolation).toBe(true);
   });
 
@@ -46,7 +49,10 @@ describe("AC4: Privacy filter runs on each synthesis against the OTHER party's m
     // the INITIATOR's private messages to prevent leaking initiator's words.
     const quotingInitiator =
       "They said they feel like their opinions are ignored when it comes to big decisions about the project direction and technical architecture.";
-    const result = checkPrivacyViolation(quotingInitiator, INITIATOR_PRIVATE_MESSAGES);
+    const result = checkPrivacyViolation(
+      quotingInitiator,
+      INITIATOR_PRIVATE_MESSAGES,
+    );
     expect(result.isViolation).toBe(true);
   });
 
@@ -101,7 +107,8 @@ describe("AC5: On filter violation, regenerate up to 2 times; fallback on final 
   test("privacy-violating first attempt triggers retry; clean second attempt succeeds", async () => {
     const violating =
       "They just want them to trust my judgment more especially on backend decisions where I have deep expertise.";
-    const clean = "There is a desire for greater autonomy in technical decisions.";
+    const clean =
+      "There is a desire for greater autonomy in technical decisions.";
     const generateFn = vi
       .fn()
       .mockResolvedValueOnce(violating)
@@ -152,7 +159,12 @@ describe("AC5: On filter violation, regenerate up to 2 times; fallback on final 
     const mockInsert = vi.fn();
     const mockCtx = { db: { insert: mockInsert } };
 
-    await filterOrRetry(generateFn, INVITEE_PRIVATE_MESSAGES, 2, mockCtx as any);
+    await filterOrRetry(
+      generateFn,
+      INVITEE_PRIVATE_MESSAGES,
+      2,
+      mockCtx as any,
+    );
 
     const auditEntry = mockInsert.mock.calls[0][1];
     expect(auditEntry.metadata).toBeDefined();

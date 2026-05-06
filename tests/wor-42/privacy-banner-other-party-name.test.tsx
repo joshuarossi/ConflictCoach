@@ -9,12 +9,7 @@ import { PrivacyBanner } from "@/components/PrivacyBanner";
 
 describe('AC 4: Component accepts otherPartyName prop for personalized copy (e.g., "Jordan can\'t see this")', () => {
   test("renders personalized copy with otherPartyName", () => {
-    render(
-      <PrivacyBanner
-        text="This is private"
-        otherPartyName="Jordan"
-      />
-    );
+    render(<PrivacyBanner text="This is private" otherPartyName="Jordan" />);
 
     // When otherPartyName is provided, the banner should include
     // personalized copy mentioning the other party by name
@@ -22,17 +17,12 @@ describe('AC 4: Component accepts otherPartyName prop for personalized copy (e.g
     // Should indicate that Jordan can't see this content
     expect(
       screen.queryByText(/Jordan.*can't see/i) ??
-        screen.queryByText(/Jordan.*will never see/i)
+        screen.queryByText(/Jordan.*will never see/i),
     ).toBeInTheDocument();
   });
 
   test("renders different names correctly", () => {
-    render(
-      <PrivacyBanner
-        text="This is private"
-        otherPartyName="Alex"
-      />
-    );
+    render(<PrivacyBanner text="This is private" otherPartyName="Alex" />);
 
     expect(screen.getByText(/Alex/)).toBeInTheDocument();
   });
@@ -42,7 +32,7 @@ describe('AC 4: Component accepts otherPartyName prop for personalized copy (e.g
 
     // Should still render the text without crashing
     expect(
-      screen.getByText("This conversation is private to you.")
+      screen.getByText("This conversation is private to you."),
     ).toBeInTheDocument();
   });
 });

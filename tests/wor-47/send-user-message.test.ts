@@ -107,7 +107,9 @@ describe("AC7: sendUserMessage rejects if case is not JOINT_ACTIVE", () => {
   test("throws CONFLICT when case is BOTH_PRIVATE_COACHING", async () => {
     const ctx = createMockCtx({
       user: USER_A,
-      dbGet: { [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "BOTH_PRIVATE_COACHING" } },
+      dbGet: {
+        [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "BOTH_PRIVATE_COACHING" },
+      },
       dbQueries: { partyStates: [PARTY_STATE_A] },
     });
 
@@ -124,7 +126,9 @@ describe("AC7: sendUserMessage rejects if case is not JOINT_ACTIVE", () => {
   test("throws CONFLICT when case is DRAFT_PRIVATE_COACHING", async () => {
     const ctx = createMockCtx({
       user: USER_A,
-      dbGet: { [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "DRAFT_PRIVATE_COACHING" } },
+      dbGet: {
+        [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "DRAFT_PRIVATE_COACHING" },
+      },
       dbQueries: { partyStates: [PARTY_STATE_A] },
     });
 

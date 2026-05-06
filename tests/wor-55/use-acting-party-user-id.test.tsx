@@ -64,34 +64,37 @@ describe("AC 4: useActingPartyUserId hook returns correct userId based on toggle
   });
 
   test("returns initiator userId when ?as=initiator", () => {
-    const hook = useActingPartyUserId as unknown as (caseId: string) => string | null;
+    const hook = useActingPartyUserId as unknown as (
+      caseId: string,
+    ) => string | null;
 
-    const { result } = renderHook(
-      () => hook("cases:test_case"),
-      { wrapper: createWrapper("/cases/test-case?as=initiator") },
-    );
+    const { result } = renderHook(() => hook("cases:test_case"), {
+      wrapper: createWrapper("/cases/test-case?as=initiator"),
+    });
 
     expect(result.current).toBe(INITIATOR_USER_ID);
   });
 
   test("returns invitee userId when ?as=invitee", () => {
-    const hook = useActingPartyUserId as unknown as (caseId: string) => string | null;
+    const hook = useActingPartyUserId as unknown as (
+      caseId: string,
+    ) => string | null;
 
-    const { result } = renderHook(
-      () => hook("cases:test_case"),
-      { wrapper: createWrapper("/cases/test-case?as=invitee") },
-    );
+    const { result } = renderHook(() => hook("cases:test_case"), {
+      wrapper: createWrapper("/cases/test-case?as=invitee"),
+    });
 
     expect(result.current).toBe(INVITEE_USER_ID);
   });
 
   test("defaults to initiator userId when ?as param is absent", () => {
-    const hook = useActingPartyUserId as unknown as (caseId: string) => string | null;
+    const hook = useActingPartyUserId as unknown as (
+      caseId: string,
+    ) => string | null;
 
-    const { result } = renderHook(
-      () => hook("cases:test_case"),
-      { wrapper: createWrapper("/cases/test-case") },
-    );
+    const { result } = renderHook(() => hook("cases:test_case"), {
+      wrapper: createWrapper("/cases/test-case"),
+    });
 
     expect(result.current).toBe(INITIATOR_USER_ID);
   });

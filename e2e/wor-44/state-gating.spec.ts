@@ -45,9 +45,7 @@ test.describe("WOR-44: Private coaching view — state gating and accessibility"
     expect(ariaLive).toBe("polite");
   });
 
-  test("Chat content is constrained to max-width 1080px", async ({
-    page,
-  }) => {
+  test("Chat content is constrained to max-width 1080px", async ({ page }) => {
     // Use a wide viewport
     await page.setViewportSize({ width: 1920, height: 1080 });
     await page.goto("/cases/test-case-id/private");

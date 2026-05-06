@@ -128,7 +128,10 @@ describe("WOR-53: CaseClosureModal", () => {
     test("calls onProposeClosure with the summary text when submitted", async () => {
       const onProposeClosure = vi.fn();
       render(
-        <CaseClosureModal {...defaultProps} onProposeClosure={onProposeClosure} />,
+        <CaseClosureModal
+          {...defaultProps}
+          onProposeClosure={onProposeClosure}
+        />,
       );
 
       const resolvedOption =
@@ -172,7 +175,10 @@ describe("WOR-53: CaseClosureModal", () => {
     test("calls onUnilateralClose when Not resolved is confirmed", async () => {
       const onUnilateralClose = vi.fn();
       render(
-        <CaseClosureModal {...defaultProps} onUnilateralClose={onUnilateralClose} />,
+        <CaseClosureModal
+          {...defaultProps}
+          onUnilateralClose={onUnilateralClose}
+        />,
       );
 
       const notResolvedOption =

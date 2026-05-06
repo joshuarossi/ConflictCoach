@@ -71,9 +71,7 @@ test.describe("WOR-68: Color contrast — WCAG AA compliance", () => {
     ).toHaveLength(0);
   });
 
-  test("Joint Chat page has no color-contrast violations", async ({
-    page,
-  }) => {
+  test("Joint Chat page has no color-contrast violations", async ({ page }) => {
     const testCase = await createTestCase(page, user, { isSolo: true });
     await advanceCaseToStatus(page, testCase.caseId, "JOINT_ACTIVE");
     await page.goto(`/cases/${testCase.caseId}/joint`);

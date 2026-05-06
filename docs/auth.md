@@ -42,9 +42,9 @@ On subsequent logins the existing record is returned. The lookup uses the `by_em
 
 Two roles exist in v1:
 
-| Role | Description |
-|---|---|
-| `USER` | Default role assigned on sign-up |
+| Role    | Description                                                                                           |
+| ------- | ----------------------------------------------------------------------------------------------------- |
+| `USER`  | Default role assigned on sign-up                                                                      |
 | `ADMIN` | Manages templates and audit logs. Promoted manually in the database — there is no self-serve endpoint |
 
 ## Auth helpers (`convex/lib/auth.ts`)
@@ -66,10 +66,10 @@ export const login = mutation(async (ctx) => {
 
 Call from any query or mutation context. Returns the caller's `UserRecord` or throws:
 
-| Error code | Condition |
-|---|---|
-| `UNAUTHENTICATED` | No identity present or identity missing email |
-| `USER_NOT_FOUND` | Identity is valid but no user row exists (the user has not been provisioned yet) |
+| Error code        | Condition                                                                        |
+| ----------------- | -------------------------------------------------------------------------------- |
+| `UNAUTHENTICATED` | No identity present or identity missing email                                    |
+| `USER_NOT_FOUND`  | Identity is valid but no user row exists (the user has not been provisioned yet) |
 
 ```ts
 import { requireAuth } from "./lib/auth";

@@ -95,15 +95,19 @@ The test imports from `../fixtures` (same as all other E2E specs) and uses `crea
 ## Data dependencies
 
 ### `api.cases.create.create` (mutation)
+
 Called when User A submits the NewCaseForm. Args: `{ category, mainTopic, description?, desiredOutcome?, isSolo: false }`. Returns `{ caseId, inviteUrl }` for two-party cases. The `inviteUrl` is constructed as `${SITE_URL}/invite/${token}`. The test does not consume the mutation return directly — it reads the invite URL from the InviteSharingPage UI (which received it via React Router state).
 
 ### `api.invites.getByToken.getByToken` (query, public)
+
 Called by InviteAcceptPage when User B navigates to `/invite/${token}`. Returns `{ status: "ACTIVE", initiatorName, mainTopic, category }` for valid tokens, or `{ status: "CONSUMED" }` / `{ status: "INVALID" }` for used/bad tokens. The test asserts the presence of `initiatorName` and `mainTopic` on the page.
 
 ### `api.invites.redeem.redeem` (mutation)
+
 Called when User B clicks Accept. Args: `{ token }`. Atomically: patches case with `inviteeUserId` and `status: "BOTH_PRIVATE_COACHING"`, inserts invitee `partyStates` row, patches token to `CONSUMED`. Returns `{ caseId }`. InviteAcceptPage then navigates to `/cases/${caseId}/form`.
 
 ### `api.cases.list` (query)
+
 Called by Dashboard for both users. Returns the user's cases with status, category, mainTopic, and other metadata. The test asserts the case appears in each user's dashboard.
 
 ## Invariants
@@ -138,15 +142,15 @@ Called by Dashboard for both users. Returns the user's cases with status, catego
 
 ## Test coverage
 
-| AC | Test layer | Verification approach |
-|----|-----------|----------------------|
-| Test uses two browser contexts | e2e | Call `browser.newContext()` twice, create separate `Page` objects. Each gets its own `createTestUser` + `loginAsUser`. Assert independence by verifying User B has no cases on their dashboard before accepting the invite. |
-| User A creates a case and obtains the invite link | e2e | Navigate pageA to `/cases/new`. Fill form (category: workplace, mainTopic, description, desiredOutcome, isSolo: false). Submit. Wait for redirect to `/cases/:caseId/invite`. Extract invite URL from the readonly input field on InviteSharingPage. Parse token from URL. |
-| User B opens invite link, registers/logs in, and accepts invitation | e2e | Log in User B via `loginAsUser(pageB, userB)`. Navigate pageB to `/invite/${token}`. Assert heading contains User A's display name ("has invited you"). Assert mainTopic and category are visible. Click Accept button. Assert navigation to `/cases/:caseId/form` (URL check). |
-| User B fills their case form after accepting | e2e | After accept redirect, if the form page renders: fill mainTopic, description, desiredOutcome fields and submit. If the route 404s: assert URL is correct and skip form fill (log warning). |
-| Both users see the case listed in their dashboards | e2e | Navigate pageA to `/dashboard`. Assert case row with the mainTopic text is visible. Navigate pageB to `/dashboard`. Assert same case row is visible. |
-| Case status transitions correctly: DRAFT_PRIVATE_COACHING → BOTH_PRIVATE_COACHING | e2e | After User B accepts, verify on both dashboards that the case status indicator reflects an active (non-draft) state. The dashboard's `statusIndicator` function maps BOTH_PRIVATE_COACHING to either "Your turn" (green) or "Waiting" (gray) depending on private coaching completion. |
-| Consumed invite link shows error when reused | e2e | After successful accept, navigate pageB (or pageA) to `/invite/${token}` again. Assert text "already been used" or "no longer valid" is visible. Assert `<a>` with "Log in" text is visible. Assert `<a>` with "Go to dashboard" text is visible. Assert no Accept or Decline buttons are present. |
+| AC                                                                                | Test layer | Verification approach                                                                                                                                                                                                                                                                              |
+| --------------------------------------------------------------------------------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Test uses two browser contexts                                                    | e2e        | Call `browser.newContext()` twice, create separate `Page` objects. Each gets its own `createTestUser` + `loginAsUser`. Assert independence by verifying User B has no cases on their dashboard before accepting the invite.                                                                        |
+| User A creates a case and obtains the invite link                                 | e2e        | Navigate pageA to `/cases/new`. Fill form (category: workplace, mainTopic, description, desiredOutcome, isSolo: false). Submit. Wait for redirect to `/cases/:caseId/invite`. Extract invite URL from the readonly input field on InviteSharingPage. Parse token from URL.                         |
+| User B opens invite link, registers/logs in, and accepts invitation               | e2e        | Log in User B via `loginAsUser(pageB, userB)`. Navigate pageB to `/invite/${token}`. Assert heading contains User A's display name ("has invited you"). Assert mainTopic and category are visible. Click Accept button. Assert navigation to `/cases/:caseId/form` (URL check).                    |
+| User B fills their case form after accepting                                      | e2e        | After accept redirect, if the form page renders: fill mainTopic, description, desiredOutcome fields and submit. If the route 404s: assert URL is correct and skip form fill (log warning).                                                                                                         |
+| Both users see the case listed in their dashboards                                | e2e        | Navigate pageA to `/dashboard`. Assert case row with the mainTopic text is visible. Navigate pageB to `/dashboard`. Assert same case row is visible.                                                                                                                                               |
+| Case status transitions correctly: DRAFT_PRIVATE_COACHING → BOTH_PRIVATE_COACHING | e2e        | After User B accepts, verify on both dashboards that the case status indicator reflects an active (non-draft) state. The dashboard's `statusIndicator` function maps BOTH_PRIVATE_COACHING to either "Your turn" (green) or "Waiting" (gray) depending on private coaching completion.             |
+| Consumed invite link shows error when reused                                      | e2e        | After successful accept, navigate pageB (or pageA) to `/invite/${token}` again. Assert text "already been used" or "no longer valid" is visible. Assert `<a>` with "Log in" text is visible. Assert `<a>` with "Go to dashboard" text is visible. Assert no Accept or Decline buttons are present. |
 
 ## Open questions
 

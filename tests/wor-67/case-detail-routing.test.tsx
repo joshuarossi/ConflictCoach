@@ -68,9 +68,7 @@ describe("AC: Routes to PrivateCoachingView for DRAFT_PRIVATE_COACHING and BOTH_
       category: "workplace",
     };
     renderCaseDetail();
-    expect(
-      screen.getByTestId("private-coaching-view"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("private-coaching-view")).toBeInTheDocument();
   });
 
   test("renders PrivateCoachingView for BOTH_PRIVATE_COACHING status", () => {
@@ -82,9 +80,7 @@ describe("AC: Routes to PrivateCoachingView for DRAFT_PRIVATE_COACHING and BOTH_
       category: "workplace",
     };
     renderCaseDetail();
-    expect(
-      screen.getByTestId("private-coaching-view"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("private-coaching-view")).toBeInTheDocument();
   });
 });
 
@@ -98,9 +94,7 @@ describe("AC: Routes to ReadyForJointView for READY_FOR_JOINT", () => {
       category: "workplace",
     };
     renderCaseDetail();
-    expect(
-      screen.getByTestId("ready-for-joint-view"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("ready-for-joint-view")).toBeInTheDocument();
   });
 });
 
@@ -114,9 +108,7 @@ describe("AC: Routes to JointChatView for JOINT_ACTIVE", () => {
       category: "workplace",
     };
     renderCaseDetail();
-    expect(
-      screen.getByTestId("joint-chat-view"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("joint-chat-view")).toBeInTheDocument();
   });
 });
 
@@ -130,9 +122,7 @@ describe("AC: Routes to ClosedCaseView for CLOSED_* statuses", () => {
       category: "workplace",
     };
     renderCaseDetail();
-    expect(
-      screen.getByTestId("closed-case-view"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("closed-case-view")).toBeInTheDocument();
   });
 
   test("renders ClosedCaseView for CLOSED_UNRESOLVED status", () => {
@@ -144,9 +134,7 @@ describe("AC: Routes to ClosedCaseView for CLOSED_* statuses", () => {
       category: "workplace",
     };
     renderCaseDetail();
-    expect(
-      screen.getByTestId("closed-case-view"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("closed-case-view")).toBeInTheDocument();
   });
 
   test("renders ClosedCaseView for CLOSED_ABANDONED status", () => {
@@ -158,8 +146,6 @@ describe("AC: Routes to ClosedCaseView for CLOSED_* statuses", () => {
       category: "workplace",
     };
     renderCaseDetail();
-    expect(
-      screen.getByTestId("closed-case-view"),
-    ).toBeInTheDocument();
+    expect(screen.getByTestId("closed-case-view")).toBeInTheDocument();
   });
 });

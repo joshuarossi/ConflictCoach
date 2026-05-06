@@ -61,7 +61,9 @@ function PrivateFieldLabel({
             className="h-4 w-4 text-text-secondary"
             strokeWidth={1.5}
             aria-hidden="true"
-            {...({ title: "Only you and the AI coach will see this." } as Record<string, string>)}
+            {...({
+              title: "Only you and the AI coach will see this.",
+            } as Record<string, string>)}
           />
           {children}
         </span>
@@ -79,7 +81,11 @@ function autoGrow(el: HTMLTextAreaElement) {
   el.style.height = `${el.scrollHeight}px`;
 }
 
-export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormProps) {
+export function NewCaseForm({
+  onSubmit,
+  onSubmitSolo,
+  disabled,
+}: NewCaseFormProps) {
   const [category, setCategory] = useState("");
   const [mainTopic, setMainTopic] = useState("");
   const [description, setDescription] = useState("");

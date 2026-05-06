@@ -11,25 +11,40 @@ import { describe, test, expect } from "vitest";
 
 import { assemblePrompt } from "../../convex/lib/prompts";
 import type { AssemblePromptOpts } from "../../convex/lib/prompts";
-import { estimateTokens, GENERATION_BUDGET } from "../../convex/lib/compression";
+import {
+  estimateTokens,
+  GENERATION_BUDGET,
+} from "../../convex/lib/compression";
 
 // Fake Convex IDs
-const CASE_ID = "cases:test_case_001" as unknown as AssemblePromptOpts["caseId"];
-const USER_A_ID = "users:test_user_a" as unknown as AssemblePromptOpts["actingUserId"];
+const CASE_ID =
+  "cases:test_case_001" as unknown as AssemblePromptOpts["caseId"];
+const USER_A_ID =
+  "users:test_user_a" as unknown as AssemblePromptOpts["actingUserId"];
 
 // Helper to create a message with roughly N tokens of content
-function makeMessageWithTokens(approxTokens: number, role: "user" | "assistant" = "user") {
+function makeMessageWithTokens(
+  approxTokens: number,
+  role: "user" | "assistant" = "user",
+) {
   const wordCount = Math.ceil(approxTokens / 1.3);
-  const content = Array.from({ length: wordCount }, (_, i) => `word${i}`).join(" ");
+  const content = Array.from({ length: wordCount }, (_, i) => `word${i}`).join(
+    " ",
+  );
   return { role, content };
 }
 
 // Build a recentHistory that exceeds the 60k generation budget
-function buildOversizedHistory(): Array<{ role: "user" | "assistant"; content: string }> {
+function buildOversizedHistory(): Array<{
+  role: "user" | "assistant";
+  content: string;
+}> {
   const messages: Array<{ role: "user" | "assistant"; content: string }> = [];
   // Create 10 messages of ~8k tokens each = ~80k total (exceeds 60k budget)
   for (let i = 0; i < 10; i++) {
-    messages.push(makeMessageWithTokens(8_000, i % 2 === 0 ? "user" : "assistant"));
+    messages.push(
+      makeMessageWithTokens(8_000, i % 2 === 0 ? "user" : "assistant"),
+    );
   }
   return messages;
 }
@@ -46,8 +61,8 @@ describe("Compression integrates with assemblePrompt before passing context to C
     });
 
     // At least one message should be a SUMMARY message
-    const hasSummary = result.messages.some((m) =>
-      m.content.includes("SUMMARY:") || m.content.match(/SUMMARY:/i),
+    const hasSummary = result.messages.some(
+      (m) => m.content.includes("SUMMARY:") || m.content.match(/SUMMARY:/i),
     );
     expect(hasSummary).toBe(true);
   });
@@ -63,10 +78,9 @@ describe("Compression integrates with assemblePrompt before passing context to C
     });
 
     // Estimate total tokens in the result
-    const totalTokens = result.messages.reduce(
-      (sum, m) => sum + estimateTokens(m.content),
-      0,
-    ) + estimateTokens(result.system);
+    const totalTokens =
+      result.messages.reduce((sum, m) => sum + estimateTokens(m.content), 0) +
+      estimateTokens(result.system);
 
     expect(totalTokens).toBeLessThanOrEqual(GENERATION_BUDGET);
   });

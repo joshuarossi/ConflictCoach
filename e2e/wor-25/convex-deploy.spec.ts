@@ -10,7 +10,7 @@ test.describe("AC4: npx convex dev deploys the schema successfully", () => {
   test("convex/schema.ts exists (prerequisite for deployment)", () => {
     expect(
       existsSync(SCHEMA_PATH),
-      "convex/schema.ts must exist before it can be deployed"
+      "convex/schema.ts must exist before it can be deployed",
     ).toBe(true);
   });
 
@@ -38,7 +38,7 @@ test.describe("AC4: npx convex dev deploys the schema successfully", () => {
 
     test.skip(
       !hasConvexConfig,
-      "Skipped: no Convex deployment configured (set CONVEX_DEPLOY_KEY or .env.local)"
+      "Skipped: no Convex deployment configured (set CONVEX_DEPLOY_KEY or .env.local)",
     );
 
     try {
@@ -53,7 +53,7 @@ test.describe("AC4: npx convex dev deploys the schema successfully", () => {
       const stderr = err.stderr?.toString() ?? "";
       expect(
         err.status,
-        `convex dev --once failed with stderr:\n${stderr}`
+        `convex dev --once failed with stderr:\n${stderr}`,
       ).toBe(0);
     }
   });

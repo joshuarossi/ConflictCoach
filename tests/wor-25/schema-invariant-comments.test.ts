@@ -16,10 +16,10 @@ describe("AC5: Key invariants are documented as comments: templateVersionId immu
     // and never updated (pinned / immutable for the life of the case)
     const hasImmutabilityComment =
       /\/\/.*templateVersionId.*(?:immut|never\s+(?:change|update)|pinned|set\s+at\s+creation)/i.test(
-        schemaSource
+        schemaSource,
       ) ||
       /\/\*[\s\S]*?templateVersionId[\s\S]*?(?:immut|never\s+(?:change|update)|pinned|set\s+at\s+creation)[\s\S]*?\*\//i.test(
-        schemaSource
+        schemaSource,
       );
     expect(hasImmutabilityComment).toBe(true);
   });
@@ -29,13 +29,13 @@ describe("AC5: Key invariants are documented as comments: templateVersionId immu
     // or that the by_case index is server-side only / never exposed to clients
     const hasIsolationComment =
       /\/\/.*privateMessages?.*(?:isolat|per.party|only.*user|never\s+exposed)/i.test(
-        schemaSource
+        schemaSource,
       ) ||
       /\/\/.*(?:isolat|per.party|only.*user|never\s+exposed).*privateMessages?/i.test(
-        schemaSource
+        schemaSource,
       ) ||
       /\/\*[\s\S]*?privateMessages?[\s\S]*?(?:isolat|per.party|never\s+exposed)[\s\S]*?\*\//i.test(
-        schemaSource
+        schemaSource,
       );
     expect(hasIsolationComment).toBe(true);
   });
@@ -45,10 +45,10 @@ describe("AC5: Key invariants are documented as comments: templateVersionId immu
     // forward migration support or is always 1
     const hasSchemaVersionComment =
       /\/\/.*schemaVersion.*(?:migrat|forward|always|version)/i.test(
-        schemaSource
+        schemaSource,
       ) ||
       /\/\*[\s\S]*?schemaVersion[\s\S]*?(?:migrat|forward|always|version)[\s\S]*?\*\//i.test(
-        schemaSource
+        schemaSource,
       );
     expect(hasSchemaVersionComment).toBe(true);
   });

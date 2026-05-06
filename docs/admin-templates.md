@@ -24,29 +24,29 @@ Non-admin callers receive a `FORBIDDEN` error.
 
 ### Mutations
 
-| Function | Purpose | Key args |
-|---|---|---|
-| `createTemplate` | Create a new template + initial version (v1) | `category`, `name`, `globalGuidance`, `coachInstructions?`, `draftCoachInstructions?` |
+| Function            | Purpose                                                  | Key args                                                                                  |
+| ------------------- | -------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `createTemplate`    | Create a new template + initial version (v1)             | `category`, `name`, `globalGuidance`, `coachInstructions?`, `draftCoachInstructions?`     |
 | `publishNewVersion` | Publish a new immutable version for an existing template | `templateId`, `globalGuidance`, `coachInstructions?`, `draftCoachInstructions?`, `notes?` |
-| `archiveTemplate` | Soft-archive a template (sets `archivedAt`) | `templateId` |
+| `archiveTemplate`   | Soft-archive a template (sets `archivedAt`)              | `templateId`                                                                              |
 
 ### Queries
 
-| Function | Purpose | Key args |
-|---|---|---|
-| `listAllTemplates` | List all templates including archived (admin view) | — |
-| `listTemplateVersions` | List all versions for a template, newest first | `templateId` |
+| Function               | Purpose                                            | Key args     |
+| ---------------------- | -------------------------------------------------- | ------------ |
+| `listAllTemplates`     | List all templates including archived (admin view) | —            |
+| `listTemplateVersions` | List all versions for a template, newest first     | `templateId` |
 
 ## Audit Logging
 
 Every mutation writes an audit log entry with one of the following action
 strings:
 
-| Action | Target type |
-|---|---|
-| `TEMPLATE_CREATED` | `template` |
+| Action               | Target type       |
+| -------------------- | ----------------- |
+| `TEMPLATE_CREATED`   | `template`        |
 | `TEMPLATE_PUBLISHED` | `templateVersion` |
-| `TEMPLATE_ARCHIVED` | `template` |
+| `TEMPLATE_ARCHIVED`  | `template`        |
 
 ## Version Numbering
 

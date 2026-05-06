@@ -21,7 +21,9 @@ vi.mock("convex/react", () => ({
 
 vi.mock("react-router-dom", async () => {
   const actual =
-    await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useParams: () => ({ caseId: "test-case-id" }),
@@ -60,9 +62,8 @@ describe("AC: Skeleton screens for loading states", () => {
   test("ConnectedPrivateCoachingView renders skeleton message bubbles when loading", async () => {
     mockedUseQuery.mockReturnValue(undefined);
 
-    const { ConnectedPrivateCoachingView } = await import(
-      "@/components/PrivateCoachingView"
-    );
+    const { ConnectedPrivateCoachingView } =
+      await import("@/components/PrivateCoachingView");
 
     const { container } = render(
       <MemoryRouter>

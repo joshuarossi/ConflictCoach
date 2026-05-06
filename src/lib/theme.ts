@@ -137,6 +137,9 @@ export const spacing = {
 // ---------------------------------------------------------------------------
 
 /** Read a CSS custom property value at runtime. */
-export function getCssVar(name: string, el: Element = document.documentElement): string {
+export function getCssVar(
+  name: string,
+  el: Element = document.documentElement,
+): string {
   return getComputedStyle(el).getPropertyValue(name).trim();
 }

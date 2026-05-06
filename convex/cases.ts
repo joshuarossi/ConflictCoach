@@ -17,16 +17,12 @@ export const list = query({
     // Query both indexes to find cases where user is initiator or invitee
     const asInitiator = await ctx.db
       .query("cases")
-      .withIndex("by_initiator", (q: any) =>
-        q.eq("initiatorUserId", user._id),
-      )
+      .withIndex("by_initiator", (q: any) => q.eq("initiatorUserId", user._id))
       .collect();
 
     const asInvitee = await ctx.db
       .query("cases")
-      .withIndex("by_invitee", (q: any) =>
-        q.eq("inviteeUserId", user._id),
-      )
+      .withIndex("by_invitee", (q: any) => q.eq("inviteeUserId", user._id))
       .collect();
 
     // Merge and deduplicate (user could theoretically appear in both)
@@ -69,8 +65,7 @@ export const list = query({
             )
             .first();
           if (otherPartyState) {
-            hasCompletedPC =
-              otherPartyState.privateCoachingCompletedAt != null;
+            hasCompletedPC = otherPartyState.privateCoachingCompletedAt != null;
           }
         }
 
@@ -195,10 +190,7 @@ export const partyStates = query({
 // identities use subject-based lookup and may lack email.
 // ---------------------------------------------------------------------------
 
-export async function getCaseCost(
-  ctx: any,
-  args: { caseId: string },
-) {
+export async function getCaseCost(ctx: any, args: { caseId: string }) {
   const identity = await ctx.auth.getUserIdentity();
   if (!identity) {
     throwAppError("UNAUTHENTICATED", "Authentication required");
@@ -230,8 +222,9 @@ export async function getCaseCost(
 
   // Party check using string comparison of IDs
   const isParty =
-    (user && (String(caseDoc.initiatorUserId) === String(user._id) ||
-      String(caseDoc.inviteeUserId) === String(user._id))) ||
+    (user &&
+      (String(caseDoc.initiatorUserId) === String(user._id) ||
+        String(caseDoc.inviteeUserId) === String(user._id))) ||
     userIdFromSubject === String(caseDoc.initiatorUserId) ||
     userIdFromSubject === String(caseDoc.inviteeUserId);
 

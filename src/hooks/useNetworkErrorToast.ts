@@ -42,9 +42,7 @@ function ensureToaster() {
  *   from null/undefined to a non-null Error.
  * - **Imperative**: call the returned function with an optional message string.
  */
-export function useNetworkErrorToast(
-  error?: Error | null,
-): ShowNetworkErrorFn {
+export function useNetworkErrorToast(error?: Error | null): ShowNetworkErrorFn {
   const prevErrorRef = useRef<Error | null>(null);
 
   useEffect(() => {

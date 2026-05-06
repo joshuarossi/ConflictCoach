@@ -7,7 +7,7 @@ describe("StreamingIndicator renders a thin vertical bar cursor blinking at 500m
     const { container } = render(<StreamingIndicator />);
 
     const cursor = container.querySelector(
-      '[data-testid="streaming-cursor"], [class*="cursor"], [class*="indicator"]'
+      '[data-testid="streaming-cursor"], [class*="cursor"], [class*="indicator"]',
     );
     expect(cursor).not.toBeNull();
   });
@@ -17,7 +17,7 @@ describe("StreamingIndicator renders a thin vertical bar cursor blinking at 500m
 
     // The cursor should have an animation — check for inline style or class
     const cursor = container.querySelector(
-      '[data-testid="streaming-cursor"], [class*="cursor"], [class*="indicator"]'
+      '[data-testid="streaming-cursor"], [class*="cursor"], [class*="indicator"]',
     ) as HTMLElement;
     expect(cursor).not.toBeNull();
 
@@ -30,10 +30,10 @@ describe("StreamingIndicator renders a thin vertical bar cursor blinking at 500m
     // Accept either inline animation or a CSS class that implies blinking
     expect(
       animation.includes("0.5s") ||
-      animation.includes("500ms") ||
-      animationName.includes("blink") ||
-      classes.includes("blink") ||
-      classes.includes("animate-")
+        animation.includes("500ms") ||
+        animationName.includes("blink") ||
+        classes.includes("blink") ||
+        classes.includes("animate-"),
     ).toBe(true);
   });
 });

@@ -41,10 +41,9 @@ describe("AC: All color tokens from StyleGuide §2.2 are defined as CSS custom p
     cssContent = fs.readFileSync(globalsPath, "utf-8");
 
     for (const token of REQUIRED_COLOR_TOKENS) {
-      expect(
-        cssContent,
-        `Missing CSS custom property: ${token}`,
-      ).toContain(token);
+      expect(cssContent, `Missing CSS custom property: ${token}`).toContain(
+        token,
+      );
     }
   });
 
@@ -53,11 +52,12 @@ describe("AC: All color tokens from StyleGuide §2.2 are defined as CSS custom p
 
     for (const token of REQUIRED_COLOR_TOKENS) {
       // Match pattern like `--bg-canvas: #FAF8F5` or `--bg-canvas: something`
-      const declarationRegex = new RegExp(`${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:\\s*.+`);
-      expect(
-        cssContent,
-        `Token ${token} is not declared with a value`,
-      ).toMatch(declarationRegex);
+      const declarationRegex = new RegExp(
+        `${token.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}\\s*:\\s*.+`,
+      );
+      expect(cssContent, `Token ${token} is not declared with a value`).toMatch(
+        declarationRegex,
+      );
     }
   });
 });

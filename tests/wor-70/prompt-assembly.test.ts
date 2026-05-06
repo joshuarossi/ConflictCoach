@@ -25,7 +25,8 @@ const alicePartyState: PartyState = {
   mainTopic: "Workplace disagreement about project direction",
   description: "We disagree on the tech stack choice for the new project.",
   desiredOutcome: "Find a compromise we can both support.",
-  synthesisText: "Alice synthesis: Both parties value project success. Key disagreement on technology.",
+  synthesisText:
+    "Alice synthesis: Both parties value project success. Key disagreement on technology.",
 };
 
 const bobPartyState: PartyState = {
@@ -34,28 +35,50 @@ const bobPartyState: PartyState = {
   mainTopic: "Project tech stack conflict",
   description: "Alice wants React, I want Vue. We need to agree.",
   desiredOutcome: "A fair process for making the decision.",
-  synthesisText: "Bob synthesis: Common ground on user experience goals. Disagreement on implementation.",
+  synthesisText:
+    "Bob synthesis: Common ground on user experience goals. Disagreement on implementation.",
 };
 
 const alicePrivateMessages: PrivateMessage[] = [
-  { userId: ALICE_ID, role: "USER", content: "I feel frustrated with the tech stack debate." },
-  { userId: ALICE_ID, role: "AI", content: "Tell me more about what frustrates you." },
+  {
+    userId: ALICE_ID,
+    role: "USER",
+    content: "I feel frustrated with the tech stack debate.",
+  },
+  {
+    userId: ALICE_ID,
+    role: "AI",
+    content: "Tell me more about what frustrates you.",
+  },
 ];
 
 const bobPrivateMessages: PrivateMessage[] = [
-  { userId: BOB_ID, role: "USER", content: "Alice never listens to my Vue arguments." },
-  { userId: BOB_ID, role: "AI", content: "What specifically do you want her to understand?" },
+  {
+    userId: BOB_ID,
+    role: "USER",
+    content: "Alice never listens to my Vue arguments.",
+  },
+  {
+    userId: BOB_ID,
+    role: "AI",
+    content: "What specifically do you want her to understand?",
+  },
 ];
 
 const allPrivateMessages = [...alicePrivateMessages, ...bobPrivateMessages];
 
 const jointMessages: JointMessage[] = [
   { authorType: "COACH", content: "Welcome to the joint session." },
-  { authorType: "USER", authorUserId: ALICE_ID, content: "Thanks, glad to be here." },
+  {
+    authorType: "USER",
+    authorUserId: ALICE_ID,
+    content: "Thanks, glad to be here.",
+  },
 ];
 
 const templateVersion: TemplateVersion = {
-  globalGuidance: "This is a workplace conflict. Focus on professional resolution.",
+  globalGuidance:
+    "This is a workplace conflict. Focus on professional resolution.",
   coachInstructions: "Pay special attention to power dynamics.",
   draftCoachInstructions: "Help the user avoid accusatory language.",
 };
@@ -64,7 +87,9 @@ const recentHistory: Message[] = [
   { role: "user", content: "Can you help me think about this?" },
 ];
 
-function baseOpts(overrides: Partial<AssemblePromptOpts> = {}): AssemblePromptOpts {
+function baseOpts(
+  overrides: Partial<AssemblePromptOpts> = {},
+): AssemblePromptOpts {
   return {
     role: "PRIVATE_COACH",
     caseId: CASE_ID,
@@ -104,10 +129,16 @@ describe("Prompt assembly tests: each role gets correct context and system promp
       const result = assemblePrompt(baseOpts({ role: "PRIVATE_COACH" }));
       const allContent = result.messages.map((m) => m.content).join("\n");
       // Alice's content should be present
-      expect(allContent).toContain("I feel frustrated with the tech stack debate");
+      expect(allContent).toContain(
+        "I feel frustrated with the tech stack debate",
+      );
       // Bob's content must be ABSENT — this is the core privacy invariant
-      expect(allContent).not.toContain("Alice never listens to my Vue arguments");
-      expect(allContent).not.toContain("What specifically do you want her to understand");
+      expect(allContent).not.toContain(
+        "Alice never listens to my Vue arguments",
+      );
+      expect(allContent).not.toContain(
+        "What specifically do you want her to understand",
+      );
     });
 
     test("does NOT include Bob's form fields", () => {
@@ -175,8 +206,12 @@ describe("Prompt assembly tests: each role gets correct context and system promp
       expect(allContent).toContain("Alice synthesis");
       expect(allContent).toContain("Bob synthesis");
       // Should NOT include raw private coaching messages
-      expect(allContent).not.toContain("I feel frustrated with the tech stack debate");
-      expect(allContent).not.toContain("Alice never listens to my Vue arguments");
+      expect(allContent).not.toContain(
+        "I feel frustrated with the tech stack debate",
+      );
+      expect(allContent).not.toContain(
+        "Alice never listens to my Vue arguments",
+      );
     });
 
     test("context includes joint chat history", () => {

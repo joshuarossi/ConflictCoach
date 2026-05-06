@@ -120,13 +120,9 @@ export const sendMessage = mutation({
 
     // Schedule AI response generation
     try {
-      await ctx.scheduler.runAfter(
-        0,
-        internal.draftCoach.generateResponse,
-        {
-          sessionId: args.sessionId,
-        },
-      );
+      await ctx.scheduler.runAfter(0, internal.draftCoach.generateResponse, {
+        sessionId: args.sessionId,
+      });
     } catch (err) {
       console.error("Failed to schedule draft coach response:", err);
       await ctx.db.insert("draftMessages", {
@@ -154,10 +150,9 @@ export const generateResponse = internalAction({
   },
   handler: async (ctx: any, args: { sessionId: string }) => {
     // Fetch session
-    const session = await ctx.runQuery(
-      internal.draftCoach._getSession,
-      { sessionId: args.sessionId },
-    );
+    const session = await ctx.runQuery(internal.draftCoach._getSession, {
+      sessionId: args.sessionId,
+    });
     if (!session) {
       throw new Error("Draft session not found");
     }
@@ -165,7 +160,8 @@ export const generateResponse = internalAction({
     // Cost budget check — short-circuit if cap exceeded
     const budget = await enforceCostBudget(ctx, session.caseId);
     if (!budget.allowed) {
-      const message = budget.boilerplate ??
+      const message =
+        budget.boilerplate ??
         "AI features are currently unavailable for this case.";
       await ctx.runMutation(internal.draftCoach._insertErrorMessage, {
         sessionId: args.sessionId,
@@ -175,10 +171,9 @@ export const generateResponse = internalAction({
     }
 
     // Fetch case
-    const caseDoc = await ctx.runQuery(
-      internal.draftCoach._getCase,
-      { caseId: session.caseId },
-    );
+    const caseDoc = await ctx.runQuery(internal.draftCoach._getCase, {
+      caseId: session.caseId,
+    });
     if (!caseDoc) {
       throw new Error("Case not found");
     }
@@ -268,7 +263,11 @@ export const generateResponse = internalAction({
         }),
       ),
       jointMessages: jointMessages.map(
-        (m: { authorType: string; authorUserId?: string; content: string }) => ({
+        (m: {
+          authorType: string;
+          authorUserId?: string;
+          content: string;
+        }) => ({
           authorType: m.authorType,
           authorUserId: m.authorUserId,
           content: m.content,
@@ -297,20 +296,16 @@ export const generateResponse = internalAction({
 
       // If readiness was detected, try to extract finalDraft from the response
       if (isReady) {
-        const aiMessage = await ctx.runQuery(
-          internal.draftCoach._getMessage,
-          { messageId },
-        );
+        const aiMessage = await ctx.runQuery(internal.draftCoach._getMessage, {
+          messageId,
+        });
         if (aiMessage && aiMessage.status === "COMPLETE") {
           const draft = extractDraft(aiMessage.content);
           if (draft) {
-            await ctx.runMutation(
-              internal.draftCoach._setFinalDraft,
-              {
-                sessionId: args.sessionId,
-                finalDraft: draft,
-              },
-            );
+            await ctx.runMutation(internal.draftCoach._setFinalDraft, {
+              sessionId: args.sessionId,
+              finalDraft: draft,
+            });
           }
         }
       }
@@ -345,7 +340,9 @@ function extractDraft(content: string): string | null {
     }
   } catch {
     // Not valid JSON — try to extract JSON from the content
-    const jsonMatch = content.match(/\{[\s\S]*"draft"\s*:\s*"((?:[^"\\]|\\.)*)"/);
+    const jsonMatch = content.match(
+      /\{[\s\S]*"draft"\s*:\s*"((?:[^"\\]|\\.)*)"/,
+    );
     if (jsonMatch && jsonMatch[1]) {
       return jsonMatch[1].replace(/\\"/g, '"').replace(/\\n/g, "\n");
     }
@@ -418,7 +415,10 @@ export const sendFinalDraft = mutation({
           caseId: session.caseId,
         });
       } catch (err) {
-        console.error("Failed to schedule coach response after draft send:", err);
+        console.error(
+          "Failed to schedule coach response after draft send:",
+          err,
+        );
       }
     }
   },
@@ -584,10 +584,7 @@ export const _insertErrorMessage = internalMutation({
     sessionId: v.id("draftSessions"),
     content: v.string(),
   },
-  handler: async (
-    ctx: any,
-    args: { sessionId: string; content: string },
-  ) => {
+  handler: async (ctx: any, args: { sessionId: string; content: string }) => {
     await ctx.db.insert("draftMessages", {
       draftSessionId: args.sessionId,
       role: "AI" as const,

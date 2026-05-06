@@ -64,7 +64,9 @@ function NotFoundView() {
 function PrivateCoachingSubView({ caseId }: { caseId: string }) {
   return (
     <div data-testid="private-coaching-view" className="space-y-4">
-      <h2 className="text-h2 font-medium text-text-primary">Private Coaching</h2>
+      <h2 className="text-h2 font-medium text-text-primary">
+        Private Coaching
+      </h2>
       <p className="text-text-secondary">
         You are in the private coaching phase. Work with your AI coach to
         prepare for the joint conversation.
@@ -170,7 +172,9 @@ function CaseDetailContent() {
         return <ClosedCaseSubView status={caseStatus} />;
       default:
         return (
-          <p className="text-text-secondary">Unknown case status: {caseStatus}</p>
+          <p className="text-text-secondary">
+            Unknown case status: {caseStatus}
+          </p>
         );
     }
   }
@@ -183,7 +187,9 @@ function CaseDetailContent() {
       {isSolo && <SoloBanner />}
       <header className="flex items-center justify-between">
         <h1 className="text-h1 font-medium text-text-primary">
-          {isSolo ? "Solo Case" : `Case with ${caseData.otherPartyName || "the other party"}`}
+          {isSolo
+            ? "Solo Case"
+            : `Case with ${caseData.otherPartyName || "the other party"}`}
         </h1>
         <span className="rounded-full bg-surface-subtle px-3 py-1 text-label font-medium text-text-secondary">
           {getPhaseLabel(caseStatus)}

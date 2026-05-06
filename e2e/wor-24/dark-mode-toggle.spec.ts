@@ -9,12 +9,16 @@ import { test, expect } from "@playwright/test";
  * theme value to the dark theme value.
  */
 test.describe("AC: Dark mode token variants toggle via prefers-color-scheme or data-theme", () => {
-  test("light mode applies light --bg-canvas value (#FAF8F5)", async ({ page }) => {
+  test("light mode applies light --bg-canvas value (#FAF8F5)", async ({
+    page,
+  }) => {
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/");
 
     const bgColor = await page.evaluate(() => {
-      return getComputedStyle(document.documentElement).getPropertyValue("--bg-canvas").trim();
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue("--bg-canvas")
+        .trim();
     });
 
     // Light mode canvas should be the warm off-white (#FAF8F5)
@@ -23,12 +27,16 @@ test.describe("AC: Dark mode token variants toggle via prefers-color-scheme or d
     expect(bgColor.toLowerCase()).not.toContain("1a1816");
   });
 
-  test("dark mode applies dark --bg-canvas value when prefers-color-scheme is dark", async ({ page }) => {
+  test("dark mode applies dark --bg-canvas value when prefers-color-scheme is dark", async ({
+    page,
+  }) => {
     await page.emulateMedia({ colorScheme: "dark" });
     await page.goto("/");
 
     const bgColor = await page.evaluate(() => {
-      return getComputedStyle(document.documentElement).getPropertyValue("--bg-canvas").trim();
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue("--bg-canvas")
+        .trim();
     });
 
     // Dark mode canvas should be #1A1816 (per style guide)
@@ -41,7 +49,9 @@ test.describe("AC: Dark mode token variants toggle via prefers-color-scheme or d
     await page.goto("/");
 
     const textColor = await page.evaluate(() => {
-      return getComputedStyle(document.documentElement).getPropertyValue("--text-primary").trim();
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue("--text-primary")
+        .trim();
     });
 
     expect(textColor).toBeTruthy();
@@ -49,7 +59,9 @@ test.describe("AC: Dark mode token variants toggle via prefers-color-scheme or d
     expect(textColor.toLowerCase()).toContain("f2efe9");
   });
 
-  test("data-theme=\"dark\" attribute also activates dark mode tokens", async ({ page }) => {
+  test('data-theme="dark" attribute also activates dark mode tokens', async ({
+    page,
+  }) => {
     // Use light system preference but set data-theme to dark
     await page.emulateMedia({ colorScheme: "light" });
     await page.goto("/");
@@ -59,7 +71,9 @@ test.describe("AC: Dark mode token variants toggle via prefers-color-scheme or d
     });
 
     const bgColor = await page.evaluate(() => {
-      return getComputedStyle(document.documentElement).getPropertyValue("--bg-canvas").trim();
+      return getComputedStyle(document.documentElement)
+        .getPropertyValue("--bg-canvas")
+        .trim();
     });
 
     expect(bgColor).toBeTruthy();

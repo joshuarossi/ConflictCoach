@@ -32,9 +32,7 @@ describe("AC1: seed.ts exports a callable Convex function", () => {
     } else {
       // Object with .handler — standard Convex pattern (action or internalMutation)
       expect(seedFn).toHaveProperty("handler");
-      expect(
-        typeof (seedFn as { handler: unknown }).handler,
-      ).toBe("function");
+      expect(typeof (seedFn as { handler: unknown }).handler).toBe("function");
     }
   });
 });

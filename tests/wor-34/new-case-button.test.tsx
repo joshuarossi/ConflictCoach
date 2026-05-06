@@ -19,7 +19,10 @@ vi.mock("convex/react", () => ({
 
 const mockNavigate = vi.fn();
 vi.mock("react-router-dom", async () => {
-  const actual = await vi.importActual<typeof import("react-router-dom")>("react-router-dom");
+  const actual =
+    await vi.importActual<typeof import("react-router-dom")>(
+      "react-router-dom",
+    );
   return {
     ...actual,
     useNavigate: () => mockNavigate,
@@ -36,7 +39,8 @@ describe("AC: +New Case primary button routes to /cases/new", () => {
       </MemoryRouter>,
     );
 
-    const newCaseButton = screen.queryByRole("link", { name: /new case/i }) ??
+    const newCaseButton =
+      screen.queryByRole("link", { name: /new case/i }) ??
       screen.getByRole("button", { name: /new case/i });
     expect(newCaseButton).toBeInTheDocument();
   });
@@ -60,7 +64,8 @@ describe("AC: +New Case primary button routes to /cases/new", () => {
       </MemoryRouter>,
     );
 
-    const newCaseButton = screen.queryByRole("link", { name: /new case/i }) ??
+    const newCaseButton =
+      screen.queryByRole("link", { name: /new case/i }) ??
       screen.getByRole("button", { name: /new case/i });
 
     // If it's a link, verify href points to /cases/new

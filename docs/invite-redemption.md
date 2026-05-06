@@ -4,9 +4,9 @@ The `invites/redeem` Convex mutation is the backend entry point for accepting a 
 
 ## Input
 
-| Field | Type | Required | Description |
-|---|---|---|---|
-| `token` | string | Yes | The 32-character url-safe invite token from the invite URL. |
+| Field   | Type   | Required | Description                                                 |
+| ------- | ------ | -------- | ----------------------------------------------------------- |
+| `token` | string | Yes      | The 32-character url-safe invite token from the invite URL. |
 
 ## What the mutation does
 
@@ -26,11 +26,11 @@ The `invites/redeem` Convex mutation is the backend entry point for accepting a 
 
 The mutation throws structured `ConvexError` responses using `throwAppError`:
 
-| Code | When |
-|---|---|
-| `TOKEN_INVALID` | Token does not exist, or its status is `CONSUMED` or `REVOKED`. |
-| `NOT_FOUND` | The case referenced by the token no longer exists. |
-| `CONFLICT` | The authenticated user is the case initiator (self-invite), or the case status does not allow the transition. |
+| Code            | When                                                                                                          |
+| --------------- | ------------------------------------------------------------------------------------------------------------- |
+| `TOKEN_INVALID` | Token does not exist, or its status is `CONSUMED` or `REVOKED`.                                               |
+| `NOT_FOUND`     | The case referenced by the token no longer exists.                                                            |
+| `CONFLICT`      | The authenticated user is the case initiator (self-invite), or the case status does not allow the transition. |
 
 ## Relationship to case creation
 

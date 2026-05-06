@@ -37,9 +37,7 @@ describe("WOR-53: ClosureConfirmationBanner", () => {
       render(<ClosureConfirmationBanner {...defaultProps} />);
 
       expect(
-        screen.getByText(
-          "We agreed to split the cost 50/50 and meet monthly.",
-        ),
+        screen.getByText("We agreed to split the cost 50/50 and meet monthly."),
       ).toBeInTheDocument();
     });
   });

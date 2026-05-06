@@ -48,9 +48,7 @@ export function PrivacyBanner({ text, otherPartyName }: PrivacyBannerProps) {
       <span>{text}</span>
 
       {otherPartyName && (
-        <span className="ml-1">
-          {otherPartyName} can&apos;t see this.
-        </span>
+        <span className="ml-1">{otherPartyName} can&apos;t see this.</span>
       )}
 
       <span className="sr-only">

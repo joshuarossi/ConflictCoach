@@ -106,8 +106,7 @@ describe("AC3: Clicking a row opens a side drawer with JSON metadata", () => {
     // The metadata should appear in JSON format in the drawer — scope to drawer
     // ENTRY_WITH_METADATA.metadata = { category: "workplace", name: "Workplace Default" }
     const drawer =
-      screen.getByRole("dialog") ||
-      screen.getByTestId("audit-detail-drawer");
+      screen.getByRole("dialog") || screen.getByTestId("audit-detail-drawer");
     expect(within(drawer).getByText(/workplace/i)).toBeInTheDocument();
     expect(within(drawer).getByText(/Workplace Default/)).toBeInTheDocument();
   });
@@ -128,8 +127,7 @@ describe("AC3: Clicking a row opens a side drawer with JSON metadata", () => {
     // Drawer should now show the second entry's metadata (version: 1)
     // and the first entry's unique metadata should no longer be prominent
     const drawer =
-      screen.getByRole("dialog") ||
-      screen.getByTestId("audit-detail-drawer");
+      screen.getByRole("dialog") || screen.getByTestId("audit-detail-drawer");
     const drawerContent = drawer.textContent || "";
     expect(drawerContent).toContain("version");
   });

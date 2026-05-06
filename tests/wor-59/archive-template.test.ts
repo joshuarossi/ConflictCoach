@@ -12,7 +12,11 @@ import {
   type MockTemplate,
 } from "./helpers";
 
-import { createTemplate, archiveTemplate, listAllTemplates } from "../../convex/templates";
+import {
+  createTemplate,
+  archiveTemplate,
+  listAllTemplates,
+} from "../../convex/templates";
 
 describe("AC5: admin/templates/archive", () => {
   test("sets archivedAt on the template", async () => {

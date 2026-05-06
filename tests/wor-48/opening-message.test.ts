@@ -17,7 +17,8 @@ import { buildOpeningMessagePrompt } from "../../convex/jointChat";
 // Fixtures
 // ---------------------------------------------------------------------------
 
-const CASE_MAIN_TOPIC = "Disagreement over project deadlines and workload distribution";
+const CASE_MAIN_TOPIC =
+  "Disagreement over project deadlines and workload distribution";
 const CASE_CATEGORY = "workplace";
 
 // ---------------------------------------------------------------------------

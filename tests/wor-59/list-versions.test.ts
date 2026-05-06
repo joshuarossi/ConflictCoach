@@ -6,7 +6,11 @@
 import { describe, test, expect } from "vitest";
 import { createMockContext, callHandler, ADMIN_USER } from "./helpers";
 
-import { createTemplate, publishNewVersion, listTemplateVersions } from "../../convex/templates";
+import {
+  createTemplate,
+  publishNewVersion,
+  listTemplateVersions,
+} from "../../convex/templates";
 
 describe("AC7: admin/templateVersions/list", () => {
   test("returns all 3 versions for a template", async () => {
@@ -30,7 +34,9 @@ describe("AC7: admin/templateVersions/list", () => {
       globalGuidance: "v3.",
     });
 
-    const versions = await callHandler(listTemplateVersions, ctx, { templateId });
+    const versions = await callHandler(listTemplateVersions, ctx, {
+      templateId,
+    });
     expect(versions).toHaveLength(3);
   });
 
@@ -55,10 +61,10 @@ describe("AC7: admin/templateVersions/list", () => {
       globalGuidance: "v3.",
     });
 
-    const versions = await callHandler(listTemplateVersions, ctx, { templateId });
-    const versionNumbers = versions.map(
-      (v: { version: number }) => v.version,
-    );
+    const versions = await callHandler(listTemplateVersions, ctx, {
+      templateId,
+    });
+    const versionNumbers = versions.map((v: { version: number }) => v.version);
 
     expect(versionNumbers).toEqual([3, 2, 1]);
   });
@@ -81,7 +87,9 @@ describe("AC7: admin/templateVersions/list", () => {
       notes: "Updated for clarity.",
     });
 
-    const versions = await callHandler(listTemplateVersions, ctx, { templateId });
+    const versions = await callHandler(listTemplateVersions, ctx, {
+      templateId,
+    });
 
     // Descending order: v2 first, v1 second
     expect(versions[0].version).toBe(2);
@@ -104,7 +112,9 @@ describe("AC7: admin/templateVersions/list", () => {
       globalGuidance: "Only version.",
     });
 
-    const versions = await callHandler(listTemplateVersions, ctx, { templateId });
+    const versions = await callHandler(listTemplateVersions, ctx, {
+      templateId,
+    });
     expect(versions).toHaveLength(1);
     expect(versions[0].version).toBe(1);
   });

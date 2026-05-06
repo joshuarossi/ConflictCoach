@@ -77,10 +77,40 @@ describe("AC1: messages query returns all jointMessages ordered by createdAt", (
 
   test("returns all messages for the case", async () => {
     const msgs = [
-      { _id: "jm:1", caseId: CASE_ID, authorType: "USER", authorUserId: USER_A._id, content: "a", status: "COMPLETE", createdAt: 100 },
-      { _id: "jm:2", caseId: CASE_ID, authorType: "COACH", content: "b", status: "COMPLETE", createdAt: 200 },
-      { _id: "jm:3", caseId: CASE_ID, authorType: "USER", authorUserId: USER_B._id, content: "c", status: "COMPLETE", createdAt: 300 },
-      { _id: "jm:4", caseId: CASE_ID, authorType: "COACH", content: "d", status: "COMPLETE", createdAt: 400 },
+      {
+        _id: "jm:1",
+        caseId: CASE_ID,
+        authorType: "USER",
+        authorUserId: USER_A._id,
+        content: "a",
+        status: "COMPLETE",
+        createdAt: 100,
+      },
+      {
+        _id: "jm:2",
+        caseId: CASE_ID,
+        authorType: "COACH",
+        content: "b",
+        status: "COMPLETE",
+        createdAt: 200,
+      },
+      {
+        _id: "jm:3",
+        caseId: CASE_ID,
+        authorType: "USER",
+        authorUserId: USER_B._id,
+        content: "c",
+        status: "COMPLETE",
+        createdAt: 300,
+      },
+      {
+        _id: "jm:4",
+        caseId: CASE_ID,
+        authorType: "COACH",
+        content: "d",
+        status: "COMPLETE",
+        createdAt: 400,
+      },
     ];
 
     const ctx = createMockCtx({
@@ -146,7 +176,9 @@ describe("AC3: Query rejects if case is not in JOINT_ACTIVE or CLOSED_* status",
   test("throws CONFLICT when case is BOTH_PRIVATE_COACHING", async () => {
     const ctx = createMockCtx({
       user: USER_A,
-      dbGet: { [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "BOTH_PRIVATE_COACHING" } },
+      dbGet: {
+        [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "BOTH_PRIVATE_COACHING" },
+      },
       dbQueries: { partyStates: [PARTY_STATE_A], jointMessages: [] },
     });
 
@@ -163,7 +195,9 @@ describe("AC3: Query rejects if case is not in JOINT_ACTIVE or CLOSED_* status",
   test("throws CONFLICT when case is DRAFT_PRIVATE_COACHING", async () => {
     const ctx = createMockCtx({
       user: USER_A,
-      dbGet: { [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "DRAFT_PRIVATE_COACHING" } },
+      dbGet: {
+        [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "DRAFT_PRIVATE_COACHING" },
+      },
       dbQueries: { partyStates: [PARTY_STATE_A], jointMessages: [] },
     });
 
@@ -221,7 +255,9 @@ describe("AC3: Query rejects if case is not in JOINT_ACTIVE or CLOSED_* status",
   test("succeeds when case is CLOSED_UNRESOLVED", async () => {
     const ctx = createMockCtx({
       user: USER_A,
-      dbGet: { [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "CLOSED_UNRESOLVED" } },
+      dbGet: {
+        [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "CLOSED_UNRESOLVED" },
+      },
       dbQueries: { partyStates: [PARTY_STATE_A], jointMessages: [] },
     });
 
@@ -233,7 +269,9 @@ describe("AC3: Query rejects if case is not in JOINT_ACTIVE or CLOSED_* status",
   test("succeeds when case is CLOSED_ABANDONED", async () => {
     const ctx = createMockCtx({
       user: USER_A,
-      dbGet: { [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "CLOSED_ABANDONED" } },
+      dbGet: {
+        [CASE_ID]: { ...CASE_JOINT_ACTIVE, status: "CLOSED_ABANDONED" },
+      },
       dbQueries: { partyStates: [PARTY_STATE_A], jointMessages: [] },
     });
 

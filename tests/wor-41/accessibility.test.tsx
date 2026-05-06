@@ -6,7 +6,7 @@ import { MessageBubble } from "@/components/chat/MessageBubble";
 describe("Chat messages container uses role='log' with aria-live='polite' for screen reader accessibility", () => {
   it("ChatWindow container has role='log'", () => {
     const { container } = render(
-      <ChatWindow messages={[]} onSendMessage={vi.fn()} />
+      <ChatWindow messages={[]} onSendMessage={vi.fn()} />,
     );
 
     const log = container.querySelector('[role="log"]');
@@ -15,7 +15,7 @@ describe("Chat messages container uses role='log' with aria-live='polite' for sc
 
   it("ChatWindow container has aria-live='polite'", () => {
     const { container } = render(
-      <ChatWindow messages={[]} onSendMessage={vi.fn()} />
+      <ChatWindow messages={[]} onSendMessage={vi.fn()} />,
     );
 
     const log = container.querySelector('[role="log"]');
@@ -32,7 +32,7 @@ describe("Chat messages container uses role='log' with aria-live='polite' for sc
         createdAt={Date.now()}
         onCopy={vi.fn()}
         onRetry={vi.fn()}
-      />
+      />,
     );
 
     const copyButton = screen.getByRole("button", { name: /copy/i });
@@ -52,7 +52,7 @@ describe("Chat messages container uses role='log' with aria-live='polite' for sc
         createdAt={Date.now()}
         onCopy={vi.fn()}
         onRetry={vi.fn()}
-      />
+      />,
     );
 
     const retryButton = screen.getByRole("button", { name: /retry/i });

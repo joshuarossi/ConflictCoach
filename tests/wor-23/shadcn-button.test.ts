@@ -13,9 +13,7 @@ describe("AC: At least one shadcn/ui primitive (Button) is installed and importa
     const { render } = await import("@testing-library/react");
     const { Button } = await import("@/components/ui/button");
 
-    const { getByRole } = render(
-      createElement(Button, null, "Click me")
-    );
+    const { getByRole } = render(createElement(Button, null, "Click me"));
 
     const button = getByRole("button", { name: "Click me" });
     expect(button).toBeDefined();

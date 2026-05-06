@@ -81,6 +81,7 @@ Single Playwright spec file containing one `test.describe` block with six tests,
 **Critical decision: extract a shared `openPanelAndGetDraft` helper.** Four of the six ACs (Generate Draft, Send, Discard, Edit) require getting to a state where DraftReadyCard is visible. A shared helper function within the spec file opens the panel, sends a user message, waits for the AI response, clicks "Draft it for me", and waits for the DraftReadyCard to appear. This matches the pattern already established in `e2e/wor-51/draft-coach-actions.spec.ts:42-80`.
 
 **Key test selectors (all already exist in the codebase):**
+
 - `[data-testid='draft-coach-panel']` — panel container
 - `[data-testid='draft-ready-card']` — DraftReadyCard container
 - `[data-testid='privacy-banner']` — privacy notice in panel header
@@ -107,6 +108,7 @@ This test does not call Convex queries directly. It exercises them through the U
 ## Invariants
 
 **The send gate.** The single most important invariant: after clicking "Draft it for me" and seeing the DraftReadyCard, the joint chat message count must NOT have increased. Only after clicking "Send this message" should the count increase by exactly one. This is verified by:
+
 1. Counting `[data-testid='joint-chat-messages'] [data-testid='message']` before opening Draft Coach.
 2. Going through the full draft generation flow.
 3. Asserting count is unchanged after DraftReadyCard appears.
@@ -142,11 +144,11 @@ This test does not call Convex queries directly. It exercises them through the U
 
 ## Test coverage
 
-| AC | Test layer | Verification approach |
-|----|-----------|----------------------|
-| Test starts a draft session via the Draft Coach panel | e2e | Create solo case, advance to JOINT_ACTIVE, navigate to `/cases/:caseId/joint`. Click "Draft with Coach" button. Assert `[data-testid='draft-coach-panel']` is visible. Assert `[data-testid='privacy-banner']` is visible. Assert no messages in panel chat area. |
-| Iterates with Draft Coach (sends messages, receives AI responses) | e2e | Open panel. Fill panel textbox, press Enter. Assert user message appears in panel. Wait for AI response (`[data-author-type='COACH']` or `[data-role='AI']`). Assert AI response is non-empty and stays within the panel (joint chat message count unchanged). |
-| Verifies that clicking 'Generate Draft' produces a draft but does NOT post to joint chat | e2e | Record joint message count. Open panel, send a message, wait for AI response. Click "Draft it for me". Wait for `[data-testid='draft-ready-card']` to appear with draft text. Assert joint message count is UNCHANGED. This is the core gate test. |
-| Verifies that clicking 'Send this message' posts the draft to joint chat | e2e | Record joint message count. Use `openPanelAndGetDraft` helper to reach DraftReadyCard. Click "Send this message". Assert panel closes (`draft-coach-panel` not visible). Wait for joint message count to increase. Assert the new message's text content matches the draft. |
-| Discards a draft session and verifies no message appears in joint chat | e2e | Record joint message count. Use `openPanelAndGetDraft` helper. Click "Discard". Assert panel closes. Assert joint message count is UNCHANGED. Assert `#joint-chat-input` value is empty. |
-| Verifies 'Edit before sending' drops text into joint chat input without sending | e2e | Record joint message count. Use `openPanelAndGetDraft` helper. Click "Edit before sending". Assert panel closes. Assert `#joint-chat-input` value is non-empty (contains draft text). Assert joint message count is UNCHANGED. |
+| AC                                                                                       | Test layer | Verification approach                                                                                                                                                                                                                                                       |
+| ---------------------------------------------------------------------------------------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Test starts a draft session via the Draft Coach panel                                    | e2e        | Create solo case, advance to JOINT_ACTIVE, navigate to `/cases/:caseId/joint`. Click "Draft with Coach" button. Assert `[data-testid='draft-coach-panel']` is visible. Assert `[data-testid='privacy-banner']` is visible. Assert no messages in panel chat area.           |
+| Iterates with Draft Coach (sends messages, receives AI responses)                        | e2e        | Open panel. Fill panel textbox, press Enter. Assert user message appears in panel. Wait for AI response (`[data-author-type='COACH']` or `[data-role='AI']`). Assert AI response is non-empty and stays within the panel (joint chat message count unchanged).              |
+| Verifies that clicking 'Generate Draft' produces a draft but does NOT post to joint chat | e2e        | Record joint message count. Open panel, send a message, wait for AI response. Click "Draft it for me". Wait for `[data-testid='draft-ready-card']` to appear with draft text. Assert joint message count is UNCHANGED. This is the core gate test.                          |
+| Verifies that clicking 'Send this message' posts the draft to joint chat                 | e2e        | Record joint message count. Use `openPanelAndGetDraft` helper to reach DraftReadyCard. Click "Send this message". Assert panel closes (`draft-coach-panel` not visible). Wait for joint message count to increase. Assert the new message's text content matches the draft. |
+| Discards a draft session and verifies no message appears in joint chat                   | e2e        | Record joint message count. Use `openPanelAndGetDraft` helper. Click "Discard". Assert panel closes. Assert joint message count is UNCHANGED. Assert `#joint-chat-input` value is empty.                                                                                    |
+| Verifies 'Edit before sending' drops text into joint chat input without sending          | e2e        | Record joint message count. Use `openPanelAndGetDraft` helper. Click "Edit before sending". Assert panel closes. Assert `#joint-chat-input` value is non-empty (contains draft text). Assert joint message count is UNCHANGED.                                              |

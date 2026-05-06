@@ -19,7 +19,8 @@ export function LandingPage() {
             A calm place to work through a difficult conversation.
           </h1>
           <p className="text-h3 text-text-secondary mb-8">
-            Guided coaching to help you find resolution — privately and together.
+            Guided coaching to help you find resolution — privately and
+            together.
           </p>
           <Link
             to="/login"
@@ -36,15 +37,22 @@ export function LandingPage() {
           <h2 className="sr-only">How it works</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 text-center">
             <div className="flex flex-col items-center gap-3">
-              <MessageCircle className="w-8 h-8 text-accent" strokeWidth={1.5} />
-              <h3 className="font-medium text-text-primary">Private Coaching</h3>
+              <MessageCircle
+                className="w-8 h-8 text-accent"
+                strokeWidth={1.5}
+              />
+              <h3 className="font-medium text-text-primary">
+                Private Coaching
+              </h3>
               <p className="text-label text-text-secondary">
                 Work through your perspective privately with an AI coach.
               </p>
             </div>
             <div className="flex flex-col items-center gap-3">
               <Users className="w-8 h-8 text-accent" strokeWidth={1.5} />
-              <h3 className="font-medium text-text-primary">Shared Conversation</h3>
+              <h3 className="font-medium text-text-primary">
+                Shared Conversation
+              </h3>
               <p className="text-label text-text-secondary">
                 Come together in a facilitated discussion with AI guidance.
               </p>

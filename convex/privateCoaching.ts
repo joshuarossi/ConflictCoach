@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { query, mutation, action, internalQuery, internalMutation } from "./_generated/server";
+import {
+  query,
+  mutation,
+  action,
+  internalQuery,
+  internalMutation,
+} from "./_generated/server";
 import { api, internal } from "./_generated/api";
 import { v } from "convex/values";
 import { throwAppError } from "./lib/errors";
@@ -45,7 +51,9 @@ async function requireParty(
 export const myMessages = query({
   args: {
     caseId: v.id("cases"),
-    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
+    partyRole: v.optional(
+      v.union(v.literal("INITIATOR"), v.literal("INVITEE")),
+    ),
   },
   handler: async (ctx: any, args: { caseId: string; partyRole?: string }) => {
     const user = await requireAuth(ctx);
@@ -88,9 +96,14 @@ export const sendUserMessage = mutation({
   args: {
     caseId: v.id("cases"),
     content: v.string(),
-    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
+    partyRole: v.optional(
+      v.union(v.literal("INITIATOR"), v.literal("INVITEE")),
+    ),
   },
-  handler: async (ctx: any, args: { caseId: string; content: string; partyRole?: string }) => {
+  handler: async (
+    ctx: any,
+    args: { caseId: string; content: string; partyRole?: string },
+  ) => {
     const user = await requireAuth(ctx);
     const caseDoc = await requireParty(ctx, args.caseId, user._id);
 
@@ -105,7 +118,9 @@ export const sendUserMessage = mutation({
     }
 
     // Determine partyRole for solo mode message isolation
-    const partyRole = caseDoc.isSolo ? (args.partyRole ?? "INITIATOR") : undefined;
+    const partyRole = caseDoc.isSolo
+      ? (args.partyRole ?? "INITIATOR")
+      : undefined;
 
     // Insert the user's message
     const messageId = await ctx.db.insert("privateMessages", {
@@ -123,7 +138,9 @@ export const sendUserMessage = mutation({
       await ctx.scheduler.runAfter(0, api.privateCoaching.generateAIResponse, {
         caseId: args.caseId,
         userId: user._id,
-        ...(partyRole ? { partyRole: partyRole as "INITIATOR" | "INVITEE" } : {}),
+        ...(partyRole
+          ? { partyRole: partyRole as "INITIATOR" | "INVITEE" }
+          : {}),
       });
     } catch (err) {
       console.error("Failed to schedule AI response:", err);
@@ -132,7 +149,8 @@ export const sendUserMessage = mutation({
         caseId: args.caseId,
         userId: user._id,
         role: "AI" as const,
-        content: "Sorry, I was unable to process your message. Please try again.",
+        content:
+          "Sorry, I was unable to process your message. Please try again.",
         status: "ERROR" as const,
         ...(partyRole ? { partyRole } : {}),
         createdAt: Date.now(),
@@ -151,9 +169,14 @@ export const generateAIResponse = action({
   args: {
     caseId: v.id("cases"),
     userId: v.id("users"),
-    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
+    partyRole: v.optional(
+      v.union(v.literal("INITIATOR"), v.literal("INVITEE")),
+    ),
   },
-  handler: async (ctx: any, args: { caseId: string; userId: string; partyRole?: string }) => {
+  handler: async (
+    ctx: any,
+    args: { caseId: string; userId: string; partyRole?: string },
+  ) => {
     // Cost budget check — short-circuit if cap exceeded
     const budget = await enforceCostBudget(ctx, args.caseId);
     if (!budget.allowed) {
@@ -184,7 +207,11 @@ export const generateAIResponse = action({
 
     const privateMessages = await ctx.runQuery(
       internal.privateCoaching._getPrivateMessagesByCase,
-      { caseId: args.caseId, userId: args.userId, ...(args.partyRole ? { partyRole: args.partyRole } : {}) },
+      {
+        caseId: args.caseId,
+        userId: args.userId,
+        ...(args.partyRole ? { partyRole: args.partyRole } : {}),
+      },
     );
 
     // Build recent history in Anthropic message format
@@ -254,7 +281,8 @@ export const generateAIResponse = action({
       await ctx.runMutation(internal.privateCoaching._insertErrorMessage, {
         caseId: args.caseId,
         userId: args.userId,
-        content: "Sorry, I encountered an error generating a response. Please try sending your message again.",
+        content:
+          "Sorry, I encountered an error generating a response. Please try sending your message again.",
         ...(args.partyRole ? { partyRole: args.partyRole } : {}),
       });
     }
@@ -325,7 +353,7 @@ export const markComplete = mutation({
       } else {
         console.warn(
           `Synthesis module reference not found for case ${args.caseId}. ` +
-          `Case will not advance to READY_FOR_JOINT automatically.`,
+            `Case will not advance to READY_FOR_JOINT automatically.`,
         );
       }
     }
@@ -358,9 +386,19 @@ export const _insertErrorMessage = internalMutation({
     caseId: v.id("cases"),
     userId: v.id("users"),
     content: v.string(),
-    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
+    partyRole: v.optional(
+      v.union(v.literal("INITIATOR"), v.literal("INVITEE")),
+    ),
   },
-  handler: async (ctx: any, args: { caseId: string; userId: string; content: string; partyRole?: string }) => {
+  handler: async (
+    ctx: any,
+    args: {
+      caseId: string;
+      userId: string;
+      content: string;
+      partyRole?: string;
+    },
+  ) => {
     await ctx.db.insert("privateMessages", {
       caseId: args.caseId,
       userId: args.userId,
@@ -377,7 +415,9 @@ export const _getPrivateMessagesByCase = internalQuery({
   args: {
     caseId: v.id("cases"),
     userId: v.id("users"),
-    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
+    partyRole: v.optional(
+      v.union(v.literal("INITIATOR"), v.literal("INVITEE")),
+    ),
   },
   handler: async (
     ctx: any,

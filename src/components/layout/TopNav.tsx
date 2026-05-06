@@ -123,7 +123,8 @@ export function TopNav({ children }: TopNavProps) {
   // to the case status when the URL doesn't say (e.g. /cases/:id).
   const pathSegments = location.pathname.split("/");
   const caseIdIndex = pathSegments.indexOf(params.caseId ?? "");
-  const phaseSegment = caseIdIndex >= 0 ? pathSegments[caseIdIndex + 1] : undefined;
+  const phaseSegment =
+    caseIdIndex >= 0 ? pathSegments[caseIdIndex + 1] : undefined;
   const phaseLabel =
     getPhaseLabel(phaseSegment) ?? getStatusPhaseLabel(caseContext?.status);
 
@@ -133,7 +134,10 @@ export function TopNav({ children }: TopNavProps) {
       ? `Case with ${otherPartyName}`
       : `Case ${params.caseId}`;
     return (
-      <nav aria-label="Case navigation" className="border-b bg-surface px-4 py-3">
+      <nav
+        aria-label="Case navigation"
+        className="border-b bg-surface px-4 py-3"
+      >
         <div className="flex items-center gap-3">
           <Link
             to="/dashboard"

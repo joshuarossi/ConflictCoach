@@ -21,11 +21,13 @@ const CASE_ID = "cases:test-case" as any;
 const USER_ID = "users:party-a" as any;
 const NON_PARTY_USER_ID = "users:stranger" as any;
 
-function makeMockCtx(overrides: {
-  caseStatus?: string;
-  callerUserId?: string;
-  hasPartyState?: boolean;
-} = {}) {
+function makeMockCtx(
+  overrides: {
+    caseStatus?: string;
+    callerUserId?: string;
+    hasPartyState?: boolean;
+  } = {},
+) {
   const {
     caseStatus = "READY_FOR_JOINT",
     callerUserId = USER_ID,

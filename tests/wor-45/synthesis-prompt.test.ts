@@ -25,7 +25,8 @@ const initiatorPartyState: PartyState = {
   userId: USER_INITIATOR,
   role: "INITIATOR",
   mainTopic: "Disagreement over project direction",
-  description: "We cannot agree on the technical architecture for the new product.",
+  description:
+    "We cannot agree on the technical architecture for the new product.",
   desiredOutcome: "A shared roadmap we both feel ownership of",
 };
 
@@ -38,15 +39,39 @@ const inviteePartyState: PartyState = {
 };
 
 const initiatorMessages: PrivateMessage[] = [
-  { userId: USER_INITIATOR, role: "USER", content: "I feel like my opinions are ignored." },
-  { userId: USER_INITIATOR, role: "AI", content: "Can you give me a specific example?" },
-  { userId: USER_INITIATOR, role: "USER", content: "Last week they picked the database without asking me." },
+  {
+    userId: USER_INITIATOR,
+    role: "USER",
+    content: "I feel like my opinions are ignored.",
+  },
+  {
+    userId: USER_INITIATOR,
+    role: "AI",
+    content: "Can you give me a specific example?",
+  },
+  {
+    userId: USER_INITIATOR,
+    role: "USER",
+    content: "Last week they picked the database without asking me.",
+  },
 ];
 
 const inviteeMessages: PrivateMessage[] = [
-  { userId: USER_INVITEE, role: "USER", content: "I just want them to trust my judgment more." },
-  { userId: USER_INVITEE, role: "AI", content: "What would that trust look like in practice?" },
-  { userId: USER_INVITEE, role: "USER", content: "They would let me lead the backend decisions." },
+  {
+    userId: USER_INVITEE,
+    role: "USER",
+    content: "I just want them to trust my judgment more.",
+  },
+  {
+    userId: USER_INVITEE,
+    role: "AI",
+    content: "What would that trust look like in practice?",
+  },
+  {
+    userId: USER_INVITEE,
+    role: "USER",
+    content: "They would let me lead the backend decisions.",
+  },
 ];
 
 function makeSynthesisOpts(

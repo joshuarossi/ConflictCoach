@@ -41,9 +41,7 @@ test.describe("WOR-54: Privacy boundary on closed case view", () => {
     await page.goto(`/cases/${caseId}/closed`);
 
     // Wait for closed case view to render
-    await expect(
-      page.getByText(/this case is closed/i),
-    ).toBeVisible();
+    await expect(page.getByText(/this case is closed/i)).toBeVisible();
 
     // --- Tab assertions: tabs must exist and be interactable ---
     const privateTab = page.getByRole("tab", {

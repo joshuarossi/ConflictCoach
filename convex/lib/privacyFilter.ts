@@ -130,7 +130,9 @@ export async function filterOrRetry(
   generateFn: () => Promise<string>,
   otherPartyMessages: string[],
   maxRetries: number,
-  ctx: { db: { insert: (table: string, doc: Record<string, unknown>) => unknown } },
+  ctx: {
+    db: { insert: (table: string, doc: Record<string, unknown>) => unknown };
+  },
 ): Promise<string> {
   const totalAttempts = 1 + maxRetries;
 

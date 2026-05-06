@@ -44,8 +44,7 @@ describe("AC5: mySynthesis returns caller's synthesisText from partyStates", () 
 
     // Result should contain User A's synthesis text — either as a string
     // or as an object with a synthesisText property
-    const text =
-      typeof result === "string" ? result : result?.synthesisText;
+    const text = typeof result === "string" ? result : result?.synthesisText;
     expect(text).toBe("User A's personalized synthesis guidance.");
   });
 
@@ -67,8 +66,7 @@ describe("AC5: mySynthesis returns caller's synthesisText from partyStates", () 
     const handler = getHandler(mySynthesis);
     const result = await handler(ctx, { caseId: CASE_ID });
 
-    const text =
-      typeof result === "string" ? result : result?.synthesisText;
+    const text = typeof result === "string" ? result : result?.synthesisText;
     expect(text == null || text === undefined).toBe(true);
   });
 

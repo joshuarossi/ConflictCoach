@@ -6,7 +6,10 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-import { SOFT_CAP_BOILERPLATE, checkCostBudget } from "../../convex/lib/costBudget";
+import {
+  SOFT_CAP_BOILERPLATE,
+  checkCostBudget,
+} from "../../convex/lib/costBudget";
 import { enforceCostBudget } from "../../convex/lib/costBudget";
 
 describe("WOR-66: $2 soft cap enforcement", () => {

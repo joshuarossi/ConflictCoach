@@ -135,9 +135,7 @@ function ClosedCaseViewInner({
 
       {/* AC1: Header with case name, category, closure date, outcome */}
       <header className="mb-6" data-testid="closed-case-header">
-        <h1 className="text-h1 font-medium text-text-primary">
-          {caseName}
-        </h1>
+        <h1 className="text-h1 font-medium text-text-primary">{caseName}</h1>
         <div className="mt-2 flex flex-wrap items-center gap-3 text-label text-text-secondary">
           <span>{category}</span>
           <span aria-hidden="true">&middot;</span>
@@ -167,10 +165,7 @@ function ClosedCaseViewInner({
       )}
 
       {/* AC4: Tab navigation */}
-      <Tabs
-        defaultValue={defaultTab}
-        onValueChange={onTabChange}
-      >
+      <Tabs defaultValue={defaultTab} onValueChange={onTabChange}>
         <TabsList className="w-full">
           <TabsTrigger value="joint" className="flex-1">
             Joint Chat
@@ -194,9 +189,7 @@ function ClosedCaseViewInner({
 
         {/* AC5: My Private Coaching tab */}
         <TabsContent value="private">
-          <div
-            className="rounded-lg border border-border-default bg-private-tint"
-          >
+          <div className="rounded-lg border border-border-default bg-private-tint">
             <div className="max-h-[60vh] overflow-y-auto">
               <ChatWindow messages={privateChatMessages} />
             </div>
@@ -319,7 +312,7 @@ export function ClosedCaseView() {
   const resolvedSynthesis =
     typeof synthesisData === "string"
       ? synthesisData
-      : synthesisData?.synthesisText ?? null;
+      : (synthesisData?.synthesisText ?? null);
 
   return (
     <ClosedCaseViewInner

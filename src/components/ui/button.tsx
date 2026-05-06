@@ -9,8 +9,7 @@ const buttonVariants = cva(
   {
     variants: {
       variant: {
-        default:
-          "bg-accent text-accent-on shadow-1 hover:bg-accent-hover",
+        default: "bg-accent text-accent-on shadow-1 hover:bg-accent-hover",
         destructive:
           // NOTE: text-accent-on is reused here (and on bg-warning, bg-coach-accent)
           // as a generic "contrasting text on filled background" token. Current light/dark
@@ -39,7 +38,8 @@ const buttonVariants = cva(
 );
 
 export interface ButtonProps
-  extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+  extends
+    React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }

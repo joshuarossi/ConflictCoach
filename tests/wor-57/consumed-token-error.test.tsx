@@ -41,9 +41,7 @@ describe("WOR-57: Consumed/invalid token error state", () => {
 
   test('AC7: shows "Log in" option', () => {
     renderPage();
-    expect(
-      screen.getByRole("link", { name: /log in/i }),
-    ).toBeInTheDocument();
+    expect(screen.getByRole("link", { name: /log in/i })).toBeInTheDocument();
   });
 
   test('AC7: shows "Go to dashboard" option', () => {

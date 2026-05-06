@@ -31,7 +31,8 @@ describe("AC: 404 if case not found or user is not a party to the case", () => {
       </MemoryRouter>,
     );
     // Should display a not-found message or element
-    const notFoundEl = screen.queryByTestId("case-not-found") ??
+    const notFoundEl =
+      screen.queryByTestId("case-not-found") ??
       screen.queryByText(/not found/i) ??
       screen.queryByText(/404/i);
     expect(notFoundEl).toBeInTheDocument();
@@ -45,8 +46,12 @@ describe("AC: 404 if case not found or user is not a party to the case", () => {
         </Routes>
       </MemoryRouter>,
     );
-    expect(screen.queryByTestId("private-coaching-view")).not.toBeInTheDocument();
-    expect(screen.queryByTestId("ready-for-joint-view")).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("private-coaching-view"),
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId("ready-for-joint-view"),
+    ).not.toBeInTheDocument();
     expect(screen.queryByTestId("joint-chat-view")).not.toBeInTheDocument();
     expect(screen.queryByTestId("closed-case-view")).not.toBeInTheDocument();
   });

@@ -133,10 +133,11 @@ const ANTI_QUOTATION_INSTRUCTION =
 // Helper: serialize all output content for searching
 // ---------------------------------------------------------------------------
 
-function allOutputContent(result: { system: string; messages: Message[] }): string {
-  return (
-    result.system + " " + result.messages.map((m) => m.content).join(" ")
-  );
+function allOutputContent(result: {
+  system: string;
+  messages: Message[];
+}): string {
+  return result.system + " " + result.messages.map((m) => m.content).join(" ");
 }
 
 // ---------------------------------------------------------------------------
@@ -517,9 +518,7 @@ describe("AC 6: Template merging behavior across roles", () => {
     });
 
     expect(result.system).toContain(mockTemplateVersion.globalGuidance);
-    expect(result.system).toContain(
-      mockTemplateVersion.draftCoachInstructions,
-    );
+    expect(result.system).toContain(mockTemplateVersion.draftCoachInstructions);
   });
 
   test("DRAFT_COACH role: coachInstructions do NOT appear in system prompt", () => {
@@ -531,9 +530,7 @@ describe("AC 6: Template merging behavior across roles", () => {
       templateVersion: mockTemplateVersion,
     });
 
-    expect(result.system).not.toContain(
-      mockTemplateVersion.coachInstructions,
-    );
+    expect(result.system).not.toContain(mockTemplateVersion.coachInstructions);
   });
 
   test("PRIVATE_COACH role: no template content is included even when templateVersion is provided", () => {
@@ -546,9 +543,7 @@ describe("AC 6: Template merging behavior across roles", () => {
     });
 
     expect(result.system).not.toContain(mockTemplateVersion.globalGuidance);
-    expect(result.system).not.toContain(
-      mockTemplateVersion.coachInstructions,
-    );
+    expect(result.system).not.toContain(mockTemplateVersion.coachInstructions);
     expect(result.system).not.toContain(
       mockTemplateVersion.draftCoachInstructions,
     );
@@ -579,8 +574,6 @@ describe("AC 6: Template merging behavior across roles", () => {
 
     expect(result.system.length).toBeGreaterThan(0);
     expect(result.system).not.toContain(mockTemplateVersion.globalGuidance);
-    expect(result.system).not.toContain(
-      mockTemplateVersion.coachInstructions,
-    );
+    expect(result.system).not.toContain(mockTemplateVersion.coachInstructions);
   });
 });

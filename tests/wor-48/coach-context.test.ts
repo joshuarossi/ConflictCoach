@@ -6,7 +6,11 @@
  */
 import { describe, test, expect } from "vitest";
 import { assemblePrompt } from "../../convex/lib/prompts";
-import type { AssemblePromptOpts, PartyState, JointMessage } from "../../convex/lib/prompts";
+import type {
+  AssemblePromptOpts,
+  PartyState,
+  JointMessage,
+} from "../../convex/lib/prompts";
 
 // ---------------------------------------------------------------------------
 // Fixtures
@@ -23,7 +27,8 @@ const partyStates: PartyState[] = [
     mainTopic: "Workspace disagreement",
     description: "We disagree about desk assignments",
     desiredOutcome: "Fair resolution",
-    synthesisText: "Party A feels strongly about having a quiet workspace and is open to compromise on timing.",
+    synthesisText:
+      "Party A feels strongly about having a quiet workspace and is open to compromise on timing.",
   },
   {
     userId: USER_B_ID,
@@ -31,19 +36,33 @@ const partyStates: PartyState[] = [
     mainTopic: "Workspace disagreement",
     description: "I think the current arrangement is fine",
     desiredOutcome: "Keep current arrangement",
-    synthesisText: "Party B values the current setup but may be open to discussing alternatives.",
+    synthesisText:
+      "Party B values the current setup but may be open to discussing alternatives.",
   },
 ];
 
 const jointMessages: JointMessage[] = [
-  { authorType: "COACH", content: "Welcome to the joint session. Let's discuss the workspace issue." },
-  { authorType: "USER", authorUserId: USER_A_ID, content: "I'd like to talk about the noise levels." },
-  { authorType: "USER", authorUserId: USER_B_ID, content: "I understand your concern." },
+  {
+    authorType: "COACH",
+    content: "Welcome to the joint session. Let's discuss the workspace issue.",
+  },
+  {
+    authorType: "USER",
+    authorUserId: USER_A_ID,
+    content: "I'd like to talk about the noise levels.",
+  },
+  {
+    authorType: "USER",
+    authorUserId: USER_B_ID,
+    content: "I understand your concern.",
+  },
 ];
 
 // Raw private messages that should NEVER appear in coach context
-const PRIVATE_MESSAGE_CONTENT_A = "My coworker is so inconsiderate and never thinks about anyone else's needs";
-const PRIVATE_MESSAGE_CONTENT_B = "I think they're being dramatic about the whole situation honestly";
+const PRIVATE_MESSAGE_CONTENT_A =
+  "My coworker is so inconsiderate and never thinks about anyone else's needs";
+const PRIVATE_MESSAGE_CONTENT_B =
+  "I think they're being dramatic about the whole situation honestly";
 
 // ---------------------------------------------------------------------------
 // AC 4: Coach context includes synthesis + joint history, excludes private
@@ -54,13 +73,16 @@ describe("AC 4: Coach context excludes raw private messages", () => {
       role: "COACH",
       caseId: CASE_ID,
       actingUserId: USER_A_ID,
-      recentHistory: [{ role: "user", content: "Can you help us find common ground?" }],
+      recentHistory: [
+        { role: "user", content: "Can you help us find common ground?" },
+      ],
       partyStates,
       jointMessages,
     };
 
     const result = assemblePrompt(opts);
-    const allContent = result.system + " " + result.messages.map((m) => m.content).join(" ");
+    const allContent =
+      result.system + " " + result.messages.map((m) => m.content).join(" ");
 
     // Synthesis texts should be present
     expect(allContent).toContain("Party A feels strongly");
@@ -102,7 +124,8 @@ describe("AC 4: Coach context excludes raw private messages", () => {
     };
 
     const result = assemblePrompt(opts);
-    const allContent = result.system + " " + result.messages.map((m) => m.content).join(" ");
+    const allContent =
+      result.system + " " + result.messages.map((m) => m.content).join(" ");
 
     // Raw private messages must NOT appear anywhere in the assembled prompt
     expect(allContent).not.toContain(PRIVATE_MESSAGE_CONTENT_A);

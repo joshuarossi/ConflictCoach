@@ -47,7 +47,9 @@ describe("AC2: confirmClosure transitions to CLOSED_RESOLVED", () => {
       (call) => call[0] === PARTY_STATE_B._id,
     );
     expect(partyStatePatch).toBeDefined();
-    expect((partyStatePatch![1] as Record<string, unknown>).closureConfirmed).toBe(true);
+    expect(
+      (partyStatePatch![1] as Record<string, unknown>).closureConfirmed,
+    ).toBe(true);
   });
 
   test("transitions case status to CLOSED_RESOLVED", async () => {

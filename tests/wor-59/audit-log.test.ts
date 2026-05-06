@@ -11,7 +11,11 @@ import {
   type MockAuditLogEntry,
 } from "./helpers";
 
-import { createTemplate, publishNewVersion, archiveTemplate } from "../../convex/templates";
+import {
+  createTemplate,
+  publishNewVersion,
+  archiveTemplate,
+} from "../../convex/templates";
 
 describe("AC8: Audit log entries", () => {
   test("create action writes TEMPLATE_CREATED audit log entry", async () => {

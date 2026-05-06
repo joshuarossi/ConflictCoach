@@ -123,14 +123,20 @@ export function MessageBubble({
 
   return (
     <div
-      className={cn("group flex w-full flex-col", wrapperAlignment, errorClasses)}
+      className={cn(
+        "group flex w-full flex-col",
+        wrapperAlignment,
+        errorClasses,
+      )}
       data-author-type={resolvedAuthorType}
       data-hovered={isHovered ? "true" : "false"}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       style={authorColor ? { borderColor: authorColor } : undefined}
     >
-      <div className={cn("flex max-w-[80%] gap-2", isUser && "flex-row-reverse")}>
+      <div
+        className={cn("flex max-w-[80%] gap-2", isUser && "flex-row-reverse")}
+      >
         {/* Avatar — joint variant only */}
         {isJoint && (
           <div
@@ -141,7 +147,10 @@ export function MessageBubble({
             )}
             aria-hidden="true"
           >
-            {isCoach ? "\u27E1" : (authorName?.[0]?.toUpperCase() ?? (partyRole === "INITIATOR" ? "I" : "V"))}
+            {isCoach
+              ? "\u27E1"
+              : (authorName?.[0]?.toUpperCase() ??
+                (partyRole === "INITIATOR" ? "I" : "V"))}
           </div>
         )}
 
@@ -157,7 +166,9 @@ export function MessageBubble({
           {(isCoach || authorName) && (
             <div className="mb-1 flex items-center gap-1.5">
               {isCoach && isJoint && (
-                <span className="text-coach-accent" aria-hidden="true">{"\u27E1"}</span>
+                <span className="text-coach-accent" aria-hidden="true">
+                  {"\u27E1"}
+                </span>
               )}
               {isCoach && !isJoint && (
                 <Sparkles
@@ -201,7 +212,10 @@ export function MessageBubble({
               data-testid="timestamp"
               className={cn(
                 "mt-1 block text-meta text-text-tertiary",
-                isJoint && (isHovered ? "opacity-100 transition-opacity" : "opacity-0 transition-opacity"),
+                isJoint &&
+                  (isHovered
+                    ? "opacity-100 transition-opacity"
+                    : "opacity-0 transition-opacity"),
                 !isJoint && !isComplete && "hidden",
               )}
             >

@@ -124,9 +124,7 @@ export function PrivateCoachingView({
                 </AlertDialogTrigger>
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>
-                      Ready to move on?
-                    </AlertDialogTitle>
+                    <AlertDialogTitle>Ready to move on?</AlertDialogTitle>
                     <AlertDialogDescription>
                       You&apos;ve had {messageCount} messages with the Coach.
                     </AlertDialogDescription>
@@ -184,7 +182,9 @@ export function ConnectedPrivateCoachingView() {
   const partyData = useQuery(api.cases.partyStates, { caseId });
   const messages = useQuery(
     api.privateCoaching.myMessages,
-    isSolo ? { caseId, partyRole: actingRole as "INITIATOR" | "INVITEE" } : { caseId },
+    isSolo
+      ? { caseId, partyRole: actingRole as "INITIATOR" | "INVITEE" }
+      : { caseId },
   );
 
   // Mutations
@@ -200,7 +200,9 @@ export function ConnectedPrivateCoachingView() {
         await sendMessage({
           caseId,
           content,
-          ...(isSolo ? { partyRole: actingRole as "INITIATOR" | "INVITEE" } : {}),
+          ...(isSolo
+            ? { partyRole: actingRole as "INITIATOR" | "INVITEE" }
+            : {}),
         });
       } catch (err) {
         showNetworkError(
@@ -242,7 +244,11 @@ export function ConnectedPrivateCoachingView() {
     caseStatus != null &&
     (ALLOWED_STATUSES as readonly string[]).includes(caseStatus);
 
-  if (caseData === undefined || partyData === undefined || (isSolo && actingUserId === null)) {
+  if (
+    caseData === undefined ||
+    partyData === undefined ||
+    (isSolo && actingUserId === null)
+  ) {
     return (
       <div className="flex h-screen flex-col">
         <div className="px-4 py-3 border-b border-border-default">
@@ -290,13 +296,15 @@ export function ConnectedPrivateCoachingView() {
     );
   }
 
-  const normalizedMessages = ((messages ?? []) as CoachingMessageRecord[]).map((m) => ({
-    _id: m._id as string,
-    role: m.role as "USER" | "AI",
-    content: m.content as string,
-    status: m.status as "STREAMING" | "COMPLETE" | "ERROR",
-    createdAt: m.createdAt as number,
-  }));
+  const normalizedMessages = ((messages ?? []) as CoachingMessageRecord[]).map(
+    (m) => ({
+      _id: m._id as string,
+      role: m.role as "USER" | "AI",
+      content: m.content as string,
+      status: m.status as "STREAMING" | "COMPLETE" | "ERROR",
+      createdAt: m.createdAt as number,
+    }),
+  );
 
   return (
     <>

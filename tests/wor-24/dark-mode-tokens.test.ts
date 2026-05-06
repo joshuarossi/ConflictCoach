@@ -15,15 +15,17 @@ describe("AC: Dark mode token variants are defined and toggle via prefers-color-
     expect(fs.existsSync(globalsPath)).toBe(true);
   });
 
-  test("globals.css contains a dark mode selector (prefers-color-scheme: dark or [data-theme=\"dark\"])", () => {
+  test('globals.css contains a dark mode selector (prefers-color-scheme: dark or [data-theme="dark"])', () => {
     cssContent = fs.readFileSync(globalsPath, "utf-8");
 
-    const hasPrefersColorScheme = cssContent.includes("prefers-color-scheme: dark");
+    const hasPrefersColorScheme = cssContent.includes(
+      "prefers-color-scheme: dark",
+    );
     const hasDataTheme = /\[data-theme\s*=\s*["']dark["']\]/.test(cssContent);
 
     expect(
       hasPrefersColorScheme || hasDataTheme,
-      "globals.css must contain either @media (prefers-color-scheme: dark) or [data-theme=\"dark\"] selector",
+      'globals.css must contain either @media (prefers-color-scheme: dark) or [data-theme="dark"] selector',
     ).toBe(true);
   });
 
@@ -31,7 +33,8 @@ describe("AC: Dark mode token variants are defined and toggle via prefers-color-
     cssContent = fs.readFileSync(globalsPath, "utf-8");
 
     // Find the dark mode block — either inside @media or [data-theme="dark"]
-    const darkBlockRegex = /(?:@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)|\[data-theme\s*=\s*["']dark["']\])\s*\{[\s\S]*?\}/;
+    const darkBlockRegex =
+      /(?:@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)|\[data-theme\s*=\s*["']dark["']\])\s*\{[\s\S]*?\}/;
     const darkBlock = cssContent.match(darkBlockRegex);
 
     expect(darkBlock, "No dark mode block found in globals.css").toBeTruthy();
@@ -49,10 +52,9 @@ describe("AC: Dark mode token variants are defined and toggle via prefers-color-
     ];
 
     for (const token of darkTokens) {
-      expect(
-        block,
-        `Dark mode block missing override for ${token}`,
-      ).toContain(token);
+      expect(block, `Dark mode block missing override for ${token}`).toContain(
+        token,
+      );
     }
   });
 });

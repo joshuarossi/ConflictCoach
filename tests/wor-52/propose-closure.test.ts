@@ -45,7 +45,9 @@ describe("AC1: proposeClosure sets closureProposed and closureSummary", () => {
       (call) => call[0] === PARTY_STATE_A._id,
     );
     expect(partyStatePatch).toBeDefined();
-    expect((partyStatePatch![1] as Record<string, unknown>).closureProposed).toBe(true);
+    expect(
+      (partyStatePatch![1] as Record<string, unknown>).closureProposed,
+    ).toBe(true);
   });
 
   test("stores closureSummary on the case", async () => {
@@ -88,7 +90,9 @@ describe("AC1: proposeClosure sets closureProposed and closureSummary", () => {
       (call) => call[0] === PARTY_STATE_B._id,
     );
     expect(partyStatePatch).toBeDefined();
-    expect((partyStatePatch![1] as Record<string, unknown>).closureProposed).toBe(true);
+    expect(
+      (partyStatePatch![1] as Record<string, unknown>).closureProposed,
+    ).toBe(true);
   });
 });
 

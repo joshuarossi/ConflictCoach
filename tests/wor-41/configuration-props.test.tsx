@@ -6,7 +6,7 @@ import { MessageBubble } from "@/components/chat/MessageBubble";
 function makeMessage(
   id: string,
   content: string,
-  authorType: "USER" | "COACH" = "USER"
+  authorType: "USER" | "COACH" = "USER",
 ) {
   return {
     _id: id,
@@ -35,7 +35,7 @@ describe("Components accept configuration props to work correctly in private coa
         messages={messages}
         onSendMessage={vi.fn()}
         authorColorMap={privateCoachingColors}
-      />
+      />,
     );
     expect(container.querySelector('[role="log"]')).not.toBeNull();
   });
@@ -46,7 +46,7 @@ describe("Components accept configuration props to work correctly in private coa
         messages={[]}
         onSendMessage={vi.fn()}
         isInputDisabled={true}
-      />
+      />,
     );
     // The input area should be disabled
     const input = container.querySelector("textarea, input[type='text']");
@@ -63,10 +63,7 @@ describe("Components accept configuration props to work correctly in private coa
     ];
 
     const { container } = render(
-      <ChatWindow
-        messages={messages}
-        onSendMessage={vi.fn()}
-      />
+      <ChatWindow messages={messages} onSendMessage={vi.fn()} />,
     );
 
     const log = container.querySelector('[role="log"]');
@@ -86,7 +83,7 @@ describe("Components accept configuration props to work correctly in private coa
         createdAt={Date.now()}
         onCopy={vi.fn()}
         onRetry={vi.fn()}
-      />
+      />,
     );
 
     // Should render with the author name visible
@@ -99,12 +96,12 @@ describe("Components accept configuration props to work correctly in private coa
         messages={[]}
         onSendMessage={vi.fn()}
         showPrivacyBanner={true}
-      />
+      />,
     );
 
     // Should show a privacy-related banner/indicator
     const banner = container.querySelector(
-      '[data-testid="privacy-banner"], [class*="privacy"], [class*="banner"]'
+      '[data-testid="privacy-banner"], [class*="privacy"], [class*="banner"]',
     );
     expect(banner).not.toBeNull();
   });

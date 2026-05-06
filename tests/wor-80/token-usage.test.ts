@@ -65,15 +65,15 @@ const DENIED_COLOR_PATTERN =
  * Standalone bg-white / bg-black (without opacity modifier like bg-black/30).
  * bg-black/30 is acceptable for dialog overlays per contract.
  */
-const DENIED_STANDALONE_BW_PATTERN = /\b(?:bg-white|text-white|border-white)\b/g;
+const DENIED_STANDALONE_BW_PATTERN =
+  /\b(?:bg-white|text-white|border-white)\b/g;
 const DENIED_BG_BLACK_SOLID = /\bbg-black\b(?!\/)/g;
 
 /**
  * Hardcoded shadow classes — only shadow-0, shadow-1, shadow-2, shadow-3
  * are allowed.
  */
-const DENIED_SHADOW_PATTERN =
-  /\bshadow-(?:sm|md|lg|xl|2xl|inner|none)\b/g;
+const DENIED_SHADOW_PATTERN = /\bshadow-(?:sm|md|lg|xl|2xl|inner|none)\b/g;
 
 /**
  * Hardcoded text size classes — only the named scale is allowed:
@@ -91,23 +91,84 @@ const DENIED_TEXT_SIZE_PATTERN =
  * These correspond to values not on the 8px grid.
  */
 const DENIED_SPACING_VALUES = new Set([
-  "7", "9", "11", "13", "14", "15", "17", "18", "19",
-  "21", "22", "23", "25", "26", "27", "28", "29", "30", "31",
-  "33", "34", "35", "36", "37", "38", "39",
-  "41", "42", "43", "44", "45", "46", "47",
+  "7",
+  "9",
+  "11",
+  "13",
+  "14",
+  "15",
+  "17",
+  "18",
+  "19",
+  "21",
+  "22",
+  "23",
+  "25",
+  "26",
+  "27",
+  "28",
+  "29",
+  "30",
+  "31",
+  "33",
+  "34",
+  "35",
+  "36",
+  "37",
+  "38",
+  "39",
+  "41",
+  "42",
+  "43",
+  "44",
+  "45",
+  "46",
+  "47",
 ]);
 const SPACING_PREFIXES = [
-  "p", "px", "py", "pt", "pr", "pb", "pl", "ps", "pe",
-  "m", "mx", "my", "mt", "mr", "mb", "ml", "ms", "me",
-  "gap", "gap-x", "gap-y",
-  "space-x", "space-y",
-  "inset", "inset-x", "inset-y", "top", "right", "bottom", "left",
-  "w", "h", "min-w", "min-h", "max-w", "max-h",
+  "p",
+  "px",
+  "py",
+  "pt",
+  "pr",
+  "pb",
+  "pl",
+  "ps",
+  "pe",
+  "m",
+  "mx",
+  "my",
+  "mt",
+  "mr",
+  "mb",
+  "ml",
+  "ms",
+  "me",
+  "gap",
+  "gap-x",
+  "gap-y",
+  "space-x",
+  "space-y",
+  "inset",
+  "inset-x",
+  "inset-y",
+  "top",
+  "right",
+  "bottom",
+  "left",
+  "w",
+  "h",
+  "min-w",
+  "min-h",
+  "max-w",
+  "max-h",
   "size",
 ];
 
 function buildDeniedSpacingPattern(): RegExp {
-  const prefixes = SPACING_PREFIXES.map((p) => p.replace(/-/g, "\\-")).join("|");
+  const prefixes = SPACING_PREFIXES.map((p) => p.replace(/-/g, "\\-")).join(
+    "|",
+  );
   const values = [...DENIED_SPACING_VALUES].join("|");
   return new RegExp(`\\b(?:${prefixes})-(?:${values})\\b`, "g");
 }

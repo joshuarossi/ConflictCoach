@@ -138,14 +138,14 @@ test.describe("WOR-73: Invite flow (two-user)", () => {
 
     // Verify invite page shows initiator info: name and main topic
     // (no cross-party data leakage — description and desiredOutcome are NOT shown)
-    await expect(
-      pageB.getByText(/has invited you|invited you/i),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(pageB.getByText(/has invited you|invited you/i)).toBeVisible({
+      timeout: 5_000,
+    });
 
     // Main topic should be visible on the invite page
-    await expect(
-      pageB.getByText(/communication breakdown/i),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(pageB.getByText(/communication breakdown/i)).toBeVisible({
+      timeout: 5_000,
+    });
 
     // Verify no private content leakage — description and desiredOutcome
     // should NOT be on the invite page
@@ -214,16 +214,16 @@ test.describe("WOR-73: Invite flow (two-user)", () => {
     // User A's dashboard
     await pageA.goto("/dashboard");
     await pageA.waitForLoadState("networkidle");
-    await expect(
-      pageA.getByText(/communication breakdown/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(pageA.getByText(/communication breakdown/i)).toBeVisible({
+      timeout: 10_000,
+    });
 
     // User B's dashboard
     await pageB.goto("/dashboard");
     await pageB.waitForLoadState("networkidle");
-    await expect(
-      pageB.getByText(/communication breakdown/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(pageB.getByText(/communication breakdown/i)).toBeVisible({
+      timeout: 10_000,
+    });
 
     // -------------------------------------------------------------------
     // AC 6: Case status transitions correctly:
@@ -244,9 +244,9 @@ test.describe("WOR-73: Invite flow (two-user)", () => {
     // The status should show "Both in Private Coaching" (the Dashboard label
     // for BOTH_PRIVATE_COACHING), confirming the transition from
     // DRAFT_PRIVATE_COACHING ("Private Coaching") actually happened.
-    await expect(
-      caseRowA.getByText(/both in private coaching/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(caseRowA.getByText(/both in private coaching/i)).toBeVisible({
+      timeout: 10_000,
+    });
 
     // On User B's dashboard: same positive status assertion
     await pageB.goto("/dashboard");
@@ -256,9 +256,9 @@ test.describe("WOR-73: Invite flow (two-user)", () => {
       .filter({ hasText: /communication breakdown/i })
       .first();
     await expect(caseRowB).toBeVisible({ timeout: 10_000 });
-    await expect(
-      caseRowB.getByText(/both in private coaching/i),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(caseRowB.getByText(/both in private coaching/i)).toBeVisible({
+      timeout: 10_000,
+    });
 
     // -------------------------------------------------------------------
     // AC 7: Consumed invite link shows error when reused
@@ -275,9 +275,9 @@ test.describe("WOR-73: Invite flow (two-user)", () => {
     ).toBeVisible({ timeout: 10_000 });
 
     // Should show "Log in" and "Go to dashboard" links (rendered as <a>)
-    await expect(
-      pageB.getByRole("link", { name: /log in/i }),
-    ).toBeVisible({ timeout: 5_000 });
+    await expect(pageB.getByRole("link", { name: /log in/i })).toBeVisible({
+      timeout: 5_000,
+    });
     await expect(
       pageB.getByRole("link", { name: /go to dashboard|dashboard/i }),
     ).toBeVisible({ timeout: 5_000 });

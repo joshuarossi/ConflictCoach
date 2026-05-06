@@ -102,10 +102,7 @@ export const setCaseStatus = mutation({
     caseId: v.id("cases"),
     status: v.string(),
   },
-  handler: async (
-    ctx: any,
-    args: { caseId: string; status: string },
-  ) => {
+  handler: async (ctx: any, args: { caseId: string; status: string }) => {
     assertTestMode();
     await ctx.db.patch(args.caseId, {
       status: args.status,

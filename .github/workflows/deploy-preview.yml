@@ -36,11 +36,37 @@ jobs:
           slug=$(printf '%s' "$HEAD_REF" | tr '[:upper:]' '[:lower:]' | sed 's/[^a-z0-9-]/-/g' | cut -c1-28 | sed 's/-$//')
           echo "slug=$slug" >> "$GITHUB_OUTPUT"
 
-      - name: Deploy Convex (preview) and build frontend
-        continue-on-error: true
+      # Deploy Convex first so the preview URL is available as VITE_CONVEX_URL
+      # for the build step. Don't swallow errors here — if Convex preview
+      # fails, the frontend would build pointing at a stale or default
+      # backend, producing a broken preview deploy. Better to fail loudly.
+      - name: Deploy Convex (preview)
+        id: convex
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_PREVIEW }}
-        run: npx convex deploy --preview-create "${{ steps.branch.outputs.slug }}" --cmd "npm run build"
+        run: |
+          set -euo pipefail
+          # The convex CLI prints the preview URL on success and writes it
+          # to .env.local as CONVEX_URL=. We capture it for the build step.
+          npx convex deploy --preview-create "${{ steps.branch.outputs.slug }}" --cmd-url-env-var-name VITE_CONVEX_URL --cmd "echo \"convex preview URL written to env\""
+          # Pull VITE_CONVEX_URL out of .env.local so subsequent steps can use it.
+          if [ -f .env.local ]; then
+            convex_url=$(grep '^VITE_CONVEX_URL=' .env.local | cut -d= -f2- | tr -d '"' | tr -d "'")
+            if [ -n "$convex_url" ]; then
+              echo "convex_url=$convex_url" >> "$GITHUB_OUTPUT"
+            fi
+          fi
+
+      - name: Build frontend with preview Convex URL
+        env:
+          VITE_CONVEX_URL: ${{ steps.convex.outputs.convex_url }}
+        run: |
+          set -euo pipefail
+          if [ -z "${VITE_CONVEX_URL:-}" ]; then
+            echo "::error::Convex preview deploy did not produce a URL. Check CONVEX_DEPLOY_KEY_PREVIEW secret." >&2
+            exit 1
+          fi
+          npm run build
 
       - name: Deploy to Cloudflare Pages (preview)
         id: cf
@@ -48,7 +74,7 @@ jobs:
         with:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=${{ steps.branch.outputs.slug }}
+          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=${{ steps.branch.outputs.slug }} --commit-dirty=true
 
       - name: Comment preview URL on PR
         uses: actions/github-script@v7

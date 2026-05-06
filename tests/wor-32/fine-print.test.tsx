@@ -44,8 +44,6 @@ describe("WOR-32: Fine print", () => {
 
   test("fine print text mentions signing in agreement", () => {
     renderLoginPage();
-    expect(
-      screen.getByText(/by signing in.*agree/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/by signing in.*agree/i)).toBeInTheDocument();
   });
 });

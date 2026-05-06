@@ -54,9 +54,7 @@ describe("JointChatView — timestamps on hover", () => {
       messageEl.parentElement!;
 
     // The timestamp should exist in the DOM but be visually hidden
-    const timeEl = container.querySelector(
-      "time, [data-testid='timestamp']",
-    );
+    const timeEl = container.querySelector("time, [data-testid='timestamp']");
     expect(timeEl).not.toBeNull();
 
     // Before hover: timestamp should be visually hidden

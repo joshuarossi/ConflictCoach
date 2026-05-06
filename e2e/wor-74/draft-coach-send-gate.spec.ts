@@ -107,9 +107,7 @@ test.describe("WOR-74: Draft Coach send gate E2E", () => {
     ).toBeVisible();
 
     // Privacy banner should be visible
-    await expect(
-      page.locator("[data-testid='privacy-banner']"),
-    ).toBeVisible();
+    await expect(page.locator("[data-testid='privacy-banner']")).toBeVisible();
 
     // Panel chat area should have no messages yet (session not created until
     // the user sends a message)
@@ -269,9 +267,7 @@ test.describe("WOR-74: Draft Coach send gate E2E", () => {
     await openPanelAndGetDraft(page);
 
     // Click "Edit before sending"
-    await page
-      .getByRole("button", { name: /edit before sending/i })
-      .click();
+    await page.getByRole("button", { name: /edit before sending/i }).click();
 
     // Panel should close
     await expect(

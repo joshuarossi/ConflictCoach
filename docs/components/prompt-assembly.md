@@ -10,16 +10,16 @@ assemblePrompt(opts: AssemblePromptOpts): { system: string; messages: Message[] 
 
 ### Parameters
 
-| Field | Type | Description |
-|---|---|---|
-| `role` | `"PRIVATE_COACH" \| "SYNTHESIS" \| "COACH" \| "DRAFT_COACH"` | The AI role to build a prompt for |
-| `caseId` | `Id<"cases">` | The case being worked on |
-| `actingUserId` | `Id<"users">` | The user making the request |
-| `recentHistory` | `Message[]` | Recent conversation messages (Anthropic SDK format) |
-| `partyStates` | `PartyState[]?` | Both parties' form fields and synthesis texts |
-| `privateMessages` | `PrivateMessage[]?` | All private coaching messages (filtered internally per role) |
-| `jointMessages` | `JointMessage[]?` | Joint session chat messages |
-| `templateVersion?` | `TemplateVersion` | Optional template with guidance and instructions |
+| Field              | Type                                                         | Description                                                  |
+| ------------------ | ------------------------------------------------------------ | ------------------------------------------------------------ |
+| `role`             | `"PRIVATE_COACH" \| "SYNTHESIS" \| "COACH" \| "DRAFT_COACH"` | The AI role to build a prompt for                            |
+| `caseId`           | `Id<"cases">`                                                | The case being worked on                                     |
+| `actingUserId`     | `Id<"users">`                                                | The user making the request                                  |
+| `recentHistory`    | `Message[]`                                                  | Recent conversation messages (Anthropic SDK format)          |
+| `partyStates`      | `PartyState[]?`                                              | Both parties' form fields and synthesis texts                |
+| `privateMessages`  | `PrivateMessage[]?`                                          | All private coaching messages (filtered internally per role) |
+| `jointMessages`    | `JointMessage[]?`                                            | Joint session chat messages                                  |
+| `templateVersion?` | `TemplateVersion`                                            | Optional template with guidance and instructions             |
 
 ### Return Value
 
@@ -30,12 +30,12 @@ assemblePrompt(opts: AssemblePromptOpts): { system: string; messages: Message[] 
 
 Each role has strict rules about what data it may access. These boundaries are **load-bearing** — the correctness of the entire privacy model depends on them.
 
-| Role | Party States | Private Messages | Joint Messages | Synthesis | Template |
-|---|---|---|---|---|---|
-| **PRIVATE_COACH** | Acting user only | Acting user only | — | — | None (hardcoded prompt) |
-| **SYNTHESIS** | Both parties | Both parties | — | — | None (self-contained prompt) |
-| **COACH** | Both parties | **Never** | Yes | Both parties | globalGuidance + coachInstructions |
-| **DRAFT_COACH** | Acting user only | **Never** | Yes | Acting user only | globalGuidance + draftCoachInstructions |
+| Role              | Party States     | Private Messages | Joint Messages | Synthesis        | Template                                |
+| ----------------- | ---------------- | ---------------- | -------------- | ---------------- | --------------------------------------- |
+| **PRIVATE_COACH** | Acting user only | Acting user only | —              | —                | None (hardcoded prompt)                 |
+| **SYNTHESIS**     | Both parties     | Both parties     | —              | —                | None (self-contained prompt)            |
+| **COACH**         | Both parties     | **Never**        | Yes            | Both parties     | globalGuidance + coachInstructions      |
+| **DRAFT_COACH**   | Acting user only | **Never**        | Yes            | Acting user only | globalGuidance + draftCoachInstructions |
 
 ### PRIVATE_COACH
 
@@ -67,7 +67,7 @@ When no `templateVersion` is provided, the system prompt still functions correct
 
 ## Key Files
 
-| File | Purpose |
-|---|---|
-| `convex/lib/prompts.ts` | `assemblePrompt()` implementation and exported types |
+| File                                  | Purpose                                                                    |
+| ------------------------------------- | -------------------------------------------------------------------------- |
+| `convex/lib/prompts.ts`               | `assemblePrompt()` implementation and exported types                       |
 | `tests/wor-38/assemblePrompt.test.ts` | Tests for all 6 acceptance criteria including privacy boundary enforcement |

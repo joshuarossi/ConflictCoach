@@ -13,12 +13,12 @@ describe("MessageBubble handles all three status states", () => {
 
   it("STREAMING: displays blinking cursor, no copy button", () => {
     const { container } = render(
-      <MessageBubble {...baseProps} status="STREAMING" />
+      <MessageBubble {...baseProps} status="STREAMING" />,
     );
 
     // Should have a streaming/blinking cursor indicator
     const cursor = container.querySelector(
-      '[data-testid="streaming-indicator"], [class*="cursor"], [class*="blink"], [class*="streaming"]'
+      '[data-testid="streaming-indicator"], [class*="cursor"], [class*="blink"], [class*="streaming"]',
     );
     expect(cursor).not.toBeNull();
 
@@ -30,7 +30,7 @@ describe("MessageBubble handles all three status states", () => {
   it("COMPLETE: shows copy button and timestamp", () => {
     const timestamp = Date.now();
     render(
-      <MessageBubble {...baseProps} status="COMPLETE" createdAt={timestamp} />
+      <MessageBubble {...baseProps} status="COMPLETE" createdAt={timestamp} />,
     );
 
     // Should have a copy button
@@ -39,7 +39,7 @@ describe("MessageBubble handles all three status states", () => {
 
     // Should display timestamp
     const { container } = render(
-      <MessageBubble {...baseProps} status="COMPLETE" createdAt={timestamp} />
+      <MessageBubble {...baseProps} status="COMPLETE" createdAt={timestamp} />,
     );
     // Timestamp should be rendered somewhere (as text or datetime attr)
     const timeEl = container.querySelector("time, [data-testid='timestamp']");
@@ -49,11 +49,7 @@ describe("MessageBubble handles all three status states", () => {
   it("ERROR: warning tint background with a Retry button", () => {
     const onRetry = vi.fn();
     const { container } = render(
-      <MessageBubble
-        {...baseProps}
-        status="ERROR"
-        onRetry={onRetry}
-      />
+      <MessageBubble {...baseProps} status="ERROR" onRetry={onRetry} />,
     );
 
     // Should have a retry button
@@ -65,10 +61,10 @@ describe("MessageBubble handles all three status states", () => {
     const classes = bubble.className + " " + bubble.innerHTML;
     expect(
       classes.includes("warning") ||
-      classes.includes("error") ||
-      classes.includes("destructive") ||
-      classes.includes("red") ||
-      classes.includes("amber")
+        classes.includes("error") ||
+        classes.includes("destructive") ||
+        classes.includes("red") ||
+        classes.includes("amber"),
     ).toBe(true);
   });
 });

@@ -15,7 +15,7 @@ When both parties mark private coaching as complete, the platform automatically 
 
    The call is **non-streaming** (one-shot) per the tech spec.
 
-4. **Privacy filter** — Each synthesis text is checked against the *other* party's private messages using `checkPrivacyViolation()` from `convex/lib/privacyFilter.ts`. This ensures that neither party's raw words are quoted or closely paraphrased in the other party's guidance.
+4. **Privacy filter** — Each synthesis text is checked against the _other_ party's private messages using `checkPrivacyViolation()` from `convex/lib/privacyFilter.ts`. This ensures that neither party's raw words are quoted or closely paraphrased in the other party's guidance.
 
 5. **Retry logic** — If the privacy filter detects a violation, the action regenerates the synthesis (up to 2 retries, 3 total attempts). If all attempts fail, a generic fallback text is substituted and an audit log entry flags the case for admin review.
 
@@ -32,9 +32,9 @@ The synthesis action follows the project's standard error-handling patterns (see
 
 ## Key Files
 
-| File | Purpose |
-|---|---|
-| `convex/synthesis/generate.ts` | Synthesis action, internal queries, and mutations |
-| `convex/privateCoaching.ts` | Trigger point (`markComplete` schedules synthesis) |
-| `convex/lib/privacyFilter.ts` | Privacy-violation checker used by the synthesis action |
-| `convex/lib/prompts.ts` | [`assemblePrompt()`](./components/prompt-assembly.md) builds the system + user prompt |
+| File                           | Purpose                                                                               |
+| ------------------------------ | ------------------------------------------------------------------------------------- |
+| `convex/synthesis/generate.ts` | Synthesis action, internal queries, and mutations                                     |
+| `convex/privateCoaching.ts`    | Trigger point (`markComplete` schedules synthesis)                                    |
+| `convex/lib/privacyFilter.ts`  | Privacy-violation checker used by the synthesis action                                |
+| `convex/lib/prompts.ts`        | [`assemblePrompt()`](./components/prompt-assembly.md) builds the system + user prompt |
