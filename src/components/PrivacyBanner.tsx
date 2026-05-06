@@ -20,14 +20,14 @@ export function PrivacyBanner({ text, otherPartyName }: PrivacyBannerProps) {
     <div
       role="region"
       aria-label="Privacy notice"
-      className="bg-private-tint flex items-center gap-2 px-4 py-2"
+      className="mx-4 mb-2 rounded-md border border-border-default bg-private-tint flex items-center gap-2 px-4 py-3"
     >
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <button
           type="button"
           aria-label="Lock — view privacy details"
           onClick={() => setModalOpen(true)}
-          className="inline-flex shrink-0 items-center justify-center rounded-sm focus:outline-none focus:ring-2 focus:ring-offset-2"
+          className="inline-flex shrink-0 items-center justify-center rounded-sm focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
         >
           <Lock size={16} strokeWidth={1.5} />
         </button>
