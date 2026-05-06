@@ -13,6 +13,7 @@ import { ReadyForJointPage } from "@/pages/ReadyForJointPage";
 import { JointChatPage } from "@/pages/JointChatPage";
 import { ClosedCasePage } from "@/pages/ClosedCasePage";
 import { InviteSharingPage } from "@/pages/InviteSharingPage";
+import { InviteeCaseFormPage } from "@/pages/InviteeCaseFormPage";
 import { TemplatesListPage } from "@/pages/admin/TemplatesListPage";
 import { TemplateEditPage } from "@/pages/admin/TemplateEditPage";
 import { AuditLogPage } from "@/pages/admin/AuditLogPage";
@@ -33,6 +34,7 @@ export function App() {
           <Route path="/cases/new" element={<NewCasePage />} />
           <Route path="/cases/:caseId" element={<CaseDetail />} />
           <Route path="/cases/:caseId/ready" element={<ReadyForJointPage />} />
+          <Route path="/cases/:caseId/form" element={<InviteeCaseFormPage />} />
           <Route path="/cases/:caseId/invite" element={<InviteSharingPage />} />
           <Route path="/cases/:caseId/closed" element={<ClosedCasePage />} />
         </Route>
