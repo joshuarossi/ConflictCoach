@@ -6,7 +6,6 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-// @ts-expect-error WOR-66 red-state import: implementation is created by task-implement.
 import {
   calculateCost,
   accumulateUsage,

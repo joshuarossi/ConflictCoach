@@ -7,7 +7,6 @@
  */
 import { describe, test, expect } from "vitest";
 
-// @ts-expect-error WOR-66 red-state import: implementation is created by task-implement.
 import {
   accumulateUsage,
   SONNET_INPUT_RATE,

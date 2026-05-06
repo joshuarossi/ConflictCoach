@@ -15,8 +15,8 @@ test.describe("AC: Font smoothing is set globally per StyleGuide §3.4", () => {
     await page.goto("/");
 
     const smoothing = await page.evaluate(() => {
-      // @ts-expect-error -- webkitFontSmoothing is a non-standard property
       return (
+        // @ts-expect-error -- webkitFontSmoothing is a non-standard property
         getComputedStyle(document.documentElement).webkitFontSmoothing ||
         getComputedStyle(document.documentElement).getPropertyValue(
           "-webkit-font-smoothing",

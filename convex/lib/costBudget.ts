@@ -35,6 +35,17 @@ export const SOFT_CAP_BOILERPLATE =
 
 export type BudgetStatus = "ok" | "soft_cap" | "hard_cap";
 
+/**
+ * Single Anthropic API call's token usage. Used as input to
+ * `accumulateUsage` and `calculateCost`. Re-exported so tests can name
+ * the type instead of redeclaring its shape inline.
+ */
+export interface AiUsageEntry {
+  model: "sonnet" | "haiku";
+  inputTokens: number;
+  outputTokens: number;
+}
+
 export interface AiUsage {
   totalInputTokens: number;
   totalOutputTokens: number;
