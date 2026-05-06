@@ -108,7 +108,19 @@ export const get = query({
       throwAppError("FORBIDDEN", "You are not a party to this case");
     }
 
-    return caseDoc;
+    // Resolve the other party's display name for CaseDetail and TopNav
+    const otherUserId =
+      caseDoc.initiatorUserId === user._id
+        ? caseDoc.inviteeUserId
+        : caseDoc.initiatorUserId;
+
+    let otherPartyName = "";
+    if (otherUserId) {
+      const otherUser = await ctx.db.get(otherUserId);
+      otherPartyName = otherUser?.displayName ?? "";
+    }
+
+    return { ...caseDoc, otherPartyName };
   },
 });
 
