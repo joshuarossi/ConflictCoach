@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef, useMemo, useCallback } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+import { useActingPartyUserId } from "../hooks/useActingPartyUserId";
 import { PrivacyBanner } from "./PrivacyBanner";
+import { SoloBanner } from "./SoloBanner";
 import { ChatWindow, type ChatMessage } from "./ChatWindow";
 import { MessageInput } from "./MessageInput";
 import {
@@ -163,12 +165,25 @@ type CoachingMessageRecord = {
 export function ConnectedPrivateCoachingView() {
   const { caseId: caseIdParam } = useParams<{ caseId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const caseId = caseIdParam as Id<"cases">;
 
   // Data queries
   const caseData = useQuery(api.cases.get, { caseId });
+  const isSolo = caseData?.isSolo === true;
+
+  // Determine acting party role from URL for solo mode
+  const asParam = searchParams.get("as") ?? "initiator";
+  const actingRole = asParam === "invitee" ? "INVITEE" : "INITIATOR";
+
+  // Canonical hook for acting party userId resolution (AC 4)
+  const actingUserId = useActingPartyUserId(caseId);
+
   const partyData = useQuery(api.cases.partyStates, { caseId });
-  const messages = useQuery(api.privateCoaching.myMessages, { caseId });
+  const messages = useQuery(
+    api.privateCoaching.myMessages,
+    isSolo ? { caseId, partyRole: actingRole as "INITIATOR" | "INVITEE" } : { caseId },
+  );
 
   // Mutations
   const sendMessage = useMutation(api.privateCoaching.sendUserMessage);
@@ -181,14 +196,18 @@ export function ConnectedPrivateCoachingView() {
     async (content: string) => {
       setMutationError(null);
       try {
-        await sendMessage({ caseId, content });
+        await sendMessage({
+          caseId,
+          content,
+          ...(isSolo ? { partyRole: actingRole as "INITIATOR" | "INVITEE" } : {}),
+        });
       } catch (err) {
         setMutationError(
           err instanceof Error ? err.message : "Failed to send message",
         );
       }
     },
-    [sendMessage, caseId],
+    [sendMessage, caseId, isSolo, actingRole],
   );
 
   const handleMarkComplete = useCallback(async () => {
@@ -223,7 +242,7 @@ export function ConnectedPrivateCoachingView() {
     caseStatus != null &&
     (ALLOWED_STATUSES as readonly string[]).includes(caseStatus);
 
-  if (caseData === undefined || partyData === undefined) {
+  if (caseData === undefined || partyData === undefined || (isSolo && actingUserId === null)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-text-secondary">Loading…</p>
@@ -274,6 +293,7 @@ export function ConnectedPrivateCoachingView() {
           {mutationError}
         </div>
       )}
+      {isSolo && <SoloBanner />}
       <PrivateCoachingView
         caseId={caseId}
         otherPartyName={otherPartyName}

@@ -176,6 +176,11 @@ export const partyStates = query({
             displayName: otherPartyName,
           }
         : null,
+      // Expose all party states with roles for solo mode's useActingPartyUserId hook
+      all: allStates.map((ps: { userId: string; role: string }) => ({
+        userId: ps.userId,
+        role: ps.role,
+      })),
     };
   },
 });
