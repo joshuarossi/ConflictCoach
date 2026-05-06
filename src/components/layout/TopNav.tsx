@@ -84,11 +84,15 @@ function UserMenu() {
         <span className="hidden sm:inline">{displayLabel}</span>
       </button>
       {open && (
-        <div className="absolute right-0 top-full z-10 mt-1 w-48 rounded-md border bg-white py-1 shadow-lg">
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-10 mt-1 w-48 rounded-md border bg-white py-1 shadow-lg"
+        >
           <div className="border-b px-3 py-2 text-sm text-gray-500 truncate">
             {user?.email}
           </div>
           <button
+            role="menuitem"
             onClick={handleLogout}
             className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
             data-testid="logout-button"
