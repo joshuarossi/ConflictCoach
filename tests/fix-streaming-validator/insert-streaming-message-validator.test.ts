@@ -87,7 +87,12 @@ const CALL_SITE_FIXTURES: CallSiteFixture[] = [
 
 // Replay the field-stripping that streamAIResponse does before calling
 // the insert mutation. Mirrors stripTransientFields in convex/lib/streaming.ts.
-const TRANSIENT_FIELDS = ["aiRole", "partyRole"];
+//
+// Note: `partyRole` was originally treated as transient (PR #75) but is now
+// persisted on privateMessages rows for solo-mode isolation. Only `aiRole`
+// remains in the strip list — it's purely a mock-mode response selector,
+// never written to the DB.
+const TRANSIENT_FIELDS = ["aiRole"];
 
 function stripTransient(
   fields: Record<string, unknown>,
@@ -113,6 +118,7 @@ const ACCEPTED_VALIDATOR_FIELDS = new Set<string>([
   "caseId",
   "userId",
   "role",
+  "partyRole",
   // jointMessages
   "authorType",
   "authorUserId",
@@ -123,7 +129,7 @@ const ACCEPTED_VALIDATOR_FIELDS = new Set<string>([
 ]);
 
 describe("insertStreamingMessage validator regression", () => {
-  test("transient-only fields (aiRole, partyRole) are stripped before insert", () => {
+  test("aiRole is stripped before insert; partyRole is preserved", () => {
     const fields = {
       caseId: "case_id",
       userId: "user_id",
@@ -133,12 +139,13 @@ describe("insertStreamingMessage validator regression", () => {
     };
     const stripped = stripTransient(fields);
     expect(stripped).not.toHaveProperty("aiRole");
-    expect(stripped).not.toHaveProperty("partyRole");
+    expect(stripped).toHaveProperty("partyRole", "INITIATOR");
     // Non-transient fields preserved
     expect(stripped).toEqual({
       caseId: "case_id",
       userId: "user_id",
       role: "AI",
+      partyRole: "INITIATOR",
     });
   });
 

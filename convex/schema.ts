@@ -87,6 +87,14 @@ export default defineSchema({
       v.literal("ERROR"),
     ),
     tokens: v.optional(v.number()),
+    // Solo mode: when one user simulates both parties, partyRole isolates
+    // each simulated party's message stream so the AI Private Coach sees
+    // only one party's history at a time. Optional because non-solo
+    // (multi-user) cases never set this — the userId field alone
+    // discriminates which party each message belongs to.
+    partyRole: v.optional(
+      v.union(v.literal("INITIATOR"), v.literal("INVITEE")),
+    ),
     createdAt: v.number(),
   })
     .index("by_case_and_user", ["caseId", "userId"])
