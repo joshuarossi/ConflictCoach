@@ -61,7 +61,7 @@ interface TemplateVersion {
   draftCoachInstructions?: string;
   publishedAt: number;
   publishedByUserId: string;
-  publishedByDisplayName?: string;
+  publishedByName?: string;
   notes?: string;
 }
 
@@ -371,7 +371,7 @@ export function TemplateEditPage() {
                         {formatAuditTimestamp(ver.publishedAt)}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {ver.publishedByDisplayName || "Unknown"}
+                        {ver.publishedByName || "Unknown"}
                       </p>
                       {ver.notes && (
                         <p className="text-sm text-gray-700 mt-1">
@@ -436,7 +436,7 @@ export function TemplateEditPage() {
               </DialogTitle>
               <DialogDescription>
                 Published {formatAuditTimestamp(viewingVersion.publishedAt)}{" "}
-                by {viewingVersion.publishedByDisplayName || "Unknown"}
+                by {viewingVersion.publishedByName || "Unknown"}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-2">
