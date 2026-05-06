@@ -150,9 +150,13 @@ describe("WOR-63: Cleanup mutation — find and transition abandoned cases", () 
       validateTransition("JOINT_ACTIVE", "CLOSED_ABANDONED"),
     ).not.toThrow();
 
-    // Invalid transition should throw (e.g., DRAFT_PRIVATE_COACHING → CLOSED_ABANDONED)
+    // Invalid transition should throw. CLOSED_RESOLVED is a terminal state
+    // per the state machine, so any transition out of it is invalid.
+    // (DRAFT_PRIVATE_COACHING → CLOSED_ABANDONED is intentionally allowed
+    // — abandonment can happen at any pre-joint stage — so it's a bad
+    // example of an invalid transition.)
     expect(() =>
-      validateTransition("DRAFT_PRIVATE_COACHING", "CLOSED_ABANDONED"),
+      validateTransition("CLOSED_RESOLVED", "CLOSED_ABANDONED"),
     ).toThrow();
   });
 
@@ -224,7 +228,9 @@ describe("WOR-63: Cleanup mutation — find and transition abandoned cases", () 
     expect(patchedIds).toContain("case_a");
     expect(patchedIds).toContain("case_b");
     expect(patchedIds).toContain("case_c");
-    expect(patchedDocs.every((p) => p.fields.status === "CLOSED_ABANDONED")).toBe(true);
+    expect(
+      patchedDocs.every((p) => p.fields.status === "CLOSED_ABANDONED"),
+    ).toBe(true);
   });
 
   test("Cleanup mutation uses internalMutation (not client-callable)", () => {

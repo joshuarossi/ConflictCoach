@@ -42,8 +42,17 @@ function makeCaseDoc(overrides: Partial<CaseDoc> = {}): CaseDoc {
 
 describe("State machine tests: all valid transitions succeed, all invalid transitions throw CONFLICT", () => {
   describe("valid transitions succeed", () => {
+    // Per VALID_TRANSITIONS in convex/lib/stateMachine.ts:
+    //   DRAFT  → BOTH, CLOSED_ABANDONED         (2 edges; abandonment can
+    //                                            happen at any pre-joint stage)
+    //   BOTH   → READY                          (1)
+    //   READY  → JOINT                          (1)
+    //   JOINT  → CLOSED_RESOLVED, CLOSED_UNRESOLVED, CLOSED_ABANDONED (3)
+    //   terminal states → none                  (0)
+    // Total: 7 valid edges.
     const validPairs: Array<[CaseStatus, CaseStatus]> = [
       ["DRAFT_PRIVATE_COACHING", "BOTH_PRIVATE_COACHING"],
+      ["DRAFT_PRIVATE_COACHING", "CLOSED_ABANDONED"],
       ["BOTH_PRIVATE_COACHING", "READY_FOR_JOINT"],
       ["READY_FOR_JOINT", "JOINT_ACTIVE"],
       ["JOINT_ACTIVE", "CLOSED_RESOLVED"],
@@ -51,22 +60,17 @@ describe("State machine tests: all valid transitions succeed, all invalid transi
       ["JOINT_ACTIVE", "CLOSED_ABANDONED"],
     ];
 
-    test.each(validPairs)(
-      "%s → %s succeeds",
-      (from, to) => {
-        expect(() => validateTransition(from, to)).not.toThrow();
-      },
-    );
+    test.each(validPairs)("%s → %s succeeds", (from, to) => {
+      expect(() => validateTransition(from, to)).not.toThrow();
+    });
 
-    test("all 7 valid transition edges are tested (6 edges from 4 source states)", () => {
-      // Count all valid edges from the VALID_TRANSITIONS map
+    test("all 7 valid transition edges are tested", () => {
       let totalEdges = 0;
       for (const targets of Object.values(VALID_TRANSITIONS)) {
         totalEdges += targets.length;
       }
-      // DRAFT->1, BOTH->1, READY->1, JOINT->3, terminal states->0 = 6 edges
-      expect(totalEdges).toBe(6);
-      expect(validPairs).toHaveLength(6);
+      expect(totalEdges).toBe(7);
+      expect(validPairs).toHaveLength(7);
     });
   });
 
@@ -82,20 +86,17 @@ describe("State machine tests: all valid transitions succeed, all invalid transi
       }
     }
 
-    test.each(invalidPairs)(
-      "%s → %s throws CONFLICT",
-      (from, to) => {
-        try {
-          validateTransition(from, to);
-          expect.unreachable("should throw");
-        } catch (err) {
-          expect(err).toBeInstanceOf(ConvexError);
-          expect((err as ConvexError<{ code: string }>).data.code).toBe(
-            "CONFLICT",
-          );
-        }
-      },
-    );
+    test.each(invalidPairs)("%s → %s throws CONFLICT", (from, to) => {
+      try {
+        validateTransition(from, to);
+        expect.unreachable("should throw");
+      } catch (err) {
+        expect(err).toBeInstanceOf(ConvexError);
+        expect((err as ConvexError<{ code: string }>).data.code).toBe(
+          "CONFLICT",
+        );
+      }
+    });
   });
 
   // -------------------------------------------------------------------------
@@ -105,16 +106,28 @@ describe("State machine tests: all valid transitions succeed, all invalid transi
   describe("canEnterJointChat", () => {
     test("returns true when both parties have completed private coaching", () => {
       const states: PartyState[] = [
-        makePartyState({ userId: "user_alice", privateCoachingCompletedAt: Date.now() }),
-        makePartyState({ userId: "user_bob", privateCoachingCompletedAt: Date.now() }),
+        makePartyState({
+          userId: "user_alice",
+          privateCoachingCompletedAt: Date.now(),
+        }),
+        makePartyState({
+          userId: "user_bob",
+          privateCoachingCompletedAt: Date.now(),
+        }),
       ];
       expect(canEnterJointChat(states)).toBe(true);
     });
 
     test("returns false when only one party has completed", () => {
       const states: PartyState[] = [
-        makePartyState({ userId: "user_alice", privateCoachingCompletedAt: Date.now() }),
-        makePartyState({ userId: "user_bob", privateCoachingCompletedAt: null }),
+        makePartyState({
+          userId: "user_alice",
+          privateCoachingCompletedAt: Date.now(),
+        }),
+        makePartyState({
+          userId: "user_bob",
+          privateCoachingCompletedAt: null,
+        }),
       ];
       expect(canEnterJointChat(states)).toBe(false);
     });

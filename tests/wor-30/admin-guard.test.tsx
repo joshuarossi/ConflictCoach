@@ -9,6 +9,7 @@ import { MemoryRouter } from "react-router-dom";
 // Mock authenticated but non-admin user
 vi.mock("@convex-dev/auth/react", () => ({
   useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
+  useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
 }));
 
 vi.mock("convex/react", () => ({
@@ -31,7 +32,7 @@ describe("AC: Admin routes show 403 for non-admin users", () => {
       render(
         <MemoryRouter initialEntries={[path]}>
           <AppRoutes />
-        </MemoryRouter>
+        </MemoryRouter>,
       );
       // Should show forbidden/403 indicator
       const forbiddenIndicator =
@@ -40,6 +41,6 @@ describe("AC: Admin routes show 403 for non-admin users", () => {
         screen.queryByText(/not authorized/i) ||
         screen.queryByText(/access denied/i);
       expect(forbiddenIndicator).toBeInTheDocument();
-    }
+    },
   );
 });

@@ -8,14 +8,26 @@ import { describe, test, expect, vi, beforeEach } from "vitest";
 import "@testing-library/jest-dom/vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
+import { MemoryRouter } from "react-router-dom";
 import { SignIn } from "@/components/SignIn";
 
-// Mock the auth actions hook
+// Mock the auth actions hook + auth state hook (component uses both since
+// the post-auth-redirect feature was added: when authenticated, it returns
+// <Navigate />; when not, it renders the form).
 const mockSignIn = vi.fn();
 
 vi.mock("@convex-dev/auth/react", () => ({
   useAuthActions: () => ({ signIn: mockSignIn }),
+  useConvexAuth: () => ({ isAuthenticated: false, isLoading: false }),
 }));
+
+function renderSignIn(initialEntries: string[] = ["/login"]) {
+  return render(
+    <MemoryRouter initialEntries={initialEntries}>
+      <SignIn />
+    </MemoryRouter>,
+  );
+}
 
 describe("SignIn component", () => {
   beforeEach(() => {
@@ -27,22 +39,22 @@ describe("SignIn component", () => {
   // -------------------------------------------------------------------------
 
   test("renders sign-in heading", () => {
-    render(<SignIn />);
+    renderSignIn();
     expect(screen.getByRole("heading")).toHaveTextContent(
       /sign in to conflict coach/i,
     );
   });
 
   test("renders email input and magic link button", () => {
-    render(<SignIn />);
+    renderSignIn();
     expect(screen.getByLabelText(/email/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /sign in with magic link/i }),
+      screen.getByRole("button", { name: /send magic link/i }),
     ).toBeInTheDocument();
   });
 
   test("renders Google sign-in button", () => {
-    render(<SignIn />);
+    renderSignIn();
     expect(
       screen.getByRole("button", { name: /continue with google/i }),
     ).toBeInTheDocument();
@@ -54,11 +66,11 @@ describe("SignIn component", () => {
 
   test("submitting email calls signIn with email provider", async () => {
     mockSignIn.mockResolvedValueOnce({});
-    render(<SignIn />);
+    renderSignIn();
 
     const emailInput = screen.getByLabelText(/email/i);
     await userEvent.type(emailInput, "test@example.com");
-    fireEvent.submit(screen.getByRole("button", { name: /sign in with magic link/i }));
+    fireEvent.submit(screen.getByRole("button", { name: /send magic link/i }));
 
     await waitFor(() => {
       expect(mockSignIn).toHaveBeenCalledWith("email", {
@@ -69,11 +81,11 @@ describe("SignIn component", () => {
 
   test("shows confirmation message after successful magic link submission", async () => {
     mockSignIn.mockResolvedValueOnce({});
-    render(<SignIn />);
+    renderSignIn();
 
     const emailInput = screen.getByLabelText(/email/i);
     await userEvent.type(emailInput, "test@example.com");
-    fireEvent.submit(screen.getByRole("button", { name: /sign in with magic link/i }));
+    fireEvent.submit(screen.getByRole("button", { name: /send magic link/i }));
 
     await waitFor(() => {
       expect(screen.getByText(/check your email/i)).toBeInTheDocument();
@@ -81,8 +93,8 @@ describe("SignIn component", () => {
   });
 
   test("does not submit if email is empty", async () => {
-    render(<SignIn />);
-    fireEvent.submit(screen.getByRole("button", { name: /sign in with magic link/i }));
+    renderSignIn();
+    fireEvent.submit(screen.getByRole("button", { name: /send magic link/i }));
 
     // signIn should not be called
     expect(mockSignIn).not.toHaveBeenCalled();
@@ -94,7 +106,7 @@ describe("SignIn component", () => {
 
   test("clicking Google button calls signIn with google provider", async () => {
     mockSignIn.mockResolvedValueOnce({});
-    render(<SignIn />);
+    renderSignIn();
 
     await userEvent.click(
       screen.getByRole("button", { name: /continue with google/i }),
@@ -109,21 +121,24 @@ describe("SignIn component", () => {
 
   test("shows error message when magic link fails", async () => {
     mockSignIn.mockRejectedValueOnce(new Error("Network error"));
-    render(<SignIn />);
+    renderSignIn();
 
     const emailInput = screen.getByLabelText(/email/i);
     await userEvent.type(emailInput, "test@example.com");
-    fireEvent.submit(screen.getByRole("button", { name: /sign in with magic link/i }));
+    fireEvent.submit(screen.getByRole("button", { name: /send magic link/i }));
 
+    // Component shows a friendly user-facing error rather than the raw
+    // Error.message — that's correct UX (AC: "Error states render inline
+    // below the email input"; copy is intentionally generic).
     await waitFor(() => {
       const alert = screen.getByRole("alert");
-      expect(alert).toHaveTextContent("Network error");
+      expect(alert).toHaveTextContent(/failed to send magic link/i);
     });
   });
 
   test("shows error message when Google sign-in fails", async () => {
     mockSignIn.mockRejectedValueOnce(new Error("OAuth failed"));
-    render(<SignIn />);
+    renderSignIn();
 
     await userEvent.click(
       screen.getByRole("button", { name: /continue with google/i }),
@@ -131,13 +146,13 @@ describe("SignIn component", () => {
 
     await waitFor(() => {
       const alert = screen.getByRole("alert");
-      expect(alert).toHaveTextContent("OAuth failed");
+      expect(alert).toHaveTextContent(/google sign-in failed/i);
     });
   });
 
   test("shows fallback error for non-Error rejection", async () => {
     mockSignIn.mockRejectedValueOnce("unknown");
-    render(<SignIn />);
+    renderSignIn();
 
     await userEvent.click(
       screen.getByRole("button", { name: /continue with google/i }),
@@ -151,7 +166,7 @@ describe("SignIn component", () => {
 
   test("clears previous error on new attempt", async () => {
     mockSignIn.mockRejectedValueOnce(new Error("First error"));
-    render(<SignIn />);
+    renderSignIn();
 
     await userEvent.click(
       screen.getByRole("button", { name: /continue with google/i }),
@@ -177,7 +192,7 @@ describe("SignIn component", () => {
   // -------------------------------------------------------------------------
 
   test("email input has proper label association", () => {
-    render(<SignIn />);
+    renderSignIn();
     const input = screen.getByLabelText(/email/i);
     expect(input).toHaveAttribute("type", "email");
     expect(input).toBeRequired();
@@ -185,11 +200,11 @@ describe("SignIn component", () => {
 
   test("error message has alert role for screen readers", async () => {
     mockSignIn.mockRejectedValueOnce(new Error("fail"));
-    render(<SignIn />);
+    renderSignIn();
 
     const emailInput = screen.getByLabelText(/email/i);
     await userEvent.type(emailInput, "a@b.com");
-    fireEvent.submit(screen.getByRole("button", { name: /sign in with magic link/i }));
+    fireEvent.submit(screen.getByRole("button", { name: /send magic link/i }));
 
     await waitFor(() => {
       expect(screen.getByRole("alert")).toBeInTheDocument();

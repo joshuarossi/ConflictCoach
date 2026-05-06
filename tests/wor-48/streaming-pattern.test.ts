@@ -45,16 +45,27 @@ function makeMockAnthropicClient(classification: string) {
       // Streaming call used by Sonnet response generation
       stream: vi.fn().mockImplementation(() => {
         const events = [
-          { type: "message_start", message: { usage: { input_tokens: 100, output_tokens: 0 } } },
-          { type: "content_block_delta", delta: { type: "text_delta", text: "I hear you." } },
-          { type: "message_delta", usage: { output_tokens: 10 }, delta: { stop_reason: "end_turn" } },
+          {
+            type: "message_start",
+            message: { usage: { input_tokens: 100, output_tokens: 0 } },
+          },
+          {
+            type: "content_block_delta",
+            delta: { type: "text_delta", text: "I hear you." },
+          },
+          {
+            type: "message_delta",
+            usage: { output_tokens: 10 },
+            delta: { stop_reason: "end_turn" },
+          },
         ];
         let idx = 0;
         return {
           [Symbol.asyncIterator]() {
             return {
               async next() {
-                if (idx < events.length) return { value: events[idx++], done: false };
+                if (idx < events.length)
+                  return { value: events[idx++], done: false };
                 return { value: undefined, done: true };
               },
             };
@@ -82,14 +93,19 @@ describe("AC 8: Streaming response follows standard infrastructure pattern", () 
       anthropicClient: client,
     });
 
-    // Must have at least two mutations: initial STREAMING insert + final COMPLETE update
-    expect(ctx.mutations.length).toBeGreaterThanOrEqual(2);
+    // Must have at least two message-row mutations: initial STREAMING insert
+    // + final COMPLETE update. Filter for message rows specifically — the
+    // handler also issues a non-message AI-usage record mutation that
+    // shouldn't be confused with the final COMPLETE write.
+    const messageMutations = ctx.mutations.filter(
+      (m) => m.args.status === "STREAMING" || m.args.status === "COMPLETE",
+    );
+    expect(messageMutations.length).toBeGreaterThanOrEqual(2);
 
-    const firstMutation = ctx.mutations[0];
-    expect(firstMutation.args.status).toBe("STREAMING");
-
-    const lastMutation = ctx.mutations[ctx.mutations.length - 1];
-    expect(lastMutation.args.status).toBe("COMPLETE");
+    expect(messageMutations[0].args.status).toBe("STREAMING");
+    expect(messageMutations[messageMutations.length - 1].args.status).toBe(
+      "COMPLETE",
+    );
   });
 
   test("token count is recorded on the final COMPLETE message", async () => {
@@ -104,15 +120,15 @@ describe("AC 8: Streaming response follows standard infrastructure pattern", () 
       anthropicClient: client,
     });
 
-    // Must have recorded at least one mutation
-    expect(ctx.mutations.length).toBeGreaterThan(0);
-
-    // The last mutation (COMPLETE) must include a token count
-    const lastMutation = ctx.mutations[ctx.mutations.length - 1];
-    expect(lastMutation.args.status).toBe("COMPLETE");
-    expect(lastMutation.args.tokens).toBeDefined();
-    expect(typeof lastMutation.args.tokens).toBe("number");
-    expect(lastMutation.args.tokens).toBeGreaterThan(0);
+    // Find the COMPLETE message mutation (handler also writes a separate
+    // AI-usage record that has no status field).
+    const completeMutation = ctx.mutations.find(
+      (m) => m.args.status === "COMPLETE",
+    );
+    expect(completeMutation).toBeDefined();
+    expect(completeMutation!.args.tokens).toBeDefined();
+    expect(typeof completeMutation!.args.tokens).toBe("number");
+    expect(completeMutation!.args.tokens as number).toBeGreaterThan(0);
   });
 
   test("streaming writes to the jointMessages table", async () => {
@@ -127,11 +143,11 @@ describe("AC 8: Streaming response follows standard infrastructure pattern", () 
       anthropicClient: client,
     });
 
-    // Must have recorded at least one mutation
-    expect(ctx.mutations.length).toBeGreaterThan(0);
-
-    // The initial insert mutation must target jointMessages
-    const insertMutation = ctx.mutations[0];
-    expect(insertMutation.args.table).toBe("jointMessages");
+    // Find the initial STREAMING insert (always the first message-row write).
+    const insertMutation = ctx.mutations.find(
+      (m) => m.args.status === "STREAMING",
+    );
+    expect(insertMutation).toBeDefined();
+    expect(insertMutation!.args.table).toBe("jointMessages");
   });
 });
