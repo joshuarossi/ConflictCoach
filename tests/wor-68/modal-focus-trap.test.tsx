@@ -94,32 +94,58 @@ describe("WOR-68: Modal focus trap — CaseClosureModal", () => {
     const user = userEvent.setup();
     const onOpenChange = vi.fn();
 
-    // Render the modal as open, then close it via Escape key
+    // Render the trigger button first, focus it (simulating the user
+    // clicking it to open the modal), THEN render the modal as open.
+    // CaseClosureModal's onOpenAutoFocus captures document.activeElement
+    // at open time; without prior focus the captured value would be <body>
+    // and there'd be nothing to restore to.
     const { rerender } = render(
+      <div>
+        <button data-testid="trigger">Open Modal</button>
+        <CaseClosureModal
+          {...defaultProps}
+          open={false}
+          onOpenChange={onOpenChange}
+        />
+      </div>,
+    );
+
+    const trigger = screen.getByTestId("trigger");
+    trigger.focus();
+    expect(document.activeElement).toBe(trigger);
+
+    // Now open the modal. CaseClosureModal is a controlled Dialog (open
+    // prop is owned by the parent). The modal will capture the trigger
+    // via onOpenAutoFocus.
+    rerender(
       <div>
         <button data-testid="trigger">Open Modal</button>
         <CaseClosureModal {...defaultProps} onOpenChange={onOpenChange} />
       </div>,
     );
 
-    // Verify focus is inside the dialog while open
+    // Focus should now be inside the dialog
     const dialog = screen.getByRole("dialog");
     expect(dialog.contains(document.activeElement)).toBe(true);
 
     // Close the modal by pressing Escape
     await user.keyboard("{Escape}");
 
-    // After close, focus should NOT be inside the former dialog container
-    // and should be somewhere outside (Radix restores to last focused element)
+    // Simulate parent reacting to onOpenChange(false) by rerendering closed.
+    rerender(
+      <div>
+        <button data-testid="trigger">Open Modal</button>
+        <CaseClosureModal
+          {...defaultProps}
+          open={false}
+          onOpenChange={onOpenChange}
+        />
+      </div>,
+    );
+
+    // After close, focus should be restored to the trigger element.
     await waitFor(() => {
-      const dialogElements = screen.queryAllByRole("dialog");
-      // Either dialog is gone or focus is outside it
-      if (dialogElements.length > 0) {
-        expect(dialogElements[0].contains(document.activeElement)).toBe(false);
-      }
-      // Focus should be on a focusable element, not lost to document.body
-      expect(document.activeElement).not.toBe(null);
-      expect(document.activeElement?.tagName).not.toBe("BODY");
+      expect(document.activeElement).toBe(screen.getByTestId("trigger"));
     });
   });
 });
