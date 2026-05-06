@@ -18,6 +18,8 @@ import type * as crons from "../crons.js";
 import type * as crons_cleanup from "../crons/cleanup.js";
 import type * as draftCoach from "../draftCoach.js";
 import type * as http from "../http.js";
+import type * as invites_decline from "../invites/decline.js";
+import type * as invites_getByToken from "../invites/getByToken.js";
 import type * as invites_redeem from "../invites/redeem.js";
 import type * as jointChat from "../jointChat.js";
 import type * as lib_audit from "../lib/audit.js";
@@ -54,6 +56,8 @@ declare const fullApi: ApiFromModules<{
   "crons/cleanup": typeof crons_cleanup;
   draftCoach: typeof draftCoach;
   http: typeof http;
+  "invites/decline": typeof invites_decline;
+  "invites/getByToken": typeof invites_getByToken;
   "invites/redeem": typeof invites_redeem;
   jointChat: typeof jointChat;
   "lib/audit": typeof lib_audit;
