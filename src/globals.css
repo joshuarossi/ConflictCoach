@@ -135,6 +135,26 @@
   --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.40);
 }
 
+/* ===== Accessibility: prefers-reduced-motion ===== */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .streaming-cursor {
+    animation: none !important;
+  }
+
+  .animate-in,
+  .animate-out {
+    animation: none !important;
+  }
+}
+
 /* ===== Global resets & font smoothing (StyleGuide §3.4) ===== */
 html {
   -webkit-font-smoothing: antialiased;
