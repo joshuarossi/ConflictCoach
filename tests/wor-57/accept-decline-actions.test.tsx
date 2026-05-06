@@ -8,7 +8,7 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 
 const mockRedeem = vi.fn().mockResolvedValue({ caseId: "case123" });
 const mockDecline = vi.fn().mockResolvedValue(undefined);
@@ -50,7 +50,9 @@ import { InviteAcceptPage } from "@/pages/InviteAcceptPage";
 function renderPage() {
   return render(
     <MemoryRouter initialEntries={["/invite/validtoken123"]}>
-      <InviteAcceptPage />
+      <Routes>
+        <Route path="/invite/:token" element={<InviteAcceptPage />} />
+      </Routes>
     </MemoryRouter>,
   );
 }
@@ -80,7 +82,7 @@ describe("WOR-57: Accept and Decline actions", () => {
 
     await waitFor(() => {
       expect(mockNavigate).toHaveBeenCalledWith(
-        expect.stringMatching(/\/case\/[^/]+\/form/),
+        expect.stringMatching(/\/cases\/[^/]+\/form/),
       );
     });
   });

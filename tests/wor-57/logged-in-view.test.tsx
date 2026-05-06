@@ -8,7 +8,7 @@
 import { describe, test, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 
 vi.mock("@convex-dev/auth/react", () => ({
   useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
@@ -29,7 +29,9 @@ import { InviteAcceptPage } from "@/pages/InviteAcceptPage";
 function renderPage(token = "validtoken123") {
   return render(
     <MemoryRouter initialEntries={[`/invite/${token}`]}>
-      <InviteAcceptPage />
+      <Routes>
+        <Route path="/invite/:token" element={<InviteAcceptPage />} />
+      </Routes>
     </MemoryRouter>,
   );
 }
