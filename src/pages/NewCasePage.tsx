@@ -1,8 +1,10 @@
+import { NewCaseForm } from "@/components/NewCaseForm";
+
 export function NewCasePage() {
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">New Case</h1>
-      <p className="text-gray-600">Case creation form will go here.</p>
+      <h1 className="text-h1 font-bold text-text-primary mb-6">New Case</h1>
+      <NewCaseForm />
     </div>
   );
 }

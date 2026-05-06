@@ -1,0 +1,164 @@
+import { useState } from "react";
+import { Button } from "@/components/ui/button";
+
+const CATEGORIES = [
+  "workplace",
+  "family",
+  "personal",
+  "contractual",
+  "other",
+] as const;
+
+export interface NewCaseFormValues {
+  category: string;
+  mainTopic: string;
+  description: string;
+  desiredOutcome: string;
+}
+
+interface NewCaseFormProps {
+  onSubmit?: (values: NewCaseFormValues) => void;
+}
+
+interface FieldErrors {
+  category?: string;
+  mainTopic?: string;
+  description?: string;
+}
+
+function validate(values: NewCaseFormValues): FieldErrors {
+  const errors: FieldErrors = {};
+  if (!values.category) {
+    errors.category = "Please select a category.";
+  }
+  if (!values.mainTopic.trim()) {
+    errors.mainTopic = "Please describe the main topic.";
+  }
+  if (!values.description.trim()) {
+    errors.description = "Please provide a description.";
+  }
+  return errors;
+}
+
+export function NewCaseForm({ onSubmit }: NewCaseFormProps) {
+  const [category, setCategory] = useState("");
+  const [mainTopic, setMainTopic] = useState("");
+  const [description, setDescription] = useState("");
+  const [desiredOutcome, setDesiredOutcome] = useState("");
+  const [errors, setErrors] = useState<FieldErrors>({});
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const values: NewCaseFormValues = {
+      category,
+      mainTopic,
+      description,
+      desiredOutcome,
+    };
+    const fieldErrors = validate(values);
+    setErrors(fieldErrors);
+    if (Object.keys(fieldErrors).length > 0) return;
+    onSubmit?.(values);
+  };
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-5">
+      {/* Category */}
+      <div>
+        <label
+          htmlFor="category"
+          className="block text-label font-medium text-text-primary mb-1"
+        >
+          Category
+        </label>
+        <select
+          id="category"
+          value={category}
+          onChange={(e) => setCategory(e.target.value)}
+          className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+        >
+          <option value="">Select a category…</option>
+          {CATEGORIES.map((cat) => (
+            <option key={cat} value={cat}>
+              {cat.charAt(0).toUpperCase() + cat.slice(1)}
+            </option>
+          ))}
+        </select>
+        {errors.category && (
+          <p className="mt-1 text-meta text-danger" role="alert">
+            {errors.category}
+          </p>
+        )}
+      </div>
+
+      {/* Main Topic */}
+      <div>
+        <label
+          htmlFor="mainTopic"
+          className="block text-label font-medium text-text-primary mb-1"
+        >
+          Main Topic
+        </label>
+        <input
+          id="mainTopic"
+          type="text"
+          value={mainTopic}
+          onChange={(e) => setMainTopic(e.target.value)}
+          placeholder="What is this conflict about?"
+          className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+        />
+        {errors.mainTopic && (
+          <p className="mt-1 text-meta text-danger" role="alert">
+            {errors.mainTopic}
+          </p>
+        )}
+      </div>
+
+      {/* Description */}
+      <div>
+        <label
+          htmlFor="description"
+          className="block text-label font-medium text-text-primary mb-1"
+        >
+          Description
+        </label>
+        <textarea
+          id="description"
+          value={description}
+          onChange={(e) => setDescription(e.target.value)}
+          placeholder="Describe the situation in your own words…"
+          rows={4}
+          className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none"
+        />
+        {errors.description && (
+          <p className="mt-1 text-meta text-danger" role="alert">
+            {errors.description}
+          </p>
+        )}
+      </div>
+
+      {/* Desired Outcome (optional) */}
+      <div>
+        <label
+          htmlFor="desiredOutcome"
+          className="block text-label font-medium text-text-primary mb-1"
+        >
+          Desired Outcome{" "}
+          <span className="text-text-tertiary font-normal">(optional)</span>
+        </label>
+        <textarea
+          id="desiredOutcome"
+          value={desiredOutcome}
+          onChange={(e) => setDesiredOutcome(e.target.value)}
+          placeholder="What would a good resolution look like?"
+          rows={3}
+          className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none"
+        />
+      </div>
+
+      <Button type="submit" className="w-full">
+        Start Case
+      </Button>
+    </form>
+  );
+}

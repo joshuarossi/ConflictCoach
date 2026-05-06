@@ -3,6 +3,26 @@ import { useQuery } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { ConvexErrorBoundary } from "@/components/layout/ConvexErrorBoundary";
+import { Skeleton } from "@/components/ui/skeleton";
+
+function CaseDetailSkeleton() {
+  return (
+    <div className="space-y-6">
+      <Skeleton className="h-8 w-48" />
+      <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1 space-y-3">
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-5 w-32" />
+        <Skeleton className="h-4 w-20" />
+        <Skeleton className="h-5 w-24" />
+      </div>
+      <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1 space-y-3">
+        <Skeleton className="h-6 w-40" />
+        <Skeleton className="h-4 w-full" />
+        <Skeleton className="h-4 w-3/4" />
+      </div>
+    </div>
+  );
+}
 
 function CaseDetailContent() {
   const { caseId: caseIdParam } = useParams<{ caseId: string }>();
@@ -14,7 +34,7 @@ function CaseDetailContent() {
   if (caseData === undefined || partyData === undefined) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-gray-500">Loading…</p>
+        <CaseDetailSkeleton />
       </div>
     );
   }
@@ -22,64 +42,64 @@ function CaseDetailContent() {
   if (caseData === null) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-gray-600">Case not found.</p>
+        <p className="text-text-secondary">Case not found.</p>
       </div>
     );
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-2xl font-bold text-gray-900">Case Detail</h1>
+      <h1 className="text-h1 font-bold text-text-primary">Case Detail</h1>
 
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
+      <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1">
         <dl className="space-y-3">
           <div>
-            <dt className="text-sm font-medium text-gray-500">Status</dt>
-            <dd className="text-gray-900" data-testid="case-status">
+            <dt className="text-meta font-medium text-text-secondary">Status</dt>
+            <dd className="text-text-primary" data-testid="case-status">
               {caseData.status}
             </dd>
           </div>
           <div>
-            <dt className="text-sm font-medium text-gray-500">Category</dt>
-            <dd className="text-gray-900">{caseData.category}</dd>
+            <dt className="text-meta font-medium text-text-secondary">Category</dt>
+            <dd className="text-text-primary">{caseData.category}</dd>
           </div>
         </dl>
       </div>
 
       {/* Own party state — full detail */}
       {partyData.self && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">
+        <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1">
+          <h2 className="text-h2 font-semibold text-text-primary mb-3">
             Your Information
           </h2>
           <dl className="space-y-3">
             {partyData.self.mainTopic && (
               <div>
-                <dt className="text-sm font-medium text-gray-500">
+                <dt className="text-meta font-medium text-text-secondary">
                   Main Topic
                 </dt>
-                <dd className="text-gray-900" data-testid="self-main-topic">
+                <dd className="text-text-primary" data-testid="self-main-topic">
                   {partyData.self.mainTopic}
                 </dd>
               </div>
             )}
             {partyData.self.description && (
               <div>
-                <dt className="text-sm font-medium text-gray-500">
+                <dt className="text-meta font-medium text-text-secondary">
                   Description
                 </dt>
-                <dd className="text-gray-900" data-testid="self-description">
+                <dd className="text-text-primary" data-testid="self-description">
                   {partyData.self.description}
                 </dd>
               </div>
             )}
             {partyData.self.desiredOutcome && (
               <div>
-                <dt className="text-sm font-medium text-gray-500">
+                <dt className="text-meta font-medium text-text-secondary">
                   Desired Outcome
                 </dt>
                 <dd
-                  className="text-gray-900"
+                  className="text-text-primary"
                   data-testid="self-desired-outcome"
                 >
                   {partyData.self.desiredOutcome}
@@ -92,23 +112,23 @@ function CaseDetailContent() {
 
       {/* Other party — phase-level booleans only, no form content */}
       {partyData.otherPhaseOnly && (
-        <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-          <h2 className="text-lg font-semibold text-gray-900 mb-3">
+        <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1">
+          <h2 className="text-h2 font-semibold text-text-primary mb-3">
             Other Party
           </h2>
           <dl className="space-y-3">
             <div>
-              <dt className="text-sm font-medium text-gray-500">Name</dt>
-              <dd className="text-gray-900">
+              <dt className="text-meta font-medium text-text-secondary">Name</dt>
+              <dd className="text-text-primary">
                 {partyData.otherPhaseOnly.displayName}
               </dd>
             </div>
             <div>
-              <dt className="text-sm font-medium text-gray-500">
+              <dt className="text-meta font-medium text-text-secondary">
                 Private Coaching
               </dt>
               <dd
-                className="text-gray-900"
+                className="text-text-primary"
                 data-testid="other-party-pc-status"
               >
                 {partyData.otherPhaseOnly.hasCompletedPC
@@ -124,13 +144,13 @@ function CaseDetailContent() {
       <div className="flex gap-4">
         <Link
           to={`/cases/${caseIdParam}/private`}
-          className="text-blue-600 underline hover:text-blue-800"
+          className="text-accent underline hover:text-accent-hover"
         >
           Private Coaching
         </Link>
         <Link
           to={`/cases/${caseIdParam}/joint`}
-          className="text-blue-600 underline hover:text-blue-800"
+          className="text-accent underline hover:text-accent-hover"
         >
           Joint Chat
         </Link>
@@ -146,3 +166,6 @@ export function CaseDetail() {
     </ConvexErrorBoundary>
   );
 }
+
+// Alias used by some consumers
+export { CaseDetail as CaseDetailView };

@@ -4,8 +4,8 @@ export function TemplateEditPage() {
   const { id } = useParams<{ id: string }>();
   return (
     <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-4">Edit Template</h1>
-      <p className="text-gray-600">Template: {id}</p>
+      <h1 className="text-h1 font-bold text-text-primary mb-4">Edit Template</h1>
+      <p className="text-text-secondary">Template: {id}</p>
     </div>
   );
 }
