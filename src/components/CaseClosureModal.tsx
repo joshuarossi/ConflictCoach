@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -31,6 +31,17 @@ export function CaseClosureModal({
   const [summary, setSummary] = useState("");
   const [reason, setReason] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
+  const triggerRef = useRef<Element | null>(null);
+  const prevOpenRef = useRef(open);
+
+  // Focus restore: fires AFTER child effects (FocusScope trap disabled)
+  // in React's bottom-up commit order, so the trap is already removed.
+  useEffect(() => {
+    if (prevOpenRef.current && !open && triggerRef.current instanceof HTMLElement) {
+      triggerRef.current.focus();
+    }
+    prevOpenRef.current = open;
+  }, [open]);
 
   const handleClose = () => {
     setSelected("resolved");
@@ -66,6 +77,10 @@ export function CaseClosureModal({
       <DialogContent
         role="dialog"
         aria-modal="true"
+        onOpenAutoFocus={() => {
+          // Capture the trigger element before Radix moves focus into the dialog
+          triggerRef.current = document.activeElement;
+        }}
       >
         <DialogHeader>
           <DialogTitle>Close this case</DialogTitle>

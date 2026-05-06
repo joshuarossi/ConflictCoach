@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { query, mutation, action, internalQuery } from "./_generated/server";
-import { internal } from "./_generated/api";
+import { api, internal } from "./_generated/api";
 import { v } from "convex/values";
 import { throwAppError } from "./lib/errors";
 import { requireAuth } from "./lib/auth";
+import { validateTransition } from "./lib/stateMachine";
 import { assemblePrompt } from "./lib/prompts";
 import { streamAIResponse } from "./lib/streaming";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "./lib/privacyFilter";
@@ -202,11 +203,68 @@ export const mySynthesis = query({
     const user = await requireAuth(ctx);
     const { partyState } = await requireCaseParty(ctx, args.caseId, user._id);
 
+    // Look up the other party's display name
+    const allPartyStates = await ctx.db
+      .query("partyStates")
+      .withIndex("by_case", (q: any) => q.eq("caseId", args.caseId))
+      .collect();
+    const otherPartyState = allPartyStates.find(
+      (ps: { userId: string }) => ps.userId !== user._id,
+    );
+    let otherPartyName = "the other party";
+    if (otherPartyState) {
+      const otherUser = await ctx.db.get(otherPartyState.userId);
+      if (otherUser?.displayName) {
+        otherPartyName = otherUser.displayName;
+      }
+    }
+
     return {
       synthesisText: partyState.synthesisText ?? null,
+      otherPartyName,
     };
   },
 });
+
+// ---------------------------------------------------------------------------
+// enterJointSession — advance case from READY_FOR_JOINT → JOINT_ACTIVE
+// ---------------------------------------------------------------------------
+
+export async function enterJointSessionHandler(
+  ctx: any,
+  args: { caseId: string },
+): Promise<void> {
+  const user = await requireAuth(ctx);
+  const { caseDoc } = await requireCaseParty(ctx, args.caseId, user._id);
+
+  // Validate transition via state machine
+  validateTransition(caseDoc.status, "JOINT_ACTIVE");
+
+  // Transition to JOINT_ACTIVE
+  await ctx.db.patch(args.caseId, {
+    status: "JOINT_ACTIVE",
+    updatedAt: Date.now(),
+  });
+
+  // Schedule Coach opening message
+  try {
+    await ctx.scheduler.runAfter(0, api.jointChat.generateOpeningMessage, {
+      caseId: args.caseId,
+    });
+  } catch (err) {
+    console.error("Failed to schedule opening message:", err);
+  }
+}
+
+export const enterJointSession = Object.assign(
+  mutation({
+    args: {
+      caseId: v.id("cases"),
+    },
+    handler: enterJointSessionHandler,
+  }),
+  { handler: enterJointSessionHandler },
+);
 
 // ---------------------------------------------------------------------------
 // Internal queries — used by generateCoachResponse action to read DB

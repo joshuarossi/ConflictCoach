@@ -9,6 +9,7 @@ import { Dashboard } from "@/pages/Dashboard";
 import { NewCasePage } from "@/pages/NewCasePage";
 import { CaseDetail } from "@/pages/CaseDetail";
 import { PrivateCoachingPage } from "@/pages/PrivateCoachingPage";
+import { ReadyForJointPage } from "@/pages/ReadyForJointPage";
 import { JointChatPage } from "@/pages/JointChatPage";
 import { ClosedCasePage } from "@/pages/ClosedCasePage";
 import { TemplatesListPage } from "@/pages/admin/TemplatesListPage";
@@ -30,6 +31,7 @@ export function App() {
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/cases/new" element={<NewCasePage />} />
           <Route path="/cases/:caseId" element={<CaseDetail />} />
+          <Route path="/cases/:caseId/ready" element={<ReadyForJointPage />} />
           <Route path="/cases/:caseId/closed" element={<ClosedCasePage />} />
         </Route>
 

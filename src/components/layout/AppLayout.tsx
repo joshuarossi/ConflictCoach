@@ -4,6 +4,7 @@ import { useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
 import { TopNav } from "./TopNav";
 import { PartyToggle } from "../PartyToggle";
+import { useRouteChangeFocus } from "../../hooks/useRouteChangeFocus";
 
 export type ContentWidth = "reading" | "chat";
 
@@ -13,6 +14,8 @@ interface AppLayoutProps {
 }
 
 export function AppLayout({ contentWidth = "reading" }: AppLayoutProps) {
+  useRouteChangeFocus();
+
   const maxWidthClass =
     contentWidth === "chat" ? "max-w-[1080px]" : "max-w-[720px]";
 

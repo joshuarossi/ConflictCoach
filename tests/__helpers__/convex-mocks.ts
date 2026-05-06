@@ -132,6 +132,7 @@ export const apiMock = {
       messages: "jointChat:messages",
       mySynthesis: "jointChat:mySynthesis",
       sendUserMessage: vi.fn(),
+      enterJointSession: vi.fn(),
     },
     privateCoaching: {
       messages: "privateCoaching:messages",
