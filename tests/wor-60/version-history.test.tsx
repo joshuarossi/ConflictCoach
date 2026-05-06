@@ -6,7 +6,7 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -60,7 +60,7 @@ const MOCK_VERSIONS = [
     publishedAt: 1_700_200_000_000, // 2023-11-17
     publishedByUserId: "users:u1",
     notes: "Added empathy guidelines.",
-    _publishedByName: "Riley Admin",
+    publishedByName: "Riley Admin",
   },
   {
     _id: "templateVersions:v2",
@@ -72,7 +72,7 @@ const MOCK_VERSIONS = [
     publishedAt: 1_700_100_000_000, // 2023-11-16
     publishedByUserId: "users:u2",
     notes: "Refined tone.",
-    _publishedByName: "Alex Ops",
+    publishedByName: "Alex Ops",
   },
   {
     _id: "templateVersions:v1",
@@ -84,7 +84,7 @@ const MOCK_VERSIONS = [
     publishedAt: 1_700_000_000_000, // 2023-11-15
     publishedByUserId: "users:u1",
     notes: "Initial release.",
-    _publishedByName: "Riley Admin",
+    publishedByName: "Riley Admin",
   },
 ];
 
@@ -95,7 +95,9 @@ const MOCK_VERSIONS = [
 function renderEdit() {
   return render(
     <MemoryRouter initialEntries={["/admin/templates/t1"]}>
-      <TemplateEditPage />
+      <Routes>
+        <Route path="/admin/templates/:id" element={<TemplateEditPage />} />
+      </Routes>
     </MemoryRouter>,
   );
 }
@@ -114,16 +116,21 @@ describe("AC7: Version history timeline", () => {
   test("shows all three versions", () => {
     renderEdit();
 
-    expect(screen.getByText(/version\s*3/i)).toBeInTheDocument();
-    expect(screen.getByText(/version\s*2/i)).toBeInTheDocument();
-    expect(screen.getByText(/version\s*1/i)).toBeInTheDocument();
+    // "Version N" labels may also appear in form textareas (current version
+    // notes/content), so use getAllByText + at-least-one rather than
+    // getByText (which throws on >1 match).
+    expect(screen.getAllByText(/version\s*3/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/version\s*2/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/version\s*1/i).length).toBeGreaterThan(0);
   });
 
   test("each version entry shows the admin display name", () => {
     renderEdit();
 
-    expect(screen.getByText(/riley admin/i)).toBeInTheDocument();
-    expect(screen.getByText(/alex ops/i)).toBeInTheDocument();
+    // Author names may legitimately appear multiple times (multiple
+    // versions by the same admin); at-least-one is the right contract.
+    expect(screen.getAllByText(/riley admin/i).length).toBeGreaterThan(0);
+    expect(screen.getAllByText(/alex ops/i).length).toBeGreaterThan(0);
   });
 
   test("each version entry shows notes", () => {
@@ -166,13 +173,19 @@ describe("AC7: Version history timeline", () => {
   test("versions are displayed in descending order (newest first)", () => {
     renderEdit();
 
-    const versionLabels = screen.getAllByText(/version\s*\d/i);
-    const versionNumbers = versionLabels.map((el) => {
+    // Headings inside version-history list entries — scoped to <h3>/<h4>
+    // (or any heading role) to exclude duplicate matches from form
+    // textareas that also contain "version N" text content.
+    const versionHeadings = screen.getAllByRole("heading", {
+      name: /version\s*\d/i,
+    });
+    const versionNumbers = versionHeadings.map((el) => {
       const match = el.textContent?.match(/version\s*(\d+)/i);
       return match ? Number(match[1]) : 0;
     });
 
     // Should be [3, 2, 1] — descending
+    expect(versionNumbers.length).toBeGreaterThan(1);
     for (let i = 0; i < versionNumbers.length - 1; i++) {
       expect(versionNumbers[i]).toBeGreaterThan(versionNumbers[i + 1]);
     }

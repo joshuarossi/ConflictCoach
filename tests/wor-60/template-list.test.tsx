@@ -61,8 +61,8 @@ const MOCK_TEMPLATES = [
     archivedAt: undefined,
     createdAt: 1_700_000_000_000,
     createdByUserId: "users:u1",
-    _currentVersion: 3,
-    _pinnedCasesCount: 5,
+    currentVersion: 3,
+    pinnedCasesCount: 5,
   },
   {
     _id: "templates:t2",
@@ -72,8 +72,8 @@ const MOCK_TEMPLATES = [
     archivedAt: 1_700_100_000_000,
     createdAt: 1_699_000_000_000,
     createdByUserId: "users:u1",
-    _currentVersion: 1,
-    _pinnedCasesCount: 0,
+    currentVersion: 1,
+    pinnedCasesCount: 0,
   },
   {
     _id: "templates:t3",
@@ -83,8 +83,8 @@ const MOCK_TEMPLATES = [
     archivedAt: undefined,
     createdAt: 1_699_500_000_000,
     createdByUserId: "users:u1",
-    _currentVersion: 2,
-    _pinnedCasesCount: 12,
+    currentVersion: 2,
+    pinnedCasesCount: 12,
   },
 ];
 

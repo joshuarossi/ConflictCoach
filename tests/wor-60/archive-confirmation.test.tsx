@@ -7,7 +7,7 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -55,7 +55,7 @@ const MOCK_TEMPLATE = {
   archivedAt: undefined,
   createdAt: 1_700_000_000_000,
   createdByUserId: "users:u1",
-  _pinnedCasesCount: 7,
+  pinnedCasesCount: 7,
 };
 
 const MOCK_VERSIONS = [
@@ -78,7 +78,9 @@ const MOCK_VERSIONS = [
 function renderEdit() {
   return render(
     <MemoryRouter initialEntries={["/admin/templates/t1"]}>
-      <TemplateEditPage />
+      <Routes>
+        <Route path="/admin/templates/:id" element={<TemplateEditPage />} />
+      </Routes>
     </MemoryRouter>,
   );
 }
@@ -161,8 +163,10 @@ describe("AC6: Archive Template with danger confirmation", () => {
     const archiveBtn = screen.getByRole("button", { name: /archive/i });
     await user.click(archiveBtn);
 
-    // Find and click cancel
-    const cancelBtn = screen.getByRole("button", { name: /cancel|no|close/i });
+    // Find and click cancel — use exact match because the shadcn Dialog
+    // also renders a "Close" button (the corner X), so /cancel|no|close/i
+    // matches multiple elements.
+    const cancelBtn = screen.getByRole("button", { name: /^cancel$/i });
     await user.click(cancelBtn);
 
     expect(mockArchive).not.toHaveBeenCalled();

@@ -356,9 +356,9 @@ export function TemplateEditPage() {
                       className="border-l-2 border-gray-200 pl-4 pb-2"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="text-sm font-semibold text-gray-900">
+                        <h3 className="text-sm font-semibold text-gray-900">
                           Version {ver.version}
-                        </span>
+                        </h3>
                         <Button
                           variant="outline"
                           size="sm"

@@ -9,7 +9,7 @@
 import { describe, test, expect, vi, beforeEach } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { MemoryRouter } from "react-router-dom";
+import { MemoryRouter, Routes, Route } from "react-router-dom";
 
 // ---------------------------------------------------------------------------
 // Mocks
@@ -96,7 +96,9 @@ const MOCK_VERSIONS = [
 function renderEdit() {
   return render(
     <MemoryRouter initialEntries={["/admin/templates/t1"]}>
-      <TemplateEditPage />
+      <Routes>
+        <Route path="/admin/templates/:id" element={<TemplateEditPage />} />
+      </Routes>
     </MemoryRouter>,
   );
 }
@@ -173,9 +175,12 @@ describe("AC4: Form fields", () => {
   test("renders Coach Instructions textarea", () => {
     renderEdit();
 
+    // Anchored regex — there's also a separate "Draft Coach Instructions"
+    // textarea, so /coach instructions/i alone matches both. Use ^ + word
+    // boundary to scope to the joint-chat coach instructions field.
     const field =
-      screen.queryByRole("textbox", { name: /coach instructions/i }) ??
-      screen.queryByLabelText(/coach instructions/i);
+      screen.queryByRole("textbox", { name: /^coach instructions$/i }) ??
+      screen.queryByLabelText(/^coach instructions$/i);
     expect(field).toBeInTheDocument();
   });
 
