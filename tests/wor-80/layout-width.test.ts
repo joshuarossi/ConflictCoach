@@ -60,8 +60,52 @@ const EXPECTED_LAYOUTS: Record<string, string> = {
 function parseLayoutAssignments(source: string): Record<string, string> {
   const assignments: Record<string, string> = {};
 
-  // Split into lines and track nesting context
-  const lines = source.split("\n");
+  // Pre-process: collapse multi-line self-closing <Route ... /> JSX into
+  // a single line so the line-by-line parser below can match prettier-
+  // formatted attributes. Prettier formats long Route declarations across
+  // 3-4 lines, e.g.:
+  //   <Route
+  //     path="/cases/:caseId/private"
+  //     element={<PrivateCoachingPage />}
+  //   />
+  // We can't use a simple `<Route\b[\s\S]*?\/>` regex because the inner
+  // `<PrivateCoachingPage />` element prop matches the lazy `/>` first,
+  // truncating the Route mid-attribute. Instead, walk line-by-line: when
+  // we see a line that opens `<Route` but doesn't close, accumulate
+  // subsequent lines until we hit a line ending in `/>` whose top-level
+  // tag balance is zero.
+  const rawLines = source.split("\n");
+  const flat: string[] = [];
+  let buf: string | null = null;
+  for (const line of rawLines) {
+    const trimmed = line.trim();
+    if (buf !== null) {
+      buf += " " + trimmed;
+      // Close when this line ends in `/>` AND the buffer has balanced
+      // angle brackets at the top level (the `/>` we just saw closes
+      // the outer <Route>, not an inner JSX element prop).
+      if (trimmed === "/>" || trimmed.endsWith(" />")) {
+        flat.push(buf.replace(/\s+/g, " "));
+        buf = null;
+      }
+      continue;
+    }
+    if (
+      trimmed.startsWith("<Route") &&
+      !trimmed.endsWith("/>") &&
+      !trimmed.endsWith(">")
+    ) {
+      // Multi-line Route opening — start buffering.
+      buf = trimmed;
+      continue;
+    }
+    flat.push(line);
+  }
+  // If we ended mid-buffer (malformed source), append it as-is so we
+  // don't lose data.
+  if (buf !== null) flat.push(buf);
+
+  const lines = flat;
   const layoutStack: string[] = [];
 
   for (const line of lines) {
@@ -85,9 +129,11 @@ function parseLayoutAssignments(source: string): Record<string, string> {
     }
 
     // Detect page Route: <Route path="..." element={<PageName />} />
-    const pageMatch = trimmed.match(
-      /<Route\s+path="[^"]+"\s+element=\{<(\w+)\s*\/>\}\s*\/>/,
-    );
+    // Match either attribute order so prettier's layout choices don't
+    // break parsing.
+    const pageMatch =
+      trimmed.match(/<Route\s+path="[^"]+"\s+element=\{<(\w+)\s*\/>\}\s*\/>/) ??
+      trimmed.match(/<Route\s+element=\{<(\w+)\s*\/>\}\s+path="[^"]+"\s*\/>/);
     if (pageMatch) {
       const pageName = pageMatch[1];
       const currentLayout =
