@@ -4,6 +4,7 @@ import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
 import { ConvexErrorBoundary } from "@/components/layout/ConvexErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
+import { SoloBanner } from "@/components/SoloBanner";
 
 /**
  * Maps a case status to a human-readable phase name for display.
@@ -168,11 +169,15 @@ function CaseDetailContent() {
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const isSolo = (caseData as any).isSolo === true;
+
   return (
     <div className="space-y-6">
+      {isSolo && <SoloBanner />}
       <header className="flex items-center justify-between">
         <h1 className="text-2xl font-bold text-gray-900">
-          Case with {caseData.otherPartyName || "the other party"}
+          {isSolo ? "Solo Case" : `Case with ${caseData.otherPartyName || "the other party"}`}
         </h1>
         <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
           {getPhaseLabel(status)}

@@ -130,6 +130,14 @@ function CaseRowItem({ caseItem }: { caseItem: CaseRow }) {
             <span className="font-medium text-text-primary truncate">
               {otherPartyName}
             </span>
+            {caseItem.isSolo && (
+              <span
+                className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+                data-testid="solo-badge"
+              >
+                Solo
+              </span>
+            )}
             <span className="text-meta text-text-tertiary capitalize">
               {caseItem.category}
             </span>

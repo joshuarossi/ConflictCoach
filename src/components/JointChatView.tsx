@@ -6,6 +6,7 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { ChatWindow, type ChatMessage } from "./ChatWindow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNetworkErrorToast } from "@/hooks/useNetworkErrorToast";
+import { ConnectedDraftCoachPanel } from "./DraftCoachPanel";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import {
   Dialog,
@@ -276,8 +277,9 @@ export function ConnectedJointChatView() {
   const sendMessage = useMutation(api.jointChat.sendUserMessage);
   const proposeClosure = useMutation(api.caseClosure.proposeClosure);
 
-  // Network error toast (DesignDoc §6.2)
+  // Network error toast (DesignDoc §6.2) — supersedes inline mutationError
   const showNetworkError = useNetworkErrorToast();
+  const [isDraftCoachOpen, setIsDraftCoachOpen] = useState(false);
 
   const handleSendMessage = useCallback(
     async (content: string) => {
@@ -301,6 +303,15 @@ export function ConnectedJointChatView() {
       );
     }
   }, [proposeClosure, typedCaseId, showNetworkError]);
+
+  const handleEditDraft = useCallback((draftText: string) => {
+    setIsDraftCoachOpen(false);
+    const el = document.getElementById("joint-chat-input") as HTMLTextAreaElement | null;
+    if (el) {
+      el.value = draftText;
+      el.focus();
+    }
+  }, []);
 
   const otherPartyName =
     partyData?.otherPhaseOnly?.displayName ??
@@ -397,8 +408,16 @@ export function ConnectedJointChatView() {
         isStreaming={isStreaming}
         synthesisText={synthesisData?.synthesisText}
         onSendMessage={handleSendMessage}
+        onOpenDraftCoach={() => setIsDraftCoachOpen(true)}
         onOpenClosure={handleProposeClosure}
         onBack={() => navigate(`/cases/${caseId}`)}
+      />
+      <ConnectedDraftCoachPanel
+        isOpen={isDraftCoachOpen}
+        onClose={() => setIsDraftCoachOpen(false)}
+        caseId={typedCaseId}
+        otherPartyName={otherPartyName}
+        onEditDraft={handleEditDraft}
       />
     </>
   );
