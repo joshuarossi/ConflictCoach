@@ -174,6 +174,7 @@ export const partyStates = query({
         ? {
             hasCompletedPC: other.privateCoachingCompletedAt != null,
             displayName: otherPartyName,
+            closureProposed: other.closureProposed ?? false,
           }
         : null,
       // Expose all party states with roles for solo mode's useActingPartyUserId hook
