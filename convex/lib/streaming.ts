@@ -92,6 +92,7 @@ const insertStreamingMessageArgs = {
   // privateMessages
   userId: v.optional(v.id("users")),
   role: v.optional(v.union(v.literal("USER"), v.literal("AI"))),
+  partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
   // jointMessages
   authorType: v.optional(v.union(v.literal("USER"), v.literal("COACH"))),
   authorUserId: v.optional(v.id("users")),
@@ -122,10 +123,15 @@ export const insertStreamingMessage = internalMutation({
  * these before forwarding to the insert mutation, otherwise Convex rejects
  * them as "extra fields not in the validator."
  *
+ * `aiRole` is purely informational for the mock-mode response selector; the
+ * persisted message row uses `role: "AI"` plus the table itself to convey
+ * type. `partyRole`, by contrast, IS persisted (added to the schema for
+ * solo-mode message isolation), so it is NOT stripped.
+ *
  * Keep in sync with any new transient fields added to StreamAIResponseOptions
  * .messageFields.
  */
-const TRANSIENT_MESSAGE_FIELDS = ["aiRole", "partyRole"] as const;
+const TRANSIENT_MESSAGE_FIELDS = ["aiRole"] as const;
 
 function stripTransientFields(
   fields: Record<string, unknown>,
