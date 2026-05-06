@@ -44,10 +44,11 @@ async function requireParty(
 export const myMessages = query({
   args: {
     caseId: v.id("cases"),
+    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
   },
-  handler: async (ctx: any, args: { caseId: string }) => {
+  handler: async (ctx: any, args: { caseId: string; partyRole?: string }) => {
     const user = await requireAuth(ctx);
-    await requireParty(ctx, args.caseId, user._id);
+    const caseDoc = await requireParty(ctx, args.caseId, user._id);
 
     const messages = await ctx.db
       .query("privateMessages")
@@ -58,9 +59,18 @@ export const myMessages = query({
 
     // Privacy enforcement: always filter by userId to guarantee isolation,
     // even if the index already scoped the results.
-    return messages.filter(
+    let filtered = messages.filter(
       (m: { userId: string }) => m.userId === user._id,
     );
+
+    // Solo mode: further filter by partyRole to isolate each party's messages
+    if (caseDoc.isSolo && args.partyRole) {
+      filtered = filtered.filter(
+        (m: { partyRole?: string }) => m.partyRole === args.partyRole,
+      );
+    }
+
+    return filtered;
   },
 });
 
@@ -77,8 +87,9 @@ export const sendUserMessage = mutation({
   args: {
     caseId: v.id("cases"),
     content: v.string(),
+    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
   },
-  handler: async (ctx: any, args: { caseId: string; content: string }) => {
+  handler: async (ctx: any, args: { caseId: string; content: string; partyRole?: string }) => {
     const user = await requireAuth(ctx);
     const caseDoc = await requireParty(ctx, args.caseId, user._id);
 
@@ -92,6 +103,9 @@ export const sendUserMessage = mutation({
       );
     }
 
+    // Determine partyRole for solo mode message isolation
+    const partyRole = caseDoc.isSolo ? (args.partyRole ?? "INITIATOR") : undefined;
+
     // Insert the user's message
     const messageId = await ctx.db.insert("privateMessages", {
       caseId: args.caseId,
@@ -99,6 +113,7 @@ export const sendUserMessage = mutation({
       role: "USER" as const,
       content: args.content,
       status: "COMPLETE" as const,
+      ...(partyRole ? { partyRole } : {}),
       createdAt: Date.now(),
     });
 
