@@ -18,8 +18,9 @@ export interface NewCaseFormValues {
   isSolo: boolean;
 }
 
-interface NewCaseFormProps {
+export interface NewCaseFormProps {
   onSubmit?: (values: NewCaseFormValues) => void;
+  onSubmitSolo?: (values: NewCaseFormValues) => void;
   disabled?: boolean;
 }
 
@@ -76,7 +77,7 @@ function autoGrow(el: HTMLTextAreaElement) {
   el.style.height = `${el.scrollHeight}px`;
 }
 
-export function NewCaseForm({ onSubmit, disabled }: NewCaseFormProps) {
+export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormProps) {
   const [category, setCategory] = useState("");
   const [mainTopic, setMainTopic] = useState("");
   const [description, setDescription] = useState("");
@@ -102,15 +103,27 @@ export function NewCaseForm({ onSubmit, disabled }: NewCaseFormProps) {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const values = collectAndValidate();
-    if (values) onSubmit?.(values);
+    if (values) {
+      if (values.isSolo && onSubmitSolo) {
+        onSubmitSolo(values);
+      } else {
+        onSubmit?.(values);
+      }
+    }
   };
 
   const mainTopicOverLimit = mainTopic.length > MAIN_TOPIC_SOFT_LIMIT;
 
+  // Progressive disclosure: reveal steps sequentially
+  const showMainTopic = !!category;
+  const showDescription = showMainTopic && !!mainTopic.trim();
+  const showOutcome = showDescription;
+  const showAdvancedAndSubmit = showMainTopic;
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {/* Step 1: Category — radio cards */}
-      <fieldset>
+      <fieldset disabled={disabled}>
         <legend className="block text-label font-medium text-text-primary mb-2">
           Category
         </legend>
@@ -136,6 +149,7 @@ export function NewCaseForm({ onSubmit, disabled }: NewCaseFormProps) {
                   value={cat.value}
                   checked={isSelected}
                   onChange={() => setCategory(cat.value)}
+                  disabled={disabled}
                   className="accent-accent"
                   aria-label={cat.label}
                 />
@@ -154,117 +168,134 @@ export function NewCaseForm({ onSubmit, disabled }: NewCaseFormProps) {
       </fieldset>
 
       {/* Step 2: Main Topic */}
-      <div>
-        <label
-          htmlFor="mainTopic"
-          className="block text-label font-medium text-text-primary mb-1"
-        >
-          Main Topic
-        </label>
-        <p className="text-meta text-text-secondary mb-1">
-          This will be visible to both parties in the case.
-        </p>
-        <input
-          id="mainTopic"
-          type="text"
-          value={mainTopic}
-          onChange={(e) => setMainTopic(e.target.value)}
-          placeholder="What is this conflict about?"
-          aria-describedby="mainTopic-counter mainTopic-error"
-          className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
-        />
-        <div className="flex justify-between mt-1">
-          {errors.mainTopic ? (
-            <p
-              id="mainTopic-error"
-              className="text-meta text-danger"
-              role="alert"
-            >
-              {errors.mainTopic}
-            </p>
-          ) : (
-            <span />
-          )}
-          <span
-            id="mainTopic-counter"
-            className={`text-meta ${mainTopicOverLimit ? "text-danger" : "text-text-tertiary"}`}
-            aria-live="polite"
+      {showMainTopic && (
+        <div>
+          <label
+            htmlFor="mainTopic"
+            className="block text-label font-medium text-text-primary mb-1"
           >
-            {mainTopic.length}/{MAIN_TOPIC_SOFT_LIMIT}
-          </span>
+            Main Topic
+          </label>
+          <p className="text-meta text-text-secondary mb-1">
+            This will be visible to both parties in the case.
+          </p>
+          <input
+            id="mainTopic"
+            type="text"
+            value={mainTopic}
+            onChange={(e) => setMainTopic(e.target.value)}
+            disabled={disabled}
+            placeholder="What is this conflict about?"
+            aria-describedby="mainTopic-counter mainTopic-error"
+            className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
+          />
+          <div className="flex justify-between mt-1">
+            {errors.mainTopic ? (
+              <p
+                id="mainTopic-error"
+                className="text-meta text-danger"
+                role="alert"
+              >
+                {errors.mainTopic}
+              </p>
+            ) : (
+              <span />
+            )}
+            <span
+              id="mainTopic-counter"
+              className={`text-meta ${mainTopicOverLimit ? "text-danger" : "text-text-tertiary"}`}
+              aria-live="polite"
+            >
+              {mainTopic.length}/{MAIN_TOPIC_SOFT_LIMIT}
+            </span>
+          </div>
         </div>
-      </div>
+      )}
 
       {/* Step 3: Description — private */}
-      <div>
-        <PrivateFieldLabel htmlFor="description">Description</PrivateFieldLabel>
-        <textarea
-          id="description"
-          value={description}
-          onChange={(e) => {
-            setDescription(e.target.value);
-            autoGrow(e.target);
-          }}
-          placeholder="Describe the situation in your own words…"
-          rows={5}
-          className="w-full rounded-md border border-border-default bg-private-tint px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none overflow-hidden"
-        />
-      </div>
+      {showDescription && (
+        <div>
+          <PrivateFieldLabel htmlFor="description">
+            Description
+          </PrivateFieldLabel>
+          <textarea
+            id="description"
+            value={description}
+            onChange={(e) => {
+              setDescription(e.target.value);
+              autoGrow(e.target);
+            }}
+            disabled={disabled}
+            placeholder="Describe the situation in your own words…"
+            rows={5}
+            className="w-full rounded-md border border-border-default bg-private-tint px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none overflow-hidden"
+          />
+        </div>
+      )}
 
       {/* Step 4: Desired Outcome — private */}
-      <div>
-        <PrivateFieldLabel htmlFor="desiredOutcome">
-          Desired Outcome{" "}
-          <span className="text-text-tertiary font-normal">(optional)</span>
-        </PrivateFieldLabel>
-        <textarea
-          id="desiredOutcome"
-          value={desiredOutcome}
-          onChange={(e) => {
-            setDesiredOutcome(e.target.value);
-            autoGrow(e.target);
-          }}
-          placeholder="What would a good resolution look like?"
-          rows={3}
-          className="w-full rounded-md border border-border-default bg-private-tint px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none overflow-hidden"
-        />
-      </div>
+      {showOutcome && (
+        <div>
+          <PrivateFieldLabel htmlFor="desiredOutcome">
+            Desired Outcome{" "}
+            <span className="text-text-tertiary font-normal">(optional)</span>
+          </PrivateFieldLabel>
+          <textarea
+            id="desiredOutcome"
+            value={desiredOutcome}
+            onChange={(e) => {
+              setDesiredOutcome(e.target.value);
+              autoGrow(e.target);
+            }}
+            disabled={disabled}
+            placeholder="What would a good resolution look like?"
+            rows={3}
+            className="w-full rounded-md border border-border-default bg-private-tint px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none overflow-hidden"
+          />
+        </div>
+      )}
 
       {/* Advanced — solo mode */}
-      <div className="border border-border-default rounded-lg">
-        <button
-          type="button"
-          className="flex items-center gap-2 w-full px-4 py-3 text-label font-medium text-text-secondary hover:text-text-primary transition-colors"
-          onClick={() => setAdvancedOpen((prev) => !prev)}
-          aria-expanded={advancedOpen}
-        >
-          {advancedOpen ? (
-            <ChevronDown className="h-4 w-4" />
-          ) : (
-            <ChevronRight className="h-4 w-4" />
+      {showAdvancedAndSubmit && (
+        <div className="border border-border-default rounded-lg">
+          <button
+            type="button"
+            className="flex items-center gap-2 w-full px-4 py-3 text-label font-medium text-text-secondary hover:text-text-primary transition-colors"
+            onClick={() => setAdvancedOpen((prev) => !prev)}
+            aria-expanded={advancedOpen}
+            disabled={disabled}
+          >
+            {advancedOpen ? (
+              <ChevronDown className="h-4 w-4" />
+            ) : (
+              <ChevronRight className="h-4 w-4" />
+            )}
+            Advanced
+          </button>
+          {advancedOpen && (
+            <div className="px-4 pb-4">
+              <label className="flex items-center gap-2 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isSolo}
+                  onChange={(e) => setIsSolo(e.target.checked)}
+                  disabled={disabled}
+                  className="accent-accent"
+                />
+                <span className="text-body text-text-primary">
+                  Create this as a solo test case (I'll play both parties)
+                </span>
+              </label>
+            </div>
           )}
-          Advanced
-        </button>
-        {advancedOpen && (
-          <div className="px-4 pb-4">
-            <label className="flex items-center gap-2 cursor-pointer">
-              <input
-                type="checkbox"
-                checked={isSolo}
-                onChange={(e) => setIsSolo(e.target.checked)}
-                className="accent-accent"
-              />
-              <span className="text-body text-text-primary">
-                Create this as a solo test case (I'll play both parties)
-              </span>
-            </label>
-          </div>
-        )}
-      </div>
+        </div>
+      )}
 
-      <Button type="submit" className="w-full" disabled={disabled}>
-        Start Case
-      </Button>
+      {showAdvancedAndSubmit && (
+        <Button type="submit" className="w-full" disabled={disabled}>
+          Start Case
+        </Button>
+      )}
     </form>
   );
 }
