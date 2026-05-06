@@ -4,6 +4,7 @@ import { internal } from "./_generated/api";
 import { v } from "convex/values";
 import { throwAppError } from "./lib/errors";
 import { requireAuth } from "./lib/auth";
+import { validateTransition } from "./lib/stateMachine";
 import { assemblePrompt } from "./lib/prompts";
 import { streamAIResponse } from "./lib/streaming";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "./lib/privacyFilter";
@@ -205,6 +206,41 @@ export const mySynthesis = query({
     return {
       synthesisText: partyState.synthesisText ?? null,
     };
+  },
+});
+
+// ---------------------------------------------------------------------------
+// enterJointSession — advance case from READY_FOR_JOINT → JOINT_ACTIVE
+// ---------------------------------------------------------------------------
+
+export const enterJointSession = mutation({
+  args: {
+    caseId: v.id("cases"),
+  },
+  handler: async (ctx: any, args: { caseId: string }) => {
+    const user = await requireAuth(ctx);
+    const { caseDoc } = await requireCaseParty(ctx, args.caseId, user._id);
+
+    // Validate transition via state machine
+    validateTransition(caseDoc.status, "JOINT_ACTIVE");
+
+    // Transition to JOINT_ACTIVE
+    await ctx.db.patch(args.caseId, {
+      status: "JOINT_ACTIVE",
+      updatedAt: Date.now(),
+    });
+
+    // Schedule Coach opening message
+    const generateRef = (internal as any)?.jointChat?.generateOpeningMessage;
+    if (generateRef) {
+      try {
+        await ctx.scheduler.runAfter(0, generateRef, {
+          caseId: args.caseId,
+        });
+      } catch (err) {
+        console.error("Failed to schedule opening message:", err);
+      }
+    }
   },
 });
 
