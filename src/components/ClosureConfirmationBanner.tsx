@@ -21,7 +21,7 @@ export function ClosureConfirmationBanner({
       </p>
       {summaryText && (
         <p className="mt-1 text-sm text-text-secondary">
-          Their summary: &ldquo;{summaryText}&rdquo;
+          Their summary: <q>{summaryText}</q>
         </p>
       )}
       <p className="mt-1 text-sm text-text-secondary">

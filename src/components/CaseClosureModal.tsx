@@ -90,6 +90,7 @@ export function CaseClosureModal({
                 type="radio"
                 name="closure-option"
                 value="resolved"
+                aria-label="Resolved"
                 checked={selected === "resolved"}
                 onChange={() => {
                   setSelected("resolved");
@@ -111,6 +112,7 @@ export function CaseClosureModal({
                 type="radio"
                 name="closure-option"
                 value="not_resolved"
+                aria-label="No resolution"
                 checked={selected === "not_resolved"}
                 onChange={() => {
                   setSelected("not_resolved");
