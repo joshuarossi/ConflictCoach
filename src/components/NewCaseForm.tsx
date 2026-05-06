@@ -60,6 +60,7 @@ function PrivateFieldLabel({
             className="h-4 w-4 text-text-secondary"
             strokeWidth={1.5}
             aria-hidden="true"
+            {...({ title: "Only you and the AI coach will see this." } as Record<string, string>)}
           />
           {children}
         </span>
@@ -118,7 +119,7 @@ export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormPro
   // If there are validation errors, show the fields that have errors
   const showMainTopic = !!category || !!errors.mainTopic;
   const showDescription = showMainTopic && !!mainTopic.trim();
-  const showOutcome = showDescription;
+  const showOutcome = showDescription && !!description.trim();
   const showAdvancedAndSubmit = showMainTopic;
 
   return (
@@ -153,6 +154,7 @@ export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormPro
                   disabled={disabled}
                   className="accent-accent"
                   aria-label={cat.label}
+                  aria-checked={isSelected ? "true" : "false"}
                 />
                 <span className="text-body font-medium text-text-primary">
                   {cat.label}
@@ -258,43 +260,54 @@ export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormPro
 
       {/* Advanced — solo mode */}
       {showAdvancedAndSubmit && (
-        <div className="border border-border-default rounded-lg">
-          <button
-            type="button"
-            className="flex items-center gap-2 w-full px-4 py-3 text-label font-medium text-text-secondary hover:text-text-primary transition-colors"
-            onClick={() => setAdvancedOpen((prev) => !prev)}
-            aria-expanded={advancedOpen}
-            disabled={disabled}
-          >
-            {advancedOpen ? (
-              <ChevronDown className="h-4 w-4" />
-            ) : (
-              <ChevronRight className="h-4 w-4" />
+        <>
+          <div className="border border-border-default rounded-lg">
+            <button
+              type="button"
+              className="flex items-center gap-2 w-full px-4 py-3 text-label font-medium text-text-secondary hover:text-text-primary transition-colors"
+              onClick={() => setAdvancedOpen((prev) => !prev)}
+              aria-expanded={advancedOpen}
+              disabled={disabled}
+            >
+              {advancedOpen ? (
+                <ChevronDown className="h-4 w-4" />
+              ) : (
+                <ChevronRight className="h-4 w-4" />
+              )}
+              Advanced
+            </button>
+            {advancedOpen && (
+              <div className="px-4 pb-4">
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isSolo}
+                    onChange={(e) => setIsSolo(e.target.checked)}
+                    disabled={disabled}
+                    className="accent-accent"
+                  />
+                  <span className="text-body text-text-primary">
+                    Create this as a solo test case (I'll play both parties)
+                  </span>
+                </label>
+              </div>
             )}
-            Advanced
-          </button>
-          {advancedOpen && (
-            <div className="px-4 pb-4">
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={isSolo}
-                  onChange={(e) => setIsSolo(e.target.checked)}
-                  disabled={disabled}
-                  className="accent-accent"
-                />
-                <span className="text-body text-text-primary">
-                  Create this as a solo test case (I'll play both parties)
-                </span>
-              </label>
-            </div>
-          )}
-        </div>
+          </div>
+          <Button
+            type="submit"
+            className="w-full"
+            disabled={disabled}
+            onClick={(e) => {
+              const values = collectAndValidate();
+              if (!values) {
+                e.preventDefault();
+              }
+            }}
+          >
+            Start Case
+          </Button>
+        </>
       )}
-
-      <Button type="submit" className="w-full" disabled={disabled}>
-        Start Case
-      </Button>
     </form>
   );
 }
