@@ -414,12 +414,14 @@ describe("AC7: Form validation", () => {
     const user = userEvent.setup();
     const { onSubmit } = renderForm();
 
-    // Select category to progress
+    // Select category — this reveals the mainTopic input AND the submit
+    // button (form's progressive disclosure: showAdvancedAndSubmit =
+    // showMainTopic). Do NOT use progressToStep here; that helper fills
+    // mainTopic before reaching submit, which would defeat the
+    // empty-mainTopic test.
     await user.click(screen.getByRole("radio", { name: /Workplace/i }));
 
-    // Leave mainTopic empty, progress to submit area and try to submit
-    await progressToStep(user, "submit");
-
+    // Click submit with mainTopic still empty
     const submitButton = screen.getByRole("button", { name: /Start Case/i });
     await user.click(submitButton);
 
@@ -465,14 +467,16 @@ describe("AC7: Form validation", () => {
     const user = userEvent.setup();
     renderForm();
 
-    // Select category but leave mainTopic empty, then submit
+    // Select category — reveals mainTopic input + submit. Do NOT use
+    // progressToStep; that helper fills mainTopic before reaching submit.
     await user.click(screen.getByRole("radio", { name: /Workplace/i }));
-    await progressToStep(user, "submit");
 
+    // Click submit with mainTopic empty to trigger validation error
     const submitButton = screen.getByRole("button", { name: /Start Case/i });
     await user.click(submitButton);
 
     const errors = screen.getAllByRole("alert");
+    expect(errors.length).toBeGreaterThan(0);
     for (const errorEl of errors) {
       // Each error should have danger styling
       expect(errorEl.className).toMatch(/danger/);
