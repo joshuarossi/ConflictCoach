@@ -3,9 +3,8 @@
 exports[`AC 5: Visual style matches DesignDoc §4.7: persistent banner, lock icon is not decorative > snapshot: PrivacyBanner renders expected structure 1`] = `
 <div
   aria-label="Privacy notice"
-  class="private-tint flex items-center gap-2 px-4 py-2"
+  class="bg-private-tint flex items-center gap-2 px-4 py-2"
   role="region"
-  style="background-color: rgb(240, 233, 224);"
 >
   <button
     aria-label="Lock — view privacy details"
