@@ -4,7 +4,9 @@
  * facts, decisions, emotional tone, and unresolved threads."
  *
  * This is an integration test with a mocked Anthropic client. We verify:
- * - The correct model (claude-haiku-4-5-20251001) is used
+ * - A Haiku-family model is used (alias preferred — Anthropic deprecates
+ *   dated snapshots, so we match the model-family prefix instead of an
+ *   exact dated ID)
  * - The compression prompt is passed correctly
  * - The response is used as the SUMMARY content
  */
@@ -17,7 +19,7 @@ import type { Message } from "../../convex/lib/prompts";
 const EXPECTED_COMPRESSION_PROMPT =
   "Summarize this conversation segment in 500 tokens or fewer, preserving facts, decisions, emotional tone, and unresolved threads.";
 
-const EXPECTED_MODEL = "claude-haiku-4-5-20251001";
+const EXPECTED_MODEL_PREFIX = /^claude-haiku-/;
 
 const CANNED_SUMMARY = "Both parties discussed communication issues. Key facts: disagreement over decision-making process. Emotional tone: frustrated but willing.";
 
@@ -49,13 +51,13 @@ describe("Haiku is called with compression prompt", () => {
     expect(call.system).toContain(EXPECTED_COMPRESSION_PROMPT);
   });
 
-  test("compressMessages uses claude-haiku-4-5-20251001 model", async () => {
+  test("compressMessages uses a Haiku-family model", async () => {
     const mockClient = createMockAnthropicClient();
 
     await compressMessages(testMessages, mockClient as unknown as import("@anthropic-ai/sdk").default);
 
     const call = mockClient._createFn.mock.calls[0][0];
-    expect(call.model).toBe(EXPECTED_MODEL);
+    expect(call.model).toMatch(EXPECTED_MODEL_PREFIX);
   });
 
   test("compressMessages returns the Haiku response as the summary text", async () => {

@@ -1,5 +1,6 @@
 import type Anthropic from "@anthropic-ai/sdk";
 import type { Message } from "./prompts";
+import { HAIKU_MODEL } from "./models";
 
 // ---------------------------------------------------------------------------
 // Budget constants (TechSpec §6.4)
@@ -14,8 +15,6 @@ export const CLASSIFICATION_BUDGET = 10_000;
 
 const COMPRESSION_PROMPT =
   "Summarize this conversation segment in 500 tokens or fewer, preserving facts, decisions, emotional tone, and unresolved threads.";
-
-const HAIKU_MODEL = "claude-haiku-4-5-20251001";
 
 // ---------------------------------------------------------------------------
 // In-memory cache: client -> (content hash -> summary)

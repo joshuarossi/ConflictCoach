@@ -10,6 +10,7 @@ import * as promptsLib from "../lib/prompts";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "../lib/privacyFilter";
 import { getMockResponse } from "../lib/claudeMock";
 import { enforceCostBudget, recordUsageFromAction } from "../lib/costBudget";
+import { SONNET_MODEL } from "../lib/models";
 
 // Maximum privacy-violation retries (total attempts = 1 + MAX_RETRIES)
 const MAX_RETRIES = 2;
@@ -323,7 +324,7 @@ export async function generateSynthesisHandler(
     let response: any;
     try {
       response = await callClaudeWithRetry(anthropicClient, {
-        model: "claude-sonnet-4-5-20250514",
+        model: SONNET_MODEL,
         max_tokens: 4096,
         system: prompt.system,
         messages: prompt.messages,

@@ -9,6 +9,7 @@ import { assemblePrompt } from "./lib/prompts";
 import { streamAIResponse } from "./lib/streaming";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "./lib/privacyFilter";
 import { CLASSIFICATION_BUDGET, compressContext } from "./lib/compression";
+import { SONNET_MODEL, HAIKU_MODEL } from "./lib/models";
 import { enforceCostBudget, SOFT_CAP_BOILERPLATE, recordUsageFromAction } from "./lib/costBudget";
 import type { Message } from "./lib/prompts";
 
@@ -365,7 +366,7 @@ export async function classifyMessage(
   );
 
   const response = await anthropicClient.messages.create({
-    model: "claude-haiku-4-5-20251001",
+    model: HAIKU_MODEL,
     max_tokens: 20,
     system: CLASSIFICATION_SYSTEM_PROMPT,
     messages: classificationMessages,
@@ -624,7 +625,7 @@ export async function generateCoachResponseHandler(
           authorType: "COACH",
           isIntervention,
         },
-        model: "claude-sonnet-4-5-20250514",
+        model: SONNET_MODEL,
         systemPrompt: prompt.system,
         userMessages: prompt.messages,
         caseId: rawArgs.caseId,
@@ -666,7 +667,7 @@ export async function generateCoachResponseHandler(
                   authorType: "COACH",
                   isIntervention,
                 },
-                model: "claude-sonnet-4-5-20250514",
+                model: SONNET_MODEL,
                 systemPrompt: prompt.system,
                 userMessages: prompt.messages,
               });
@@ -830,7 +831,7 @@ export const generateOpeningMessage = action({
           authorType: "COACH",
           isIntervention: false,
         },
-        model: "claude-sonnet-4-5-20250514",
+        model: SONNET_MODEL,
         systemPrompt: prompt.system,
         userMessages: prompt.messages,
         caseId: args.caseId,
