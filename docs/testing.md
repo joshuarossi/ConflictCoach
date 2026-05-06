@@ -32,6 +32,20 @@ End-to-end tests live in `e2e/` and run against a live Convex dev server:
 npm run test:e2e
 ```
 
+### Solo Full Flow (Smoke Test)
+
+The `e2e/wor-72/solo-full-flow.spec.ts` suite is the highest-value E2E test. It exercises the entire Conflict Coach lifecycle in a single browser session using solo mode's party toggle (`?as=initiator|invitee`):
+
+1. **Case creation** — fills the creation form, enables the solo toggle in the Advanced section, and submits.
+2. **Private coaching (both parties)** — toggles between initiator and invitee, sends messages, verifies mock AI responses stream in, and marks each party's coaching complete.
+3. **Synthesis verification** — toggles between parties and checks each sees their own synthesis card.
+4. **Joint chat** — enters the joint session, verifies the coach opening message, and sends a user message.
+5. **Draft Coach** — opens the Draft Coach panel, converses, clicks "Draft it for me", verifies the DraftReadyCard, and sends the draft into joint chat.
+6. **Closure** — proposes a resolution with summary, toggles to the other party, and confirms.
+7. **Dashboard** — navigates to `/dashboard` and verifies the case appears in the Closed section.
+
+All transitions are UI-driven (no `advanceCaseToStatus` shortcuts), making this a true integration test. It runs with `CLAUDE_MOCK=true` for deterministic AI responses.
+
 ### Privacy Security Suite
 
 The `e2e/wor-75/privacy.spec.ts` suite validates the application's core privacy guarantees at the browser level:
