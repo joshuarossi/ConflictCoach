@@ -37,6 +37,15 @@ export default defineSchema({
     updatedAt: v.number(),
     closedAt: v.optional(v.number()),
     closureSummary: v.optional(v.string()), // populated on resolution
+    // Per-case AI cost accumulator (WOR-66)
+    aiUsage: v.optional(
+      v.object({
+        totalInputTokens: v.number(),
+        totalOutputTokens: v.number(),
+        totalCostUsd: v.number(),
+        softCapReachedAt: v.optional(v.number()),
+      }),
+    ),
   })
     .index("by_initiator", ["initiatorUserId"])
     .index("by_invitee", ["inviteeUserId"]),
