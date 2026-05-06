@@ -278,17 +278,18 @@ export const listTemplateVersions = query({
     // Enrich with publisher display name (prefer denormalized field, fall back to lookup)
     const enriched = await Promise.all(
       versions.map(async (ver: any) => {
+        // Use denormalized publishedByName if available, else look up user
         if (ver.publishedByName) {
-          return ver;
+          return { ...ver, publishedByDisplayName: ver.publishedByName };
         }
-        let publishedByName = "Unknown";
+        let publishedByDisplayName = "Unknown";
         if (ver.publishedByUserId) {
           const publisher = await ctx.db.get(ver.publishedByUserId);
           if (publisher) {
-            publishedByName = publisher.displayName || publisher.email || "Unknown";
+            publishedByDisplayName = publisher.displayName || publisher.email || "Unknown";
           }
         }
-        return { ...ver, publishedByName };
+        return { ...ver, publishedByDisplayName };
       }),
     );
 

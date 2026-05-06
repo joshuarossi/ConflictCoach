@@ -13,18 +13,18 @@ import {
 } from "@/components/ui/dialog";
 
 const listAllQuery: FunctionReference<"query"> = (() => {
-  const ref = makeFunctionReference<"query">("templates:listAllTemplates");
+  const ref = makeFunctionReference<"query">("admin/templates:listAll");
   Object.defineProperty(ref, "toString", {
-    value: () => "templates:listAllTemplates",
+    value: () => "admin/templates:listAll",
     configurable: true,
   });
   return ref;
 })();
 
 const createMutation: FunctionReference<"mutation"> = (() => {
-  const ref = makeFunctionReference<"mutation">("templates:createTemplate");
+  const ref = makeFunctionReference<"mutation">("admin/templates:create");
   Object.defineProperty(ref, "toString", {
-    value: () => "templates:createTemplate",
+    value: () => "admin/templates:create",
     configurable: true,
   });
   return ref;

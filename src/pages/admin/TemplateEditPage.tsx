@@ -17,36 +17,36 @@ import { formatAuditTimestamp } from "@/lib/formatAuditTimestamp";
 // --- Function references (avoid anyApi proxy issues) ---
 
 const getTemplateQuery: FunctionReference<"query"> = (() => {
-  const ref = makeFunctionReference<"query">("templates:getTemplate");
+  const ref = makeFunctionReference<"query">("admin/templates:get");
   Object.defineProperty(ref, "toString", {
-    value: () => "templates:getTemplate",
+    value: () => "admin/templates:get",
     configurable: true,
   });
   return ref;
 })();
 
 const listVersionsQuery: FunctionReference<"query"> = (() => {
-  const ref = makeFunctionReference<"query">("templates:listTemplateVersions");
+  const ref = makeFunctionReference<"query">("admin/templates:listVersions");
   Object.defineProperty(ref, "toString", {
-    value: () => "templates:listTemplateVersions",
+    value: () => "admin/templates:listVersions",
     configurable: true,
   });
   return ref;
 })();
 
 const publishMutation: FunctionReference<"mutation"> = (() => {
-  const ref = makeFunctionReference<"mutation">("templates:publishNewVersion");
+  const ref = makeFunctionReference<"mutation">("admin/templates:publishNewVersion");
   Object.defineProperty(ref, "toString", {
-    value: () => "templates:publishNewVersion",
+    value: () => "admin/templates:publishNewVersion",
     configurable: true,
   });
   return ref;
 })();
 
 const archiveMutation: FunctionReference<"mutation"> = (() => {
-  const ref = makeFunctionReference<"mutation">("templates:archiveTemplate");
+  const ref = makeFunctionReference<"mutation">("admin/templates:archive");
   Object.defineProperty(ref, "toString", {
-    value: () => "templates:archiveTemplate",
+    value: () => "admin/templates:archive",
     configurable: true,
   });
   return ref;
@@ -61,7 +61,7 @@ interface TemplateVersion {
   draftCoachInstructions?: string;
   publishedAt: number;
   publishedByUserId: string;
-  publishedByName: string;
+  publishedByDisplayName?: string;
   notes?: string;
 }
 
@@ -352,6 +352,7 @@ export function TemplateEditPage() {
                   {versions.map((ver) => (
                     <div
                       key={ver._id}
+                      data-testid="version-entry"
                       className="border-l-2 border-gray-200 pl-4 pb-2"
                     >
                       <div className="flex items-center justify-between">
@@ -370,7 +371,7 @@ export function TemplateEditPage() {
                         {formatAuditTimestamp(ver.publishedAt)}
                       </p>
                       <p className="text-xs text-gray-500">
-                        {ver.publishedByName || "Unknown"}
+                        {ver.publishedByDisplayName || "Unknown"}
                       </p>
                       {ver.notes && (
                         <p className="text-sm text-gray-700 mt-1">
@@ -435,7 +436,7 @@ export function TemplateEditPage() {
               </DialogTitle>
               <DialogDescription>
                 Published {formatAuditTimestamp(viewingVersion.publishedAt)}{" "}
-                by {viewingVersion.publishedByName || "Unknown"}
+                by {viewingVersion.publishedByDisplayName || "Unknown"}
               </DialogDescription>
             </DialogHeader>
             <div className="space-y-4 pt-2">
