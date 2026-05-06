@@ -61,6 +61,15 @@ All three functions use a two-step authorization check:
 1. **Authentication** — `requireAuth(ctx)` verifies the caller has a valid session. Throws `UNAUTHENTICATED` if not.
 2. **Party membership** — A `partyStates` lookup by `(caseId, userId)` confirms the caller is a party to the case. Throws `FORBIDDEN` if no matching record exists.
 
+## Draft Coach Integration
+
+The joint chat view includes an embedded Draft Coach panel that lets participants privately craft messages with AI assistance before sending them to the joint chat. See [Draft Coach component docs](components/draft-coach.md) for full details.
+
+- The "Draft with Coach" button in the input bar opens the panel.
+- The panel is rendered by `ConnectedDraftCoachPanel` alongside `JointChatView`.
+- "Send this message" is the only path for a draft to reach the joint chat (via `draftCoach/sendFinalDraft`).
+- "Edit before sending" drops the draft text into the joint chat input field for manual editing.
+
 ## Key Files
 
 | File | Purpose |
@@ -69,3 +78,5 @@ All three functions use a two-step authorization check:
 | `convex/lib/auth.ts` | `requireAuth()` authentication helper |
 | `convex/lib/errors.ts` | `throwAppError()` standardised error codes |
 | `convex/lib/stateMachine.ts` | Case status definitions and transitions |
+| `src/components/DraftCoachPanel.tsx` | Draft Coach panel and connected wrapper |
+| `src/components/DraftReadyCard.tsx` | Draft-ready card with send/edit/refine/discard actions |
