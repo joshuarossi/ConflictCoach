@@ -51,7 +51,7 @@ describe("AC2: All tables have correct field types and validators", () => {
 
     test('has role field as v.union(v.literal("USER"), v.literal("ADMIN"))', () => {
       expect(schemaSource).toMatch(
-        /users:\s*defineTable\(\{[^}]*role:\s*v\.union\(v\.literal\("USER"\),\s*v\.literal\("ADMIN"\)\)/s,
+        /users:\s*defineTable\(\{[^}]*role:\s*v\.union\(\s*v\.literal\("USER"\),\s*v\.literal\("ADMIN"\)\)/s,
       );
     });
 
@@ -161,7 +161,7 @@ describe("AC2: All tables have correct field types and validators", () => {
 
     test('has role as v.union(v.literal("INITIATOR"), v.literal("INVITEE"))', () => {
       expect(schemaSource).toMatch(
-        /partyStates:\s*defineTable\(\{[^}]*role:\s*v\.union\(v\.literal\("INITIATOR"\),\s*v\.literal\("INVITEE"\)\)/s,
+        /partyStates:\s*defineTable\(\{[^}]*role:\s*v\.union\(\s*v\.literal\("INITIATOR"\),\s*v\.literal\("INVITEE"\)\)/s,
       );
     });
 
@@ -211,13 +211,13 @@ describe("AC2: All tables have correct field types and validators", () => {
         /privateMessages:\s*defineTable\(\{[^}]*userId:\s*v\.id\("users"\)/s,
       );
       expect(schemaSource).toMatch(
-        /privateMessages:\s*defineTable\(\{[^}]*role:\s*v\.union\(v\.literal\("USER"\),\s*v\.literal\("AI"\)\)/s,
+        /privateMessages:\s*defineTable\(\{[^}]*role:\s*v\.union\(\s*v\.literal\("USER"\),\s*v\.literal\("AI"\)\)/s,
       );
       expect(schemaSource).toMatch(
         /privateMessages:\s*defineTable\(\{[^}]*content:\s*v\.string\(\)/s,
       );
       expect(schemaSource).toMatch(
-        /privateMessages:\s*defineTable\(\{[^}]*status:\s*v\.union\(v\.literal\("STREAMING"\),\s*v\.literal\("COMPLETE"\),\s*v\.literal\("ERROR"\)\)/s,
+        /privateMessages:\s*defineTable\(\{[^}]*status:\s*v\.union\(\s*v\.literal\("STREAMING"\),\s*v\.literal\("COMPLETE"\),\s*v\.literal\("ERROR"\),?\s*\)/s,
       );
       expect(schemaSource).toMatch(
         /privateMessages:\s*defineTable\(\{[^}]*tokens:\s*v\.optional\(v\.number\(\)\)/s,
@@ -235,7 +235,7 @@ describe("AC2: All tables have correct field types and validators", () => {
         /jointMessages:\s*defineTable\(\{[^}]*caseId:\s*v\.id\("cases"\)/s,
       );
       expect(schemaSource).toMatch(
-        /jointMessages:\s*defineTable\(\{[^}]*authorType:\s*v\.union\(v\.literal\("USER"\),\s*v\.literal\("COACH"\)\)/s,
+        /jointMessages:\s*defineTable\(\{[^}]*authorType:\s*v\.union\(\s*v\.literal\("USER"\),\s*v\.literal\("COACH"\)\)/s,
       );
       expect(schemaSource).toMatch(
         /jointMessages:\s*defineTable\(\{[^}]*authorUserId:\s*v\.optional\(v\.id\("users"\)\)/s,
@@ -262,7 +262,7 @@ describe("AC2: All tables have correct field types and validators", () => {
         /draftSessions:\s*defineTable\(\{[^}]*userId:\s*v\.id\("users"\)/s,
       );
       expect(schemaSource).toMatch(
-        /draftSessions:\s*defineTable\(\{[^}]*status:\s*v\.union\(v\.literal\("ACTIVE"\),\s*v\.literal\("SENT"\),\s*v\.literal\("DISCARDED"\)\)/s,
+        /draftSessions:\s*defineTable\(\{[^}]*status:\s*v\.union\(\s*v\.literal\("ACTIVE"\),\s*v\.literal\("SENT"\),\s*v\.literal\("DISCARDED"\),?\s*\)/s,
       );
       expect(schemaSource).toMatch(
         /draftSessions:\s*defineTable\(\{[^}]*finalDraft:\s*v\.optional\(v\.string\(\)\)/s,
@@ -277,7 +277,7 @@ describe("AC2: All tables have correct field types and validators", () => {
         /draftMessages:\s*defineTable\(\{[^}]*draftSessionId:\s*v\.id\("draftSessions"\)/s,
       );
       expect(schemaSource).toMatch(
-        /draftMessages:\s*defineTable\(\{[^}]*role:\s*v\.union\(v\.literal\("USER"\),\s*v\.literal\("AI"\)\)/s,
+        /draftMessages:\s*defineTable\(\{[^}]*role:\s*v\.union\(\s*v\.literal\("USER"\),\s*v\.literal\("AI"\)\)/s,
       );
       expect(schemaSource).toMatch(
         /draftMessages:\s*defineTable\(\{[^}]*content:\s*v\.string\(\)/s,
@@ -295,7 +295,7 @@ describe("AC2: All tables have correct field types and validators", () => {
         /inviteTokens:\s*defineTable\(\{[^}]*token:\s*v\.string\(\)/s,
       );
       expect(schemaSource).toMatch(
-        /inviteTokens:\s*defineTable\(\{[^}]*status:\s*v\.union\(v\.literal\("ACTIVE"\),\s*v\.literal\("CONSUMED"\),\s*v\.literal\("REVOKED"\)\)/s,
+        /inviteTokens:\s*defineTable\(\{[^}]*status:\s*v\.union\(\s*v\.literal\("ACTIVE"\),\s*v\.literal\("CONSUMED"\),\s*v\.literal\("REVOKED"\),?\s*\)/s,
       );
       expect(schemaSource).toMatch(
         /inviteTokens:\s*defineTable\(\{[^}]*consumedAt:\s*v\.optional\(v\.number\(\)\)/s,
