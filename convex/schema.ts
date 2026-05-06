@@ -154,6 +154,7 @@ export default defineSchema({
     draftCoachInstructions: v.optional(v.string()),
     publishedAt: v.number(),
     publishedByUserId: v.id("users"),
+    publishedByName: v.optional(v.string()), // denormalized display name at publish time
     notes: v.optional(v.string()),
   }).index("by_template", ["templateId"]),
 
