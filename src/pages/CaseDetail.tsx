@@ -90,10 +90,10 @@ function ReadyForJointSubView({ caseId }: { caseId: string }) {
         to begin.
       </p>
       <Link
-        to={`/cases/${caseId}/joint`}
+        to={`/cases/${caseId}/ready`}
         className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
       >
-        Start Joint Chat
+        View Synthesis &amp; Enter Joint Session
       </Link>
     </div>
   );
