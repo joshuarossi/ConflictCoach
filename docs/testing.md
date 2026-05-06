@@ -46,6 +46,18 @@ The `e2e/wor-72/solo-full-flow.spec.ts` suite is the highest-value E2E test. It 
 
 All transitions are UI-driven (no `advanceCaseToStatus` shortcuts), making this a true integration test. It runs with `CLAUDE_MOCK=true` for deterministic AI responses.
 
+### Invite Flow — Two-User (E2E)
+
+The `e2e/wor-73/invite-flow.spec.ts` suite validates the full two-party invite lifecycle using two isolated Playwright browser contexts (independent cookies and auth state):
+
+1. **User A creates a case** — fills the creation form and submits, then lands on the post-create sharing screen where the invite URL is displayed.
+2. **User B accepts the invite** — opens the invite link in a separate browser context, logs in, and clicks Accept. The case transitions from `DRAFT_PRIVATE_COACHING` to `BOTH_PRIVATE_COACHING`.
+3. **User B fills the invitee form** — after accepting, User B is routed to the case form and submits their side (main topic, description, desired outcome).
+4. **Both dashboards show the case** — both User A and User B see the shared case listed on their dashboards.
+5. **Consumed link is rejected** — navigating to the same invite URL a second time shows a `TOKEN_INVALID` error with options to log in or go to the dashboard.
+
+Like the solo flow, the invite flow runs with `CLAUDE_MOCK=true` for deterministic AI responses.
+
 ### Privacy Security Suite
 
 The `e2e/wor-75/privacy.spec.ts` suite validates the application's core privacy guarantees at the browser level:
