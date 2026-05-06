@@ -17,9 +17,7 @@ import { render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
-// @ts-expect-error WOR-37 red-state import: implementation is created by task-implement.
 import { InviteSharingView } from "@/pages/InviteSharingPage";
-// @ts-expect-error WOR-37 red-state import: implementation is created by task-implement.
 import type { InviteSharingViewProps } from "@/pages/InviteSharingPage";
 
 // Save original clipboard so we can restore after tests that mock it
