@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -32,21 +32,23 @@ export function CaseClosureModal({
   const [reason, setReason] = useState("");
   const [validationError, setValidationError] = useState<string | null>(null);
   const triggerRef = useRef<Element | null>(null);
+  const prevOpenRef = useRef(open);
 
-  const wrappedOpenChange = (nextOpen: boolean) => {
-    if (!nextOpen && triggerRef.current instanceof HTMLElement) {
-      const trigger = triggerRef.current;
-      setTimeout(() => trigger.focus(), 0);
+  // Focus restore: fires AFTER child effects (FocusScope trap disabled)
+  // in React's bottom-up commit order, so the trap is already removed.
+  useEffect(() => {
+    if (prevOpenRef.current && !open && triggerRef.current instanceof HTMLElement) {
+      triggerRef.current.focus();
     }
-    onOpenChange(nextOpen);
-  };
+    prevOpenRef.current = open;
+  }, [open]);
 
   const handleClose = () => {
     setSelected("resolved");
     setSummary("");
     setReason("");
     setValidationError(null);
-    wrappedOpenChange(false);
+    onOpenChange(false);
   };
 
   const handleProposeResolution = () => {
@@ -71,7 +73,7 @@ export function CaseClosureModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={wrappedOpenChange}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent
         role="dialog"
         aria-modal="true"
