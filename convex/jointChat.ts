@@ -8,6 +8,7 @@ import { assemblePrompt } from "./lib/prompts";
 import { streamAIResponse } from "./lib/streaming";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "./lib/privacyFilter";
 import { CLASSIFICATION_BUDGET, compressContext } from "./lib/compression";
+import { enforceCostBudget, SOFT_CAP_BOILERPLATE, recordUsageFromAction } from "./lib/costBudget";
 import type { Message } from "./lib/prompts";
 
 // ---------------------------------------------------------------------------
@@ -272,15 +273,33 @@ const VALID_CLASSIFICATIONS: Classification[] = [
   "NORMAL_EXCHANGE",
 ];
 
+export interface ClassificationResult {
+  classification: Classification;
+  usage?: { input_tokens: number; output_tokens: number };
+}
+
 export async function classifyMessage(
   anthropicClient: any,
   messageContent: string,
-  contextMessages: Message[] = [],
-): Promise<Classification> {
+  contextMessages?: Message[],
+): Promise<Classification>;
+export async function classifyMessage(
+  anthropicClient: any,
+  messageContent: string,
+  contextMessages: Message[],
+  returnUsage: true,
+): Promise<ClassificationResult>;
+export async function classifyMessage(
+  anthropicClient: any,
+  messageContent: string,
+  contextMessages?: Message[],
+  returnUsage?: boolean,
+): Promise<Classification | ClassificationResult> {
+  const messages = contextMessages ?? [];
   // Compress context if needed to stay within Haiku's 10k classification budget
   const classificationMessages = compressContext(
     [
-      ...contextMessages,
+      ...messages,
       { role: "user" as const, content: `Classify this message: "${messageContent}"` },
     ],
     CLASSIFICATION_SYSTEM_PROMPT,
@@ -299,12 +318,24 @@ export async function classifyMessage(
 
   // Parse classification — match against valid labels
   const upper = text.toUpperCase().replace(/[^A-Z_]/g, "");
+  let classification: Classification = "NORMAL_EXCHANGE";
   if (VALID_CLASSIFICATIONS.includes(upper as Classification)) {
-    return upper as Classification;
+    classification = upper as Classification;
   }
 
-  // Fallback: default to NORMAL_EXCHANGE if Haiku returns unexpected output
-  return "NORMAL_EXCHANGE";
+  if (returnUsage) {
+    return {
+      classification,
+      usage: response.usage
+        ? {
+            input_tokens: response.usage.input_tokens ?? 0,
+            output_tokens: response.usage.output_tokens ?? 0,
+          }
+        : undefined,
+    };
+  }
+
+  return classification;
 }
 
 // ---------------------------------------------------------------------------
@@ -349,6 +380,16 @@ export async function generateCoachResponseHandler(
   ctx: any,
   rawArgs: CoachResponseDIArgs | CoachResponseRuntimeArgs,
 ): Promise<void> {
+    // Cost budget check (runtime path only — DI callers manage their own budget)
+    if (!isDIArgs(rawArgs)) {
+      const budget = await enforceCostBudget(ctx, rawArgs.caseId);
+      if (!budget.allowed && budget.status === "hard_cap") {
+        // Hard cap: no AI at all
+        return;
+      }
+      // Soft cap is handled below after classification (classification still runs)
+    }
+
     let triggeringMessageContent: string;
     let contextHistory: Message[];
     let promptPartyStates: Array<{
@@ -448,15 +489,54 @@ export async function generateCoachResponseHandler(
     }
 
     // Classify via Haiku gate
-    const classification = await classifyMessage(
+    const classificationResult = await classifyMessage(
       anthropicClient,
       triggeringMessageContent,
       contextHistory,
+      true,
     );
+    const classification = classificationResult.classification;
+
+    // Record Haiku classification usage
+    if (!isDIArgs(rawArgs) && classificationResult.usage) {
+      try {
+        await recordUsageFromAction(
+          ctx,
+          rawArgs.caseId,
+          classificationResult.usage.input_tokens,
+          classificationResult.usage.output_tokens,
+          "haiku",
+        );
+      } catch (usageErr) {
+        console.error("Failed to record classification usage:", usageErr);
+      }
+    }
 
     // Exit early for NORMAL_EXCHANGE — no coach response
     if (classification === "NORMAL_EXCHANGE") {
       return;
+    }
+
+    // Soft cap check: classification ran (cheap Haiku), but generation is
+    // replaced with boilerplate at soft cap
+    if (!isDIArgs(rawArgs)) {
+      const budget = await enforceCostBudget(ctx, rawArgs.caseId);
+      if (!budget.allowed && budget.status === "soft_cap") {
+        // Insert boilerplate as a COACH message instead of calling Sonnet
+        await ctx.runMutation(
+          (internal as any).lib.streaming.insertStreamingMessage,
+          {
+            table: "jointMessages",
+            caseId: rawArgs.caseId,
+            authorType: "COACH",
+            isIntervention: false,
+            content: SOFT_CAP_BOILERPLATE,
+            status: "COMPLETE" as const,
+            createdAt: Date.now(),
+          },
+        );
+        return;
+      }
     }
 
     // Assemble coach prompt (includes synthesis texts + joint history,
@@ -489,6 +569,7 @@ export async function generateCoachResponseHandler(
         model: "claude-sonnet-4-5-20250514",
         systemPrompt: prompt.system,
         userMessages: prompt.messages,
+        caseId: rawArgs.caseId,
       });
 
       // Privacy filter (runtime-only — requires runQuery to re-read the
@@ -617,6 +698,26 @@ export const generateOpeningMessage = action({
     caseId: v.id("cases"),
   },
   handler: async (ctx: any, args: { caseId: string }) => {
+    // Cost budget check
+    const budget = await enforceCostBudget(ctx, args.caseId);
+    if (!budget.allowed) {
+      // At either cap, insert a static welcome instead of calling Claude
+      await ctx.runMutation(
+        (internal as any).lib.streaming.insertStreamingMessage,
+        {
+          table: "jointMessages",
+          caseId: args.caseId,
+          authorType: "COACH",
+          isIntervention: false,
+          content: budget.boilerplate ??
+            "Welcome to the joint session. I'm here to help facilitate your conversation.",
+          status: "COMPLETE" as const,
+          createdAt: Date.now(),
+        },
+      );
+      return;
+    }
+
     const caseDoc = await ctx.runQuery(internal.jointChat._getCase, {
       caseId: args.caseId,
     });
@@ -674,6 +775,7 @@ export const generateOpeningMessage = action({
         model: "claude-sonnet-4-5-20250514",
         systemPrompt: prompt.system,
         userMessages: prompt.messages,
+        caseId: args.caseId,
       });
     } catch (err) {
       console.error(

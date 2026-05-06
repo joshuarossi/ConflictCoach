@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { query } from "./_generated/server";
 import { v } from "convex/values";
-import { requireAuth } from "./lib/auth";
+import { requireAuth, getUserByEmail } from "./lib/auth";
 import { throwAppError } from "./lib/errors";
+import { DEFAULT_AI_USAGE } from "./lib/costBudget";
 
 // ---------------------------------------------------------------------------
 // list — return all cases where the authenticated user is a party
@@ -177,4 +178,73 @@ export const partyStates = query({
         : null,
     };
   },
+});
+
+// ---------------------------------------------------------------------------
+// getCaseCost — return AI cost data for a case (party or admin)
+//
+// Exported as a plain async function so it can be called directly, and also
+// registered as a Convex query (getCaseCostQuery) for client use.
+// Uses lightweight identity-based auth (not requireAuth) because Convex Auth
+// identities use subject-based lookup and may lack email.
+// ---------------------------------------------------------------------------
+
+export async function getCaseCost(
+  ctx: any,
+  args: { caseId: string },
+) {
+  const identity = await ctx.auth.getUserIdentity();
+  if (!identity) {
+    throwAppError("UNAUTHENTICATED", "Authentication required");
+  }
+
+  const caseDoc = await ctx.db.get(args.caseId);
+  if (!caseDoc) {
+    throwAppError("NOT_FOUND", "Case not found");
+  }
+
+  // Admin check: look up user record to check role
+  // Convex Auth subject format is "userId|sessionId"
+  const subject = identity.subject ?? "";
+  const userIdFromSubject = subject.split("|")[0] || "";
+
+  let user: any = null;
+  if (userIdFromSubject) {
+    try {
+      user = await ctx.db.get(userIdFromSubject);
+    } catch {
+      user = null;
+    }
+  }
+  if (!user && identity.email) {
+    user = await getUserByEmail(ctx, identity.email);
+  }
+
+  const userIsAdmin = user?.role === "ADMIN";
+
+  // Party check using string comparison of IDs
+  const isParty =
+    (user && (String(caseDoc.initiatorUserId) === String(user._id) ||
+      String(caseDoc.inviteeUserId) === String(user._id))) ||
+    userIdFromSubject === String(caseDoc.initiatorUserId) ||
+    userIdFromSubject === String(caseDoc.inviteeUserId);
+
+  if (!isParty && !userIsAdmin) {
+    throwAppError("FORBIDDEN", "Not authorized to view this case's cost");
+  }
+
+  const usage = caseDoc.aiUsage ?? DEFAULT_AI_USAGE;
+  return {
+    totalInputTokens: usage.totalInputTokens,
+    totalOutputTokens: usage.totalOutputTokens,
+    totalCostUsd: usage.totalCostUsd,
+    totalCost: usage.totalCostUsd,
+    softCapReachedAt: usage.softCapReachedAt ?? null,
+  };
+}
+
+// Convex query registration for client-side use
+export const getCaseCostQuery = query({
+  args: { caseId: v.id("cases") },
+  handler: getCaseCost,
 });
