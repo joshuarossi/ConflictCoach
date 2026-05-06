@@ -164,6 +164,7 @@ export function Dashboard() {
           {[0, 1, 2].map((i) => (
             <div
               key={i}
+              data-testid="skeleton-row"
               className="flex items-center justify-between rounded-md border border-border-default bg-surface px-4 py-3 shadow-1"
             >
               <div className="flex items-center gap-3 flex-1">

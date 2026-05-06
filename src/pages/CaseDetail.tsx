@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 function CaseDetailSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" data-testid="case-detail-skeleton">
       <Skeleton className="h-8 w-48" />
       <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1 space-y-3">
         <Skeleton className="h-4 w-20" />

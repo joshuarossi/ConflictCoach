@@ -75,6 +75,7 @@ export function NewCaseForm({ onSubmit }: NewCaseFormProps) {
           id="category"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
+          aria-describedby={errors.category ? "category-error" : undefined}
           className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         >
           <option value="">Select a category…</option>
@@ -85,7 +86,7 @@ export function NewCaseForm({ onSubmit }: NewCaseFormProps) {
           ))}
         </select>
         {errors.category && (
-          <p className="mt-1 text-meta text-danger" role="alert">
+          <p id="category-error" className="mt-1 text-meta text-danger" role="alert">
             {errors.category}
           </p>
         )}
@@ -105,10 +106,11 @@ export function NewCaseForm({ onSubmit }: NewCaseFormProps) {
           value={mainTopic}
           onChange={(e) => setMainTopic(e.target.value)}
           placeholder="What is this conflict about?"
+          aria-describedby={errors.mainTopic ? "mainTopic-error" : undefined}
           className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
         />
         {errors.mainTopic && (
-          <p className="mt-1 text-meta text-danger" role="alert">
+          <p id="mainTopic-error" className="mt-1 text-meta text-danger" role="alert">
             {errors.mainTopic}
           </p>
         )}
@@ -128,10 +130,11 @@ export function NewCaseForm({ onSubmit }: NewCaseFormProps) {
           onChange={(e) => setDescription(e.target.value)}
           placeholder="Describe the situation in your own words…"
           rows={4}
+          aria-describedby={errors.description ? "description-error" : undefined}
           className="w-full rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent resize-none"
         />
         {errors.description && (
-          <p className="mt-1 text-meta text-danger" role="alert">
+          <p id="description-error" className="mt-1 text-meta text-danger" role="alert">
             {errors.description}
           </p>
         )}

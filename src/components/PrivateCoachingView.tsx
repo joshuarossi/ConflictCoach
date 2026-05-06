@@ -233,6 +233,7 @@ export function ConnectedPrivateCoachingView() {
           {[0, 1, 2, 3].map((i) => (
             <div
               key={i}
+              data-testid="skeleton-message"
               className={`flex ${i % 2 === 0 ? "justify-end" : "justify-start"}`}
             >
               <Skeleton
