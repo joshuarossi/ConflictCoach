@@ -70,6 +70,29 @@ The joint chat view includes an embedded Draft Coach panel that lets participant
 - "Send this message" is the only path for a draft to reach the joint chat (via `draftCoach/sendFinalDraft`).
 - "Edit before sending" drops the draft text into the joint chat input field for manual editing.
 
+## Case Closure
+
+The joint chat header includes a **Close** button that opens a styled modal for ending the case. The modal offers three options:
+
+| Option | Behaviour |
+|---|---|
+| **Resolved** | Requires a summary textarea ("Briefly describe what you agreed to."). Calls `proposeClosure`; the other party must confirm before the case closes. |
+| **Not resolved** | Warning-styled option with an optional note. Calls `unilateralClose`; case transitions to `CLOSED_UNRESOLVED` immediately. |
+| **Take a break** | Closes the modal with no backend call. Case stays `JOINT_ACTIVE`. |
+
+### Confirmation banner
+
+When one party proposes a resolution, the other party sees a `ClosureConfirmationBanner` rendered above the chat input. The banner displays the proposer's summary and two buttons:
+
+- **Confirm** — calls `confirmClosure`, transitions the case to `CLOSED_RESOLVED`, and redirects both parties to the read-only archive view.
+- **Reject and keep talking** — clears the `closureProposed` flag so both parties can continue chatting.
+
+### Design notes
+
+- No celebration animation on closure — the moment is intentionally quiet.
+- The modal traps focus and restores it on close (`role="dialog"`, `aria-modal="true"`).
+- Consequence text is shown for both Resolved and Not resolved options so participants understand the impact.
+
 ## Key Files
 
 | File | Purpose |
@@ -78,5 +101,7 @@ The joint chat view includes an embedded Draft Coach panel that lets participant
 | `convex/lib/auth.ts` | `requireAuth()` authentication helper |
 | `convex/lib/errors.ts` | `throwAppError()` standardised error codes |
 | `convex/lib/stateMachine.ts` | Case status definitions and transitions |
+| `src/components/CaseClosureModal.tsx` | Closure modal with Resolved / Not resolved / Take a break options |
+| `src/components/ClosureConfirmationBanner.tsx` | Banner shown to the other party when closure is proposed |
 | `src/components/DraftCoachPanel.tsx` | Draft Coach panel and connected wrapper |
 | `src/components/DraftReadyCard.tsx` | Draft-ready card with send/edit/refine/discard actions |

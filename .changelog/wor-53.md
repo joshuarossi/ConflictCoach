@@ -1,0 +1,3 @@
+### WOR-53: Case closure modal and confirmation banner
+
+Added the case closure UI to the joint chat view. A "Close" button in the chat header opens a modal with three options: **Resolved** (requires a summary of what was agreed), **Not resolved** (closes the case immediately with a warning), and **Take a break** (dismisses the modal, case stays active). When one party proposes a resolution, the other party sees a confirmation banner above the chat input showing the summary and offering **Confirm** or **Reject and keep talking** buttons. Confirming transitions the case to CLOSED_RESOLVED; rejecting clears the proposal and lets both parties continue chatting.
