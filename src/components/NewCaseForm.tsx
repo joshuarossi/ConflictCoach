@@ -115,7 +115,8 @@ export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormPro
   const mainTopicOverLimit = mainTopic.length > MAIN_TOPIC_SOFT_LIMIT;
 
   // Progressive disclosure: reveal steps sequentially
-  const showMainTopic = !!category;
+  // If there are validation errors, show the fields that have errors
+  const showMainTopic = !!category || !!errors.mainTopic;
   const showDescription = showMainTopic && !!mainTopic.trim();
   const showOutcome = showDescription;
   const showAdvancedAndSubmit = showMainTopic;
