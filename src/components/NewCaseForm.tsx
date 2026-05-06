@@ -292,11 +292,9 @@ export function NewCaseForm({ onSubmit, onSubmitSolo, disabled }: NewCaseFormPro
         </div>
       )}
 
-      {showAdvancedAndSubmit && (
-        <Button type="submit" className="w-full" disabled={disabled}>
-          Start Case
-        </Button>
-      )}
+      <Button type="submit" className="w-full" disabled={disabled}>
+        Start Case
+      </Button>
     </form>
   );
 }
