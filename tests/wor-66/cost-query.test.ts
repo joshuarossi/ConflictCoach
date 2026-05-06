@@ -53,11 +53,26 @@ describe("WOR-66: Per-case cost queryable", () => {
     test("getCaseCost returns totalCost, totalInputTokens, totalOutputTokens", async () => {
       const mockCase = {
         _id: "case-123" as any,
-        aiUsage: { totalInputTokens: 5000, totalOutputTokens: 2000, totalCost: 0.05 },
+        aiUsage: { totalInputTokens: 5000, totalOutputTokens: 2000, totalCostUsd: 0.05 },
       };
+      const mockAdminUser = { _id: "admin-user", role: "ADMIN", email: "admin@test" };
+      // db.get is called twice: once with caseId (return case doc), once with
+      // userId from `subject` (return admin user record). Convex Auth's
+      // identity.subject is "<userId>|<sessionId>", so requireAuth/getCaseCost
+      // splits and looks up the row by userId.
       const mockCtx = {
-        auth: { getUserIdentity: vi.fn().mockResolvedValue({ subject: "admin-user", role: "admin" }) },
-        db: { get: vi.fn().mockResolvedValue(mockCase) },
+        auth: {
+          getUserIdentity: vi.fn().mockResolvedValue({
+            subject: "admin-user|session-1",
+          }),
+        },
+        db: {
+          get: vi.fn().mockImplementation(async (id: string) => {
+            if (id === "case-123") return mockCase;
+            if (id === "admin-user") return mockAdminUser;
+            return null;
+          }),
+        },
       };
 
       const result = await getCaseCost(mockCtx as any, { caseId: mockCase._id });
