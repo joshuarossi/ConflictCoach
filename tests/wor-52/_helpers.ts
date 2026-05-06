@@ -123,9 +123,9 @@ export function createMockCtx(options: CreateMockCtxOptions = {}) {
  * Extract the handler function from a Convex function definition.
  * Convex wraps handlers in an object; this unwraps it.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function getHandler(
   fn: Record<string, unknown> | ((...args: unknown[]) => unknown),
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): (...args: any[]) => any {
   return typeof fn === "function"
     ? fn
