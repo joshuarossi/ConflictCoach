@@ -31,7 +31,10 @@ export function DraftReadyCard({
       </div>
 
       {/* Draft text */}
-      <div className="mb-4 whitespace-pre-wrap rounded-sm bg-surface p-3 text-label text-text-primary">
+      <div
+        data-testid="draft-text-content"
+        className="mb-4 whitespace-pre-wrap rounded-sm bg-surface p-3 text-label text-text-primary"
+      >
         {draftText}
       </div>
 
