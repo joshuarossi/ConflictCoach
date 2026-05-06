@@ -222,6 +222,52 @@ export async function callMutation(
 }
 
 /**
+ * Calls a Convex query via the test window hook and returns the result or
+ * a structured error. Unlike callMutation, this uses __TEST_CALL_QUERY__
+ * which dispatches through client.query() and can invoke Convex query
+ * functions.
+ *
+ * The app's test shim (src/testHooks.ts) must wire
+ * window.__TEST_CALL_QUERY__ alongside the existing mutation hook.
+ */
+export async function callQuery(
+  page: Page,
+  query: string,
+  args: Record<string, unknown>,
+): Promise<{ ok: true; value: unknown } | { ok: false; code: string; message: string }> {
+  return page.evaluate(
+    async ({ query, args }) => {
+      const w = window as unknown as {
+        __TEST_CALL_QUERY__?: (
+          query: string,
+          args: Record<string, unknown>,
+        ) => Promise<unknown>;
+      };
+      if (!w.__TEST_CALL_QUERY__) {
+        throw new Error(
+          "Test query hook __TEST_CALL_QUERY__ not found on window. " +
+            "Ensure CLAUDE_MOCK=true and the test shim is mounted. " +
+            "See WOR-76: src/testHooks.ts needs a __TEST_CALL_QUERY__ hook " +
+            "that dispatches via convex.query().",
+        );
+      }
+      try {
+        const value = await w.__TEST_CALL_QUERY__(query, args);
+        return { ok: true as const, value };
+      } catch (e: unknown) {
+        const err = e as { data?: { code?: string }; message?: string };
+        return {
+          ok: false as const,
+          code: err.data?.code ?? "UNKNOWN",
+          message: err.message ?? String(e),
+        };
+      }
+    },
+    { query, args },
+  );
+}
+
+/**
  * Advances a case to the given status via the __TEST_ADVANCE_CASE__ window
  * hook exposed in test mode (CLAUDE_MOCK=true). The hook drives the backend
  * test-support mutation that force-transitions case status for E2E scenarios.
