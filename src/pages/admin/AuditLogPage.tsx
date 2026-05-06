@@ -104,9 +104,9 @@ function AuditLogPageContent() {
   }, [allEntries]);
 
   return (
-    <div style={{ background: "var(--bg-canvas, #f9fafb)" }} className="min-h-screen">
+    <div className="min-h-screen bg-canvas">
       <div className="px-4 py-6">
-        <h1 className="text-h1 font-bold text-text-primary mb-6">Audit Log</h1>
+        <h1 className="text-h1 font-medium text-text-primary mb-6">Audit Log</h1>
 
         {/* Filters */}
         <div className="flex gap-4 mb-6">
@@ -158,10 +158,10 @@ function AuditLogPageContent() {
           <table aria-label="Audit log" className="w-full border-collapse">
             <thead>
               <tr className="border-b border-border-default">
-                <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Actor</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Action</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Target</th>
-                <th className="text-left py-3 px-4 text-sm font-semibold" style={{ color: "var(--text-primary, #111827)" }}>Timestamp</th>
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">Actor</th>
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">Action</th>
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">Target</th>
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">Timestamp</th>
               </tr>
             </thead>
             <tbody>
@@ -170,19 +170,18 @@ function AuditLogPageContent() {
                   key={entry._id}
                   data-testid={`audit-row-${entry._id}`}
                   onClick={() => setSelectedEntry(entry)}
-                  className="border-b border-border-default hover:bg-surface-subtle cursor-pointer"
-                  style={{ background: "var(--bg-surface, #ffffff)" }}
+                  className="border-b border-border-default hover:bg-surface-subtle cursor-pointer bg-surface"
                 >
-                  <td className="py-3 px-4 text-sm" style={{ color: "var(--text-primary, #111827)" }}>
+                  <td className="py-3 px-4 text-label text-text-primary">
                     {entry.actorDisplayName}
                   </td>
-                  <td className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
+                  <td className="py-3 px-4 text-label text-text-secondary">
                     {entry.action}
                   </td>
-                  <td className="py-3 px-4 text-sm" style={{ fontFamily: "'JetBrains Mono', monospace", color: "var(--text-secondary, #6b7280)" }}>
+                  <td className="py-3 px-4 text-label font-mono text-text-secondary">
                     {entry.targetType}:{entry.targetId}
                   </td>
-                  <td className="py-3 px-4 text-sm" style={{ color: "var(--text-secondary, #6b7280)" }}>
+                  <td className="py-3 px-4 text-label text-text-secondary">
                     {formatAuditTimestamp(entry.createdAt)}
                   </td>
                 </tr>
@@ -198,7 +197,7 @@ function AuditLogPageContent() {
           className="fixed inset-0 z-50 flex justify-end"
           onClick={() => setSelectedEntry(null)}
         >
-          <div className="fixed inset-0 bg-black/30" />
+          <div className="fixed inset-0 bg-black/30 backdrop-blur-sm" />
           <div
             role="dialog"
             aria-label="Audit entry details"
@@ -208,10 +207,10 @@ function AuditLogPageContent() {
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-h2 font-semibold text-text-primary">Entry Details</h2>
+              <h2 className="text-h2 font-medium text-text-primary">Entry Details</h2>
               <button
                 onClick={() => setSelectedEntry(null)}
-                className="text-text-tertiary hover:text-text-secondary text-xl leading-none"
+                className="text-text-tertiary hover:text-text-secondary text-h2 leading-none"
                 aria-label="Close drawer"
               >
                 &times;

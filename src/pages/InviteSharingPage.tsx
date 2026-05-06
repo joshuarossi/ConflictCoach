@@ -58,18 +58,18 @@ export function InviteSharingView({
   return (
     <div className="mx-auto w-full max-w-[720px] px-4 py-6">
       {/* AC1: Heading with name */}
-      <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-6">
+      <h1 className="text-h1 font-medium text-text-primary mb-6">
         Your case is ready. Send this link to {displayName}.
       </h1>
 
       {/* AC2: Copyable link field */}
-      <div className="rounded-[var(--radius-lg)] border border-[var(--border-default)] bg-[var(--bg-surface)] p-4 mb-6">
+      <div className="rounded-lg border border-border-default bg-surface p-4 mb-6">
         <div className="flex items-center gap-3">
           <input
             type="text"
             readOnly
             value={inviteUrl}
-            className="flex-1 rounded-md border border-[var(--border-default)] bg-[var(--bg-canvas)] px-3 py-2 font-mono text-sm text-[var(--text-primary)] select-all focus:outline-none focus:ring-1 focus:ring-[var(--accent)]"
+            className="flex-1 rounded-md border border-border-default bg-canvas px-3 py-2 font-mono text-label text-text-primary select-all focus:outline-none focus:ring-1 focus:ring-accent"
             onFocus={(e) => e.target.select()}
           />
           <Button
@@ -97,7 +97,7 @@ export function InviteSharingView({
       <div className="flex flex-col gap-3 mb-6">
         <a
           href={mailtoHref}
-          className="inline-flex items-center justify-center gap-2 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] px-4 py-2.5 text-sm font-medium text-[var(--text-primary)] hover:bg-[var(--bg-surface-subtle)] transition-colors"
+          className="inline-flex items-center justify-center gap-2 rounded-md border border-border-default bg-surface px-4 py-2.5 text-label font-medium text-text-primary hover:bg-surface-subtle transition-colors"
         >
           <Mail className="h-4 w-4" />
           Copy for email
@@ -137,7 +137,7 @@ export function InviteSharingView({
         <CollapsibleTrigger asChild>
           <button
             type="button"
-            className="flex items-center gap-2 w-full rounded-md border border-[var(--border-default)] bg-[var(--bg-surface)] px-4 py-3 text-sm font-medium text-[var(--text-secondary)] hover:text-[var(--text-primary)] transition-colors mb-6"
+            className="flex items-center gap-2 w-full rounded-md border border-border-default bg-surface px-4 py-3 text-label font-medium text-text-secondary hover:text-text-primary transition-colors mb-6"
           >
             {suggestionsOpen ? (
               <ChevronDown className="h-4 w-4" />
@@ -148,7 +148,7 @@ export function InviteSharingView({
           </button>
         </CollapsibleTrigger>
         <CollapsibleContent className="mb-6">
-          <div className="rounded-md border border-[var(--border-default)] bg-[var(--bg-surface-subtle)] px-4 py-3 text-sm text-[var(--text-secondary)] whitespace-pre-wrap">
+          <div className="rounded-md border border-border-default bg-surface-subtle px-4 py-3 text-label text-text-secondary whitespace-pre-wrap">
             {suggestedLanguage}
           </div>
         </CollapsibleContent>
@@ -158,7 +158,7 @@ export function InviteSharingView({
       <div className="text-center">
         <Link
           to={`/cases/${caseId}/private`}
-          className="text-sm text-[var(--accent)] hover:underline"
+          className="text-label text-accent hover:underline"
         >
           Or, start your private coaching now &rarr;
         </Link>
@@ -193,15 +193,15 @@ export function InviteSharingPage() {
   if (!inviteUrl) {
     return (
       <div className="mx-auto w-full max-w-[720px] px-4 py-6 text-center">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)] mb-4">
+        <h1 className="text-h1 font-medium text-text-primary mb-4">
           This link is no longer available.
         </h1>
-        <p className="text-sm text-[var(--text-secondary)] mb-6">
+        <p className="text-label text-text-secondary mb-6">
           Check your case dashboard.
         </p>
         <Link
           to="/dashboard"
-          className="text-sm text-[var(--accent)] hover:underline"
+          className="text-label text-accent hover:underline"
         >
           Go to Dashboard
         </Link>
@@ -226,7 +226,7 @@ export function InviteSharingPage() {
   if (caseData === null) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-[var(--text-secondary)]">Case not found.</p>
+        <p className="text-text-secondary">Case not found.</p>
       </div>
     );
   }

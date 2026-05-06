@@ -20,25 +20,25 @@ export function ClosureConfirmationBanner({
         {proposerName} has proposed resolving this case.
       </p>
       {summaryText && (
-        <p className="mt-1 text-sm text-text-secondary">
+        <p className="mt-1 text-label text-text-secondary">
           Their summary: <q>{summaryText}</q>
         </p>
       )}
-      <p className="mt-1 text-sm text-text-secondary">
+      <p className="mt-1 text-label text-text-secondary">
         This closes the case for both of you.
       </p>
       <div className="mt-3 flex gap-2">
         <button
           type="button"
           onClick={onConfirm}
-          className="inline-flex h-9 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-on hover:bg-accent-hover"
+          className="inline-flex h-10 items-center rounded-md bg-accent px-4 text-label font-medium text-accent-on hover:bg-accent-hover"
         >
           Confirm
         </button>
         <button
           type="button"
           onClick={onReject}
-          className="inline-flex h-9 items-center rounded-md border border-border-default bg-surface px-4 text-sm font-medium text-text-primary hover:bg-surface-subtle"
+          className="inline-flex h-10 items-center rounded-md border border-border-default bg-surface px-4 text-label font-medium text-text-primary hover:bg-surface-subtle"
         >
           Reject and keep talking
         </button>

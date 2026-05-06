@@ -45,7 +45,7 @@ export function NewCasePage() {
 
   return (
     <div>
-      <h1 className="text-h1 font-bold text-text-primary mb-6">New Case</h1>
+      <h1 className="text-h1 font-medium text-text-primary mb-6">New Case</h1>
       <NewCaseForm onSubmit={handleSubmit} disabled={isSubmitting} />
       {submitError && (
         <p className="mt-4 text-meta text-danger" role="alert">

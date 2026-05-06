@@ -123,7 +123,7 @@ export function TemplateEditPage() {
   if (template === undefined || versions === undefined) {
     return (
       <div className="px-4 py-6">
-        <p className="text-gray-500">Loading…</p>
+        <p className="text-text-tertiary">Loading…</p>
       </div>
     );
   }
@@ -131,7 +131,7 @@ export function TemplateEditPage() {
   if (template === null) {
     return (
       <div className="px-4 py-6">
-        <p className="text-red-600">Template not found.</p>
+        <p className="text-danger">Template not found.</p>
       </div>
     );
   }
@@ -176,15 +176,12 @@ export function TemplateEditPage() {
   }
 
   return (
-    <div
-      style={{ background: "var(--bg-canvas, #f9fafb)" }}
-      className="min-h-screen"
-    >
+    <div className="min-h-screen bg-canvas">
       <div className="px-4 py-6">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Edit Template</h1>
-            <p className="text-gray-600 mt-1">{template.name}</p>
+            <h1 className="text-h1 font-medium text-text-primary">Edit Template</h1>
+            <p className="text-text-secondary mt-1">{template.name}</p>
           </div>
           <Button
             variant="outline"
@@ -198,15 +195,12 @@ export function TemplateEditPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Left pane: Edit form */}
           <div className="lg:col-span-2">
-            <div
-              className="rounded-lg border border-gray-200 p-6"
-              style={{ background: "var(--bg-surface, #ffffff)" }}
-            >
+            <div className="rounded-lg border border-border-default bg-surface p-6">
               <form onSubmit={handlePublish} className="space-y-4">
                 <div>
                   <label
                     htmlFor="edit-category"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-label font-medium text-text-secondary mb-1"
                   >
                     Category
                   </label>
@@ -214,7 +208,7 @@ export function TemplateEditPage() {
                     id="edit-category"
                     value={formCategory}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white"
+                    className="w-full rounded-md border border-border-strong px-3 py-2 text-label bg-surface focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                     disabled={isArchived}
                   >
                     {CATEGORIES.map((c) => (
@@ -228,7 +222,7 @@ export function TemplateEditPage() {
                 <div>
                   <label
                     htmlFor="edit-name"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-label font-medium text-text-secondary mb-1"
                   >
                     Name
                   </label>
@@ -237,7 +231,7 @@ export function TemplateEditPage() {
                     type="text"
                     value={formName}
                     onChange={(e) => setName(e.target.value)}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    className="w-full rounded-md border border-border-strong px-3 py-2 text-label focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                     disabled={isArchived}
                   />
                 </div>
@@ -245,7 +239,7 @@ export function TemplateEditPage() {
                 <div>
                   <label
                     htmlFor="edit-globalGuidance"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-label font-medium text-text-secondary mb-1"
                   >
                     Global Guidance
                   </label>
@@ -254,7 +248,7 @@ export function TemplateEditPage() {
                     value={formGlobalGuidance}
                     onChange={(e) => setGlobalGuidance(e.target.value)}
                     rows={6}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono"
+                    className="w-full rounded-md border border-border-strong px-3 py-2 text-label font-mono focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                     disabled={isArchived}
                   />
                 </div>
@@ -262,7 +256,7 @@ export function TemplateEditPage() {
                 <div>
                   <label
                     htmlFor="edit-coachInstructions"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-label font-medium text-text-secondary mb-1"
                   >
                     Coach Instructions
                   </label>
@@ -271,7 +265,7 @@ export function TemplateEditPage() {
                     value={formCoachInstructions}
                     onChange={(e) => setCoachInstructions(e.target.value)}
                     rows={4}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono"
+                    className="w-full rounded-md border border-border-strong px-3 py-2 text-label font-mono focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                     disabled={isArchived}
                   />
                 </div>
@@ -279,7 +273,7 @@ export function TemplateEditPage() {
                 <div>
                   <label
                     htmlFor="edit-draftCoachInstructions"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-label font-medium text-text-secondary mb-1"
                   >
                     Draft Coach Instructions
                   </label>
@@ -288,7 +282,7 @@ export function TemplateEditPage() {
                     value={formDraftCoachInstructions}
                     onChange={(e) => setDraftCoachInstructions(e.target.value)}
                     rows={4}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono"
+                    className="w-full rounded-md border border-border-strong px-3 py-2 text-label font-mono focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                     disabled={isArchived}
                   />
                 </div>
@@ -296,7 +290,7 @@ export function TemplateEditPage() {
                 <div>
                   <label
                     htmlFor="edit-notes"
-                    className="block text-sm font-medium text-gray-700 mb-1"
+                    className="block text-label font-medium text-text-secondary mb-1"
                   >
                     Notes
                   </label>
@@ -305,7 +299,7 @@ export function TemplateEditPage() {
                     value={notes}
                     onChange={(e) => setNotes(e.target.value)}
                     rows={2}
-                    className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                    className="w-full rounded-md border border-border-strong px-3 py-2 text-label focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                     placeholder="Describe what changed in this version…"
                     disabled={isArchived}
                   />
@@ -322,7 +316,7 @@ export function TemplateEditPage() {
                     </Button>
                   )}
                   {isArchived && (
-                    <span className="text-sm text-red-600 font-medium">
+                    <span className="text-label text-danger font-medium">
                       This template is archived.
                     </span>
                   )}
@@ -338,25 +332,22 @@ export function TemplateEditPage() {
 
           {/* Right pane: Version history timeline */}
           <div className="lg:col-span-1">
-            <div
-              className="rounded-lg border border-gray-200 p-6"
-              style={{ background: "var(--bg-surface, #ffffff)" }}
-            >
-              <h2 className="text-lg font-semibold text-gray-900 mb-4">
+            <div className="rounded-lg border border-border-default bg-surface p-6">
+              <h2 className="text-h3 font-medium text-text-primary mb-4">
                 Version History
               </h2>
               {versions.length === 0 ? (
-                <p className="text-gray-500 text-sm">No versions yet.</p>
+                <p className="text-text-tertiary text-label">No versions yet.</p>
               ) : (
                 <div className="space-y-4">
                   {versions.map((ver) => (
                     <div
                       key={ver._id}
                       data-testid="version-entry"
-                      className="border-l-2 border-gray-200 pl-4 pb-2"
+                      className="border-l-2 border-border-default pl-4 pb-2"
                     >
                       <div className="flex items-center justify-between">
-                        <h3 className="text-sm font-semibold text-gray-900">
+                        <h3 className="text-label font-medium text-text-primary">
                           Version {ver.version}
                         </h3>
                         <Button
@@ -367,14 +358,14 @@ export function TemplateEditPage() {
                           View
                         </Button>
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">
+                      <p className="text-timestamp text-text-tertiary mt-1">
                         {formatAuditTimestamp(ver.publishedAt)}
                       </p>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-timestamp text-text-tertiary">
                         {ver.publishedByName || "Unknown"}
                       </p>
                       {ver.notes && (
-                        <p className="text-sm text-gray-700 mt-1">
+                        <p className="text-label text-text-secondary mt-1">
                           {ver.notes}
                         </p>
                       )}
@@ -395,7 +386,7 @@ export function TemplateEditPage() {
             <DialogDescription>
               Are you sure you want to archive &ldquo;{template.name}&rdquo;?
               {template.pinnedCasesCount > 0 && (
-                <span className="block mt-2 text-red-600 font-medium">
+                <span className="block mt-2 text-danger font-medium">
                   Warning: {template.pinnedCasesCount} case
                   {template.pinnedCasesCount === 1 ? " is" : "s are"} currently
                   pinned to this template.
@@ -441,39 +432,39 @@ export function TemplateEditPage() {
             </DialogHeader>
             <div className="space-y-4 pt-2">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-1">
+                <label className="block text-label font-medium text-text-secondary mb-1">
                   Global Guidance
                 </label>
-                <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
+                <div className="rounded-md border border-border-default bg-surface-subtle px-3 py-2 text-label font-mono whitespace-pre-wrap">
                   {viewingVersion.globalGuidance}
                 </div>
               </div>
               {viewingVersion.coachInstructions && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-label font-medium text-text-secondary mb-1">
                     Coach Instructions
                   </label>
-                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
+                  <div className="rounded-md border border-border-default bg-surface-subtle px-3 py-2 text-label font-mono whitespace-pre-wrap">
                     {viewingVersion.coachInstructions}
                   </div>
                 </div>
               )}
               {viewingVersion.draftCoachInstructions && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-label font-medium text-text-secondary mb-1">
                     Draft Coach Instructions
                   </label>
-                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm font-mono whitespace-pre-wrap">
+                  <div className="rounded-md border border-border-default bg-surface-subtle px-3 py-2 text-label font-mono whitespace-pre-wrap">
                     {viewingVersion.draftCoachInstructions}
                   </div>
                 </div>
               )}
               {viewingVersion.notes && (
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
+                  <label className="block text-label font-medium text-text-secondary mb-1">
                     Notes
                   </label>
-                  <div className="rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm whitespace-pre-wrap">
+                  <div className="rounded-md border border-border-default bg-surface-subtle px-3 py-2 text-label whitespace-pre-wrap">
                     {viewingVersion.notes}
                   </div>
                 </div>

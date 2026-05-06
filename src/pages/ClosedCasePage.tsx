@@ -26,11 +26,11 @@ function outcomeLabel(status: string): string {
 function outcomeBadgeClasses(status: string): string {
   switch (status) {
     case "CLOSED_RESOLVED":
-      return "bg-[var(--success)]/15 text-[var(--success)]";
+      return "bg-success/15 text-success";
     case "CLOSED_UNRESOLVED":
-      return "bg-[var(--warning)]/15 text-[var(--warning)]";
+      return "bg-warning/15 text-warning";
     case "CLOSED_ABANDONED":
-      return "bg-[var(--bg-surface-subtle)] text-[var(--text-tertiary)]";
+      return "bg-surface-subtle text-text-tertiary";
     default:
       return "";
   }
@@ -127,7 +127,7 @@ function ClosedCaseViewInner({
     <div className="mx-auto w-full max-w-[720px] px-4 py-6">
       {/* AC7: Closed banner */}
       <div
-        className="mb-6 rounded-md border border-[var(--border-default)] bg-[var(--bg-surface-subtle)] px-4 py-3 text-center text-sm text-[var(--text-secondary)]"
+        className="mb-6 rounded-md border border-border-default bg-surface-subtle px-4 py-3 text-center text-label text-text-secondary"
         role="status"
       >
         This case is closed. No new messages can be added.
@@ -135,15 +135,15 @@ function ClosedCaseViewInner({
 
       {/* AC1: Header with case name, category, closure date, outcome */}
       <header className="mb-6" data-testid="closed-case-header">
-        <h1 className="text-2xl font-bold text-[var(--text-primary)]">
+        <h1 className="text-h1 font-medium text-text-primary">
           {caseName}
         </h1>
-        <div className="mt-2 flex flex-wrap items-center gap-3 text-sm text-[var(--text-secondary)]">
+        <div className="mt-2 flex flex-wrap items-center gap-3 text-label text-text-secondary">
           <span>{category}</span>
           <span aria-hidden="true">&middot;</span>
           <span>Closed {formatDate(closedAt)}</span>
           <span
-            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium ${outcomeBadgeClasses(status)}`}
+            className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-timestamp font-medium ${outcomeBadgeClasses(status)}`}
             data-testid="outcome-badge"
           >
             {outcomeLabel(status)}
@@ -154,13 +154,13 @@ function ClosedCaseViewInner({
       {/* AC2: Closure summary for resolved cases */}
       {status === "CLOSED_RESOLVED" && closureSummary && (
         <div
-          className="mb-6 rounded-lg border border-[var(--success)]/30 bg-[var(--success)]/5 p-4"
+          className="mb-6 rounded-lg border border-success/30 bg-success/5 p-4"
           data-testid="closure-summary-card"
         >
-          <h2 className="mb-2 text-sm font-semibold text-[var(--success)]">
+          <h2 className="mb-2 text-label font-medium text-success">
             Resolution Summary
           </h2>
-          <p className="text-sm text-[var(--text-primary)] whitespace-pre-wrap">
+          <p className="text-label text-text-primary whitespace-pre-wrap">
             {closureSummary}
           </p>
         </div>
@@ -185,7 +185,7 @@ function ClosedCaseViewInner({
 
         {/* AC3: Read-only joint chat transcript */}
         <TabsContent value="joint">
-          <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)]">
+          <div className="rounded-lg border border-border-default bg-surface">
             <div className="max-h-[60vh] overflow-y-auto">
               <ChatWindow messages={jointChatMessages} />
             </div>
@@ -195,8 +195,7 @@ function ClosedCaseViewInner({
         {/* AC5: My Private Coaching tab */}
         <TabsContent value="private">
           <div
-            className="rounded-lg border border-[var(--border-default)]"
-            style={{ backgroundColor: "var(--private-tint)" }}
+            className="rounded-lg border border-border-default bg-private-tint"
           >
             <div className="max-h-[60vh] overflow-y-auto">
               <ChatWindow messages={privateChatMessages} />
@@ -206,13 +205,13 @@ function ClosedCaseViewInner({
 
         {/* AC6: My Guidance (synthesis) tab */}
         <TabsContent value="guidance">
-          <div className="rounded-lg border border-[var(--border-default)] bg-[var(--bg-surface)] p-6">
+          <div className="rounded-lg border border-border-default bg-surface p-6">
             {synthesisText ? (
-              <div className="whitespace-pre-wrap text-sm text-[var(--text-primary)]">
+              <div className="whitespace-pre-wrap text-label text-text-primary">
                 {synthesisText}
               </div>
             ) : (
-              <p className="text-sm text-[var(--text-tertiary)]">
+              <p className="text-label text-text-tertiary">
                 No guidance available.
               </p>
             )}
@@ -266,7 +265,7 @@ export function ClosedCaseView() {
   if (caseData === null) {
     return (
       <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-[var(--text-secondary)]">Case not found.</p>
+        <p className="text-text-secondary">Case not found.</p>
       </div>
     );
   }

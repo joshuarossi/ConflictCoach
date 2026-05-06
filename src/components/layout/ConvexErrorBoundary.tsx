@@ -39,8 +39,8 @@ export class ConvexErrorBoundary extends Component<Props, State> {
         }
         return (
           <div className="flex flex-col items-center justify-center py-24 px-4">
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">Error</h1>
-            <p className="text-lg text-gray-600">
+            <h1 className="text-h1 font-medium text-text-primary mb-2">Error</h1>
+            <p className="text-h3 text-text-secondary">
               {typeof data.message === "string"
                 ? data.message
                 : "An unexpected error occurred."}

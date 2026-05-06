@@ -56,8 +56,8 @@ export function SignIn() {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-500">Loading…</p>
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
+        <p className="text-text-tertiary">Loading…</p>
       </div>
     );
   }
@@ -86,20 +86,20 @@ export function SignIn() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gray-50">
-      <div className="w-full max-w-[400px] space-y-6 rounded-lg border bg-white p-8 shadow-sm">
-        <h1 className="text-center text-2xl font-bold text-gray-900">
+    <div className="flex min-h-screen items-center justify-center bg-canvas">
+      <div className="w-full max-w-[400px] space-y-6 rounded-lg border bg-surface p-8 shadow-1">
+        <h1 className="text-center text-h1 font-medium text-text-primary">
           Sign in to Conflict Coach
         </h1>
 
         {submitted ? (
-          <p className="text-center text-gray-600">
+          <p className="text-center text-text-secondary">
             Check your email for a magic link to sign in.
           </p>
         ) : (
           <>
             <form onSubmit={handleMagicLink} className="space-y-4">
-              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="email" className="block text-label font-medium text-text-secondary">
                 Email
               </label>
               <input
@@ -108,18 +108,18 @@ export function SignIn() {
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-md border px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border-strong px-3 py-2 text-label focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 required
               />
               {error && (
-                <p role="alert" className="text-sm text-red-600">
+                <p role="alert" className="text-label text-danger">
                   {error}
                 </p>
               )}
               <button
                 type="submit"
                 disabled={pending}
-                className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+                className="w-full rounded-md bg-accent px-4 py-2 text-label font-medium text-accent-on hover:bg-accent-hover disabled:opacity-50"
               >
                 Send magic link
               </button>
@@ -129,8 +129,8 @@ export function SignIn() {
               <div className="absolute inset-0 flex items-center">
                 <span className="w-full border-t" />
               </div>
-              <div className="relative flex justify-center text-xs uppercase">
-                <span className="bg-white px-2 text-gray-500">or</span>
+              <div className="relative flex justify-center text-timestamp uppercase">
+                <span className="bg-surface px-2 text-text-tertiary">or</span>
               </div>
             </div>
 
@@ -138,20 +138,20 @@ export function SignIn() {
               type="button"
               onClick={handleGoogle}
               disabled={pending}
-              className="w-full rounded-md border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+              className="w-full rounded-md border border-border-default px-4 py-2 text-label font-medium text-text-secondary hover:bg-surface-subtle disabled:opacity-50"
             >
               Continue with Google
             </button>
           </>
         )}
 
-        <p className="text-center text-xs text-gray-500">
+        <p className="text-center text-timestamp text-text-tertiary">
           By signing in, you agree to our{" "}
-          <a href="/terms" className="underline hover:text-gray-700">
+          <a href="/terms" className="underline hover:text-text-secondary">
             Terms
           </a>{" "}
           and{" "}
-          <a href="/privacy" className="underline hover:text-gray-700">
+          <a href="/privacy" className="underline hover:text-text-secondary">
             Privacy Policy
           </a>
           .
