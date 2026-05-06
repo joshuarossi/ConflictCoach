@@ -45,7 +45,7 @@ export interface StreamAIResponseOptions {
    * (those are set automatically).
    */
   messageFields: Record<string, unknown>;
-  /** Claude model id, e.g. "claude-sonnet-4-5-20250514" */
+  /** Claude model id (alias preferred — see convex/lib/models.ts), e.g. "claude-sonnet-4-6". */
   model: string;
   /** System prompt sent to Claude. */
   systemPrompt: string;

@@ -7,6 +7,7 @@ import { requireAuth } from "./lib/auth";
 import { assemblePrompt } from "./lib/prompts";
 import { streamAIResponse } from "./lib/streaming";
 import { enforceCostBudget } from "./lib/costBudget";
+import { SONNET_MODEL } from "./lib/models";
 import type { Message } from "./lib/prompts";
 
 // ---------------------------------------------------------------------------
@@ -242,7 +243,7 @@ export const generateAIResponse = action({
           aiRole: "PRIVATE_COACH",
           ...(args.partyRole ? { partyRole: args.partyRole } : {}),
         },
-        model: "claude-sonnet-4-5-20250514",
+        model: SONNET_MODEL,
         systemPrompt: prompt.system,
         userMessages: prompt.messages,
         caseId: args.caseId,

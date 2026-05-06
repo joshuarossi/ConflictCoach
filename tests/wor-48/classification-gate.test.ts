@@ -71,14 +71,16 @@ describe("AC 1: Haiku classification gate", () => {
     expect(result).toBe("NORMAL_EXCHANGE");
   });
 
-  test("uses Haiku model (claude-haiku-4-5-20251001) for classification", async () => {
+  test("uses Haiku model (claude-haiku-4-5) for classification", async () => {
     const client = makeMockAnthropicClient("NORMAL_EXCHANGE");
     await classifyMessage(client, "test message");
 
-    // The real implementation must call Haiku, not Sonnet
+    // The real implementation must call Haiku, not Sonnet. Match the
+    // model name prefix so dated snapshots and unversioned aliases both
+    // pass — Anthropic deprecates dated IDs on a rolling basis.
     expect(client.messages.create).toHaveBeenCalledWith(
       expect.objectContaining({
-        model: "claude-haiku-4-5-20251001",
+        model: expect.stringMatching(/^claude-haiku-/),
       }),
     );
   });
