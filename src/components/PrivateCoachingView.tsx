@@ -3,6 +3,7 @@ import { useParams, useNavigate, useSearchParams } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../convex/_generated/api";
 import type { Id } from "../../convex/_generated/dataModel";
+import { useActingPartyUserId } from "../hooks/useActingPartyUserId";
 import { PrivacyBanner } from "./PrivacyBanner";
 import { SoloBanner } from "./SoloBanner";
 import { ChatWindow, type ChatMessage } from "./ChatWindow";
@@ -175,6 +176,9 @@ export function ConnectedPrivateCoachingView() {
   const asParam = searchParams.get("as") ?? "initiator";
   const actingRole = asParam === "invitee" ? "INVITEE" : "INITIATOR";
 
+  // Canonical hook for acting party userId resolution (AC 4)
+  const actingUserId = useActingPartyUserId(caseId);
+
   const partyData = useQuery(api.cases.partyStates, { caseId });
   const messages = useQuery(
     api.privateCoaching.myMessages,
@@ -238,7 +242,7 @@ export function ConnectedPrivateCoachingView() {
     caseStatus != null &&
     (ALLOWED_STATUSES as readonly string[]).includes(caseStatus);
 
-  if (caseData === undefined || partyData === undefined) {
+  if (caseData === undefined || partyData === undefined || (isSolo && actingUserId === null)) {
     return (
       <div className="flex min-h-screen items-center justify-center">
         <p className="text-text-secondary">Loading…</p>

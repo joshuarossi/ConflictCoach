@@ -1,9 +1,7 @@
 import { useSearchParams } from "react-router-dom";
-
-interface PartyState {
-  userId: string;
-  role: "INITIATOR" | "INVITEE";
-}
+import { useQuery } from "convex/react";
+import { api } from "../../convex/_generated/api";
+import type { Id } from "../../convex/_generated/dataModel";
 
 /**
  * Returns the userId for the currently acting party in a case.
@@ -11,19 +9,25 @@ interface PartyState {
  * In solo mode, reads the `?as=initiator|invitee` URL query param to determine
  * which party the user is viewing as. Defaults to "initiator" when absent.
  *
- * In normal (non-solo) mode, returns the authenticated user's own userId
- * (same as the single matching partyState).
+ * Fetches party states via `api.cases.partyStates` internally.
  */
 export function useActingPartyUserId(
-  partyStates: PartyState[] | null | undefined,
+  caseId: Id<"cases"> | undefined,
 ): string | null {
   const [searchParams] = useSearchParams();
   const asParam = searchParams.get("as") ?? "initiator";
 
-  if (!partyStates || partyStates.length === 0) return null;
+  const partyData = useQuery(
+    api.cases.partyStates,
+    caseId ? { caseId } : "skip",
+  );
+
+  if (!partyData?.all || partyData.all.length === 0) return null;
 
   const targetRole = asParam === "invitee" ? "INVITEE" : "INITIATOR";
-  const matchingState = partyStates.find((ps) => ps.role === targetRole);
+  const matchingState = partyData.all.find(
+    (ps: { userId: string; role: string }) => ps.role === targetRole,
+  );
 
   return matchingState?.userId ?? null;
 }
