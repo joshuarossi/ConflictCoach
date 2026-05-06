@@ -13,7 +13,7 @@
  * - Copy feedback (button state change)
  */
 import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
-import { render, screen, within } from "@testing-library/react";
+import { render, screen, within, act, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { MemoryRouter } from "react-router-dom";
 
@@ -95,8 +95,12 @@ describe("AC: Copyable link field", () => {
 
   test("displays a 'Copy link' button near the field", () => {
     renderView();
+    // Anchored regex: the inline button's accessible name must match
+    // exactly, not be a substring. Necessary because the share-section's
+    // "Just copy link" button also contains the substring "copy link"
+    // and would otherwise produce an ambiguous getByRole match.
     expect(
-      screen.getByRole("button", { name: /copy link/i }),
+      screen.getByRole("button", { name: /^Copy link$/i }),
     ).toBeInTheDocument();
   });
 });
@@ -302,7 +306,8 @@ describe("AC: Copy success feedback", () => {
     });
 
     renderView();
-    const copyButton = screen.getByRole("button", { name: /copy link/i });
+    // Anchored regex: see explanation on the displays-button test.
+    const copyButton = screen.getByRole("button", { name: /^Copy link$/i });
     await user.click(copyButton);
 
     expect(screen.getByText(/copied/i)).toBeInTheDocument();
@@ -317,18 +322,23 @@ describe("AC: Copy success feedback", () => {
     });
 
     renderView();
-    const copyButton = screen.getByRole("button", { name: /copy link/i });
+    const copyButton = screen.getByRole("button", { name: /^Copy link$/i });
     await user.click(copyButton);
 
     // Should show "Copied!" right after click
     expect(screen.getByText(/copied/i)).toBeInTheDocument();
 
-    // Advance past the feedback timeout (~2s)
-    vi.advanceTimersByTime(2500);
+    // Advance past the feedback timeout (~2s). Wrap in act() so React's
+    // state update from setCopiedButton(null) is flushed before assertion.
+    await act(async () => {
+      vi.advanceTimersByTime(2500);
+    });
 
     // Should revert to "Copy link"
-    expect(
-      screen.getByRole("button", { name: /copy link/i }),
-    ).toBeInTheDocument();
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: /^Copy link$/i }),
+      ).toBeInTheDocument();
+    });
   });
 });
