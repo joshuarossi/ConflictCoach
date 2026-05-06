@@ -9,6 +9,7 @@ import { _getCase, _getPartyStates } from "../privateCoaching";
 import * as promptsLib from "../lib/prompts";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "../lib/privacyFilter";
 import { getMockResponse } from "../lib/claudeMock";
+import { enforceCostBudget, recordUsageFromAction } from "../lib/costBudget";
 
 // Maximum privacy-violation retries (total attempts = 1 + MAX_RETRIES)
 const MAX_RETRIES = 2;
@@ -206,6 +207,12 @@ export async function generateSynthesisHandler(
   ctx: any,
   args: { caseId: string },
 ) {
+  // Cost budget check — short-circuit if cap exceeded
+  const budget = await enforceCostBudget(ctx, args.caseId);
+  if (!budget.allowed) {
+    return;
+  }
+
   // 1. Read case and party states
   const caseDoc = await ctx.runQuery(_getCase, {
     caseId: args.caseId,
@@ -328,6 +335,21 @@ export async function generateSynthesisHandler(
         throw timeoutErr;
       }
       throw err;
+    }
+
+    // Record AI usage from the response
+    if (response?.usage) {
+      try {
+        await recordUsageFromAction(
+          ctx,
+          args.caseId,
+          response.usage.input_tokens ?? 0,
+          response.usage.output_tokens ?? 0,
+          "sonnet",
+        );
+      } catch (usageErr) {
+        console.error("Failed to record synthesis AI usage:", usageErr);
+      }
     }
 
     // Guard against unexpected response shape

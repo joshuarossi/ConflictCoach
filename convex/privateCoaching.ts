@@ -6,6 +6,7 @@ import { throwAppError } from "./lib/errors";
 import { requireAuth } from "./lib/auth";
 import { assemblePrompt } from "./lib/prompts";
 import { streamAIResponse } from "./lib/streaming";
+import { enforceCostBudget } from "./lib/costBudget";
 import type { Message } from "./lib/prompts";
 
 // ---------------------------------------------------------------------------
@@ -134,6 +135,20 @@ export const generateAIResponse = action({
     userId: v.id("users"),
   },
   handler: async (ctx: any, args: { caseId: string; userId: string }) => {
+    // Cost budget check — short-circuit if cap exceeded
+    const budget = await enforceCostBudget(ctx, args.caseId);
+    if (!budget.allowed) {
+      if (budget.boilerplate) {
+        // Soft cap: insert boilerplate instead of calling Claude
+        await ctx.runMutation(internal.privateCoaching._insertErrorMessage, {
+          caseId: args.caseId,
+          userId: args.userId,
+          content: budget.boilerplate,
+        });
+      }
+      return;
+    }
+
     // Fetch case, party state, and message history for prompt assembly
     const caseDoc = await ctx.runQuery(internal.privateCoaching._getCase, {
       caseId: args.caseId,
@@ -210,6 +225,7 @@ export const generateAIResponse = action({
         model: "claude-sonnet-4-5-20250514",
         systemPrompt: prompt.system,
         userMessages: prompt.messages,
+        caseId: args.caseId,
       });
     } catch (err) {
       console.error("AI streaming failed for case", args.caseId, ":", err);

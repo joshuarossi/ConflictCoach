@@ -4,12 +4,14 @@ import { internal } from "../_generated/api";
 import { v } from "convex/values";
 import type { GenericActionCtx, GenericDataModel } from "convex/server";
 import { runMockStreamWithDelay } from "./claudeMock";
+import { getModelType } from "./costBudget";
 
 // Resolve mutation references with optional chaining so the module is safe to
 // import in test environments where `internal` is a stub/empty object.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 const insertRef: any = (internal as any)?.lib?.streaming?.insertStreamingMessage;
 const updateRef: any = (internal as any)?.lib?.streaming?.updateStreamingMessage;
+const recordAiUsageRef: any = (internal as any)?.lib?.costBudget?.recordAiUsage;
 
 // ---------------------------------------------------------------------------
 // Types
@@ -51,6 +53,8 @@ export interface StreamAIResponseOptions {
   userMessages: Array<{ role: "user" | "assistant"; content: string }>;
   /** Max tokens for Claude response (default 4096). */
   maxTokens?: number;
+  /** If provided, AI usage is recorded to this case's cost accumulator. */
+  caseId?: string;
 }
 
 // ---------------------------------------------------------------------------
@@ -136,6 +140,7 @@ export async function streamAIResponse(
     systemPrompt,
     userMessages,
     maxTokens = 4096,
+    caseId,
   } = options;
 
   // 1. Insert placeholder message with status=STREAMING and empty content
@@ -165,13 +170,27 @@ export async function streamAIResponse(
 
   // 3. Real Claude API call with retry logic
   try {
-    await callClaudeWithRetry(ctx, anthropicClient, {
+    const tokenData = await callClaudeWithRetry(ctx, anthropicClient, {
       messageId,
       model,
       systemPrompt,
       userMessages,
       maxTokens,
     });
+
+    // Record AI usage on the case cost accumulator if caseId provided
+    if (caseId && recordAiUsageRef && tokenData) {
+      try {
+        await ctx.runMutation(recordAiUsageRef, {
+          caseId,
+          inputTokens: tokenData.inputTokens,
+          outputTokens: tokenData.outputTokens,
+          model: getModelType(model),
+        });
+      } catch (usageErr) {
+        console.error("Failed to record AI usage:", usageErr);
+      }
+    }
   } catch (error: unknown) {
     const errorMessage =
       error instanceof Error ? error.message : "Unknown AI error";
@@ -197,17 +216,21 @@ interface StreamParams {
   maxTokens: number;
 }
 
+interface TokenData {
+  inputTokens: number;
+  outputTokens: number;
+}
+
 async function callClaudeWithRetry(
   ctx: ActionCtx,
   client: Anthropic,
   params: StreamParams,
-): Promise<void> {
+): Promise<TokenData> {
   let lastError: unknown;
 
   for (let attempt = 0; attempt < 2; attempt++) {
     try {
-      await executeStream(ctx, client, params);
-      return; // success
+      return await executeStream(ctx, client, params);
     } catch (error: unknown) {
       lastError = error;
 
@@ -224,7 +247,7 @@ async function callClaudeWithRetry(
           content: CONTENT_FILTER_MESSAGE,
           status: "ERROR" as const,
         });
-        return; // handled gracefully
+        return { inputTokens: 0, outputTokens: 0 };
       }
 
       throw error;
@@ -251,7 +274,7 @@ async function executeStream(
   ctx: ActionCtx,
   client: Anthropic,
   params: StreamParams,
-): Promise<void> {
+): Promise<TokenData> {
   const { messageId, model, systemPrompt, userMessages, maxTokens } = params;
 
   // Create the stream — may throw synchronously (e.g. API unreachable)
@@ -355,6 +378,8 @@ async function executeStream(
     status: "COMPLETE" as const,
     tokens: totalTokens,
   });
+
+  return { inputTokens, outputTokens };
 }
 
 // ---------------------------------------------------------------------------

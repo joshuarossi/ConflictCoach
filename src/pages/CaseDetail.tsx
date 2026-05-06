@@ -5,21 +5,126 @@ import type { Id } from "../../convex/_generated/dataModel";
 import { ConvexErrorBoundary } from "@/components/layout/ConvexErrorBoundary";
 import { Skeleton } from "@/components/ui/skeleton";
 
+/**
+ * Maps a case status to a human-readable phase name for display.
+ */
+function getPhaseLabel(status: string): string {
+  switch (status) {
+    case "DRAFT_PRIVATE_COACHING":
+    case "BOTH_PRIVATE_COACHING":
+      return "Private Coaching";
+    case "READY_FOR_JOINT":
+      return "Ready for Joint";
+    case "JOINT_ACTIVE":
+      return "Joint Chat";
+    case "CLOSED_RESOLVED":
+      return "Closed — Resolved";
+    case "CLOSED_UNRESOLVED":
+      return "Closed — Unresolved";
+    case "CLOSED_ABANDONED":
+      return "Closed — Abandoned";
+    default:
+      return status;
+  }
+}
+
 function CaseDetailSkeleton() {
   return (
     <div className="space-y-6" data-testid="case-detail-skeleton">
       <Skeleton className="h-8 w-48" />
-      <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1 space-y-3">
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-5 w-32" />
-        <Skeleton className="h-4 w-20" />
-        <Skeleton className="h-5 w-24" />
+      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm space-y-4">
+        <Skeleton className="h-4 w-32" />
+        <Skeleton className="h-4 w-64" />
+        <Skeleton className="h-4 w-40" />
       </div>
-      <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1 space-y-3">
-        <Skeleton className="h-6 w-40" />
-        <Skeleton className="h-4 w-full" />
-        <Skeleton className="h-4 w-3/4" />
-      </div>
+    </div>
+  );
+}
+
+function NotFoundView() {
+  return (
+    <div
+      className="flex flex-col items-center justify-center py-24 px-4"
+      data-testid="case-not-found"
+    >
+      <h1 className="text-4xl font-bold text-gray-900 mb-2">404</h1>
+      <p className="text-lg text-gray-600">Case not found.</p>
+      <Link
+        to="/dashboard"
+        className="mt-4 text-blue-600 hover:text-blue-800 underline"
+      >
+        Back to Dashboard
+      </Link>
+    </div>
+  );
+}
+
+function PrivateCoachingSubView({ caseId }: { caseId: string }) {
+  return (
+    <div data-testid="private-coaching-view" className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-900">Private Coaching</h2>
+      <p className="text-gray-600">
+        You are in the private coaching phase. Work with your AI coach to
+        prepare for the joint conversation.
+      </p>
+      <Link
+        to={`/cases/${caseId}/private`}
+        className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+      >
+        Continue Private Coaching
+      </Link>
+    </div>
+  );
+}
+
+function ReadyForJointSubView({ caseId }: { caseId: string }) {
+  return (
+    <div data-testid="ready-for-joint-view" className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-900">
+        Ready for Joint Session
+      </h2>
+      <p className="text-gray-600">
+        Both parties have completed private coaching. The joint session is ready
+        to begin.
+      </p>
+      <Link
+        to={`/cases/${caseId}/joint`}
+        className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+      >
+        Start Joint Chat
+      </Link>
+    </div>
+  );
+}
+
+function JointChatSubView({ caseId }: { caseId: string }) {
+  return (
+    <div data-testid="joint-chat-view" className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-900">Joint Chat</h2>
+      <p className="text-gray-600">
+        The joint conversation is active. Continue the facilitated discussion.
+      </p>
+      <Link
+        to={`/cases/${caseId}/joint`}
+        className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+      >
+        Continue Joint Chat
+      </Link>
+    </div>
+  );
+}
+
+function ClosedCaseSubView({ status }: { status: string }) {
+  return (
+    <div data-testid="closed-case-view" className="space-y-4">
+      <h2 className="text-xl font-semibold text-gray-900">Case Closed</h2>
+      <p className="text-gray-600">{getPhaseLabel(status)}</p>
+      <Link
+        to="/dashboard"
+        className="inline-block rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+      >
+        Back to Dashboard
+      </Link>
     </div>
   );
 }
@@ -29,132 +134,51 @@ function CaseDetailContent() {
   const caseId = caseIdParam as Id<"cases">;
 
   const caseData = useQuery(api.cases.get, { caseId });
-  const partyData = useQuery(api.cases.partyStates, { caseId });
 
-  if (caseData === undefined || partyData === undefined) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <CaseDetailSkeleton />
-      </div>
-    );
+  // Loading state
+  if (caseData === undefined) {
+    return <CaseDetailSkeleton />;
   }
 
+  // Not found
   if (caseData === null) {
-    return (
-      <div className="flex min-h-[50vh] items-center justify-center">
-        <p className="text-text-secondary">Case not found.</p>
-      </div>
-    );
+    return <NotFoundView />;
+  }
+
+  const status = caseData.status as string;
+
+  // Route to the correct sub-view based on case status
+  function renderSubView() {
+    switch (status) {
+      case "DRAFT_PRIVATE_COACHING":
+      case "BOTH_PRIVATE_COACHING":
+        return <PrivateCoachingSubView caseId={caseIdParam!} />;
+      case "READY_FOR_JOINT":
+        return <ReadyForJointSubView caseId={caseIdParam!} />;
+      case "JOINT_ACTIVE":
+        return <JointChatSubView caseId={caseIdParam!} />;
+      case "CLOSED_RESOLVED":
+      case "CLOSED_UNRESOLVED":
+      case "CLOSED_ABANDONED":
+        return <ClosedCaseSubView status={status} />;
+      default:
+        return (
+          <p className="text-gray-600">Unknown case status: {status}</p>
+        );
+    }
   }
 
   return (
     <div className="space-y-6">
-      <h1 className="text-h1 font-bold text-text-primary">Case Detail</h1>
-
-      <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1">
-        <dl className="space-y-3">
-          <div>
-            <dt className="text-meta font-medium text-text-secondary">Status</dt>
-            <dd className="text-text-primary" data-testid="case-status">
-              {caseData.status}
-            </dd>
-          </div>
-          <div>
-            <dt className="text-meta font-medium text-text-secondary">Category</dt>
-            <dd className="text-text-primary">{caseData.category}</dd>
-          </div>
-        </dl>
-      </div>
-
-      {/* Own party state — full detail */}
-      {partyData.self && (
-        <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1">
-          <h2 className="text-h2 font-semibold text-text-primary mb-3">
-            Your Information
-          </h2>
-          <dl className="space-y-3">
-            {partyData.self.mainTopic && (
-              <div>
-                <dt className="text-meta font-medium text-text-secondary">
-                  Main Topic
-                </dt>
-                <dd className="text-text-primary" data-testid="self-main-topic">
-                  {partyData.self.mainTopic}
-                </dd>
-              </div>
-            )}
-            {partyData.self.description && (
-              <div>
-                <dt className="text-meta font-medium text-text-secondary">
-                  Description
-                </dt>
-                <dd className="text-text-primary" data-testid="self-description">
-                  {partyData.self.description}
-                </dd>
-              </div>
-            )}
-            {partyData.self.desiredOutcome && (
-              <div>
-                <dt className="text-meta font-medium text-text-secondary">
-                  Desired Outcome
-                </dt>
-                <dd
-                  className="text-text-primary"
-                  data-testid="self-desired-outcome"
-                >
-                  {partyData.self.desiredOutcome}
-                </dd>
-              </div>
-            )}
-          </dl>
-        </div>
-      )}
-
-      {/* Other party — phase-level booleans only, no form content */}
-      {partyData.otherPhaseOnly && (
-        <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1">
-          <h2 className="text-h2 font-semibold text-text-primary mb-3">
-            Other Party
-          </h2>
-          <dl className="space-y-3">
-            <div>
-              <dt className="text-meta font-medium text-text-secondary">Name</dt>
-              <dd className="text-text-primary">
-                {partyData.otherPhaseOnly.displayName}
-              </dd>
-            </div>
-            <div>
-              <dt className="text-meta font-medium text-text-secondary">
-                Private Coaching
-              </dt>
-              <dd
-                className="text-text-primary"
-                data-testid="other-party-pc-status"
-              >
-                {partyData.otherPhaseOnly.hasCompletedPC
-                  ? "Completed"
-                  : "In progress"}
-              </dd>
-            </div>
-          </dl>
-        </div>
-      )}
-
-      {/* Navigation links */}
-      <div className="flex gap-4">
-        <Link
-          to={`/cases/${caseIdParam}/private`}
-          className="text-accent underline hover:text-accent-hover"
-        >
-          Private Coaching
-        </Link>
-        <Link
-          to={`/cases/${caseIdParam}/joint`}
-          className="text-accent underline hover:text-accent-hover"
-        >
-          Joint Chat
-        </Link>
-      </div>
+      <header className="flex items-center justify-between">
+        <h1 className="text-2xl font-bold text-gray-900">
+          Case with {caseData.otherPartyName || "the other party"}
+        </h1>
+        <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+          {getPhaseLabel(status)}
+        </span>
+      </header>
+      {renderSubView()}
     </div>
   );
 }
@@ -166,6 +190,3 @@ export function CaseDetail() {
     </ConvexErrorBoundary>
   );
 }
-
-// Alias used by some consumers
-export { CaseDetail as CaseDetailView };

@@ -13,6 +13,7 @@ import { requireAuth } from "./lib/auth";
 import { assemblePrompt } from "./lib/prompts";
 import { streamAIResponse } from "./lib/streaming";
 import { detectReadiness } from "./lib/draftCoachReadiness";
+import { enforceCostBudget } from "./lib/costBudget";
 import type { Message } from "./lib/prompts";
 
 // ---------------------------------------------------------------------------
@@ -160,6 +161,18 @@ export const generateResponse = internalAction({
       throw new Error("Draft session not found");
     }
 
+    // Cost budget check — short-circuit if cap exceeded
+    const budget = await enforceCostBudget(ctx, session.caseId);
+    if (!budget.allowed) {
+      const message = budget.boilerplate ??
+        "AI features are currently unavailable for this case.";
+      await ctx.runMutation(internal.draftCoach._insertErrorMessage, {
+        sessionId: args.sessionId,
+        content: message,
+      });
+      return;
+    }
+
     // Fetch case
     const caseDoc = await ctx.runQuery(
       internal.draftCoach._getCase,
@@ -278,6 +291,7 @@ export const generateResponse = internalAction({
         model: "claude-sonnet-4-5-20250514",
         systemPrompt: prompt.system,
         userMessages: prompt.messages,
+        caseId: session.caseId,
       });
 
       // If readiness was detected, try to extract finalDraft from the response
