@@ -122,6 +122,7 @@ export const sendUserMessage = mutation({
       await ctx.scheduler.runAfter(0, api.privateCoaching.generateAIResponse, {
         caseId: args.caseId,
         userId: user._id,
+        ...(partyRole ? { partyRole: partyRole as "INITIATOR" | "INVITEE" } : {}),
       });
     } catch (err) {
       console.error("Failed to schedule AI response:", err);
@@ -132,6 +133,7 @@ export const sendUserMessage = mutation({
         role: "AI" as const,
         content: "Sorry, I was unable to process your message. Please try again.",
         status: "ERROR" as const,
+        ...(partyRole ? { partyRole } : {}),
         createdAt: Date.now(),
       });
     }
@@ -148,8 +150,9 @@ export const generateAIResponse = action({
   args: {
     caseId: v.id("cases"),
     userId: v.id("users"),
+    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
   },
-  handler: async (ctx: any, args: { caseId: string; userId: string }) => {
+  handler: async (ctx: any, args: { caseId: string; userId: string; partyRole?: string }) => {
     // Cost budget check — short-circuit if cap exceeded
     const budget = await enforceCostBudget(ctx, args.caseId);
     if (!budget.allowed) {
@@ -159,6 +162,7 @@ export const generateAIResponse = action({
           caseId: args.caseId,
           userId: args.userId,
           content: budget.boilerplate,
+          ...(args.partyRole ? { partyRole: args.partyRole } : {}),
         });
       }
       return;
@@ -179,7 +183,7 @@ export const generateAIResponse = action({
 
     const privateMessages = await ctx.runQuery(
       internal.privateCoaching._getPrivateMessagesByCase,
-      { caseId: args.caseId, userId: args.userId },
+      { caseId: args.caseId, userId: args.userId, ...(args.partyRole ? { partyRole: args.partyRole } : {}) },
     );
 
     // Build recent history in Anthropic message format
@@ -236,6 +240,7 @@ export const generateAIResponse = action({
           userId: args.userId,
           role: "AI",
           aiRole: "PRIVATE_COACH",
+          ...(args.partyRole ? { partyRole: args.partyRole } : {}),
         },
         model: "claude-sonnet-4-5-20250514",
         systemPrompt: prompt.system,
@@ -249,6 +254,7 @@ export const generateAIResponse = action({
         caseId: args.caseId,
         userId: args.userId,
         content: "Sorry, I encountered an error generating a response. Please try sending your message again.",
+        ...(args.partyRole ? { partyRole: args.partyRole } : {}),
       });
     }
   },
@@ -351,14 +357,16 @@ export const _insertErrorMessage = internalMutation({
     caseId: v.id("cases"),
     userId: v.id("users"),
     content: v.string(),
+    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
   },
-  handler: async (ctx: any, args: { caseId: string; userId: string; content: string }) => {
+  handler: async (ctx: any, args: { caseId: string; userId: string; content: string; partyRole?: string }) => {
     await ctx.db.insert("privateMessages", {
       caseId: args.caseId,
       userId: args.userId,
       role: "AI" as const,
       content: args.content,
       status: "ERROR" as const,
+      ...(args.partyRole ? { partyRole: args.partyRole } : {}),
       createdAt: Date.now(),
     });
   },
@@ -368,16 +376,26 @@ export const _getPrivateMessagesByCase = internalQuery({
   args: {
     caseId: v.id("cases"),
     userId: v.id("users"),
+    partyRole: v.optional(v.union(v.literal("INITIATOR"), v.literal("INVITEE"))),
   },
   handler: async (
     ctx: any,
-    args: { caseId: string; userId: string },
+    args: { caseId: string; userId: string; partyRole?: string },
   ) => {
-    return await ctx.db
+    const messages = await ctx.db
       .query("privateMessages")
       .withIndex("by_case_and_user", (q: any) =>
         q.eq("caseId", args.caseId).eq("userId", args.userId),
       )
       .collect();
+
+    // In solo mode, filter by partyRole to isolate each party's message history
+    if (args.partyRole) {
+      return messages.filter(
+        (m: { partyRole?: string }) => m.partyRole === args.partyRole,
+      );
+    }
+
+    return messages;
   },
 });
