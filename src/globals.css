@@ -135,7 +135,7 @@
   --shadow-3: 0 12px 32px rgba(0, 0, 0, 0.40);
 }
 
-/* ===== Accessibility: prefers-reduced-motion ===== */
+/* ===== Reduced Motion ===== */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,

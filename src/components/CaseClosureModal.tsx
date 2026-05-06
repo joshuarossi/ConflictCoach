@@ -33,12 +33,20 @@ export function CaseClosureModal({
   const [validationError, setValidationError] = useState<string | null>(null);
   const triggerRef = useRef<Element | null>(null);
 
+  const wrappedOpenChange = (nextOpen: boolean) => {
+    if (!nextOpen && triggerRef.current instanceof HTMLElement) {
+      const trigger = triggerRef.current;
+      setTimeout(() => trigger.focus(), 0);
+    }
+    onOpenChange(nextOpen);
+  };
+
   const handleClose = () => {
     setSelected("resolved");
     setSummary("");
     setReason("");
     setValidationError(null);
-    onOpenChange(false);
+    wrappedOpenChange(false);
   };
 
   const handleProposeResolution = () => {
@@ -63,19 +71,13 @@ export function CaseClosureModal({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={wrappedOpenChange}>
       <DialogContent
         role="dialog"
         aria-modal="true"
         onOpenAutoFocus={() => {
           // Capture the trigger element before Radix moves focus into the dialog
           triggerRef.current = document.activeElement;
-        }}
-        onCloseAutoFocus={(e) => {
-          e.preventDefault();
-          if (triggerRef.current instanceof HTMLElement) {
-            triggerRef.current.focus();
-          }
         }}
       >
         <DialogHeader>

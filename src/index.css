@@ -87,7 +87,7 @@
   outline-offset: 2px;
 }
 
-/* ===== Accessibility: prefers-reduced-motion ===== */
+/* ===== Reduced Motion ===== */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
