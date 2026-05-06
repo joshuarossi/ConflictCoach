@@ -29,9 +29,9 @@ raw Tailwind palette classes.
 Pages render at one of two widths, assigned per route (see `App.tsx`):
 
 - **Reading width** — 720 px (`ReadingLayout`): landing, dashboard, case
-  creation, invite, admin list pages.
-- **Chat width** — 1080 px (`ChatLayout`): private coaching, joint chat, case
-  detail, admin template editor.
+  detail, case creation, invite, admin pages (templates list, template editor,
+  audit log).
+- **Chat width** — 1080 px (`ChatLayout`): private coaching, joint chat.
 
 ## Contributing
 

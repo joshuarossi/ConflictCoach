@@ -44,6 +44,9 @@ export function InviteAcceptPage() {
   }
 
   // --- Error states: invalid or consumed token ---
+  // Convex returns `null` from a query if the lookup found nothing (the
+  // common shape for "this token doesn't exist or has been consumed").
+  // Treat that the same way as an explicit INVALID/CONSUMED status.
   if (invite === null || invite.status === "INVALID" || invite.status === "CONSUMED") {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-4">
@@ -99,6 +102,9 @@ export function InviteAcceptPage() {
     setError(null);
     try {
       const result = await redeemMutation({ token });
+      // Per WOR-57 AC5: route to the invitee case form (not case detail), so
+      // the invitee fills their own description/desiredOutcome before
+      // entering private coaching. The form page itself ships in WOR-36.
       navigate(`/cases/${result.caseId}/form`);
     } catch (err) {
       const parsed = parseConvexError(err);

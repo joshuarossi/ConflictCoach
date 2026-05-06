@@ -12,6 +12,10 @@ const buttonVariants = cva(
         default:
           "bg-accent text-accent-on shadow-1 hover:bg-accent-hover",
         destructive:
+          // NOTE: text-accent-on is reused here (and on bg-warning, bg-coach-accent)
+          // as a generic "contrasting text on filled background" token. Current light/dark
+          // values produce correct WCAG contrast. If accent-on diverges from danger/warning
+          // needs, add dedicated --danger-on / --warning-on tokens.
           "bg-danger text-accent-on shadow-1 hover:bg-danger/90",
         outline:
           "border border-border-default bg-surface shadow-1 hover:bg-surface-subtle hover:text-text-primary",

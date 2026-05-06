@@ -107,8 +107,10 @@ export function TemplateEditPage() {
   const [notes, setNotes] = useState("");
 
   const [publishing, setPublishing] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
   const [showArchiveModal, setShowArchiveModal] = useState(false);
   const [archiving, setArchiving] = useState(false);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
   const [viewingVersion, setViewingVersion] = useState<TemplateVersion | null>(null);
 
   // Derive current values from latest version when form hasn't been touched
@@ -142,6 +144,7 @@ export function TemplateEditPage() {
     e.preventDefault();
     if (!id || !formGlobalGuidance.trim()) return;
     setPublishing(true);
+    setPublishError(null);
     try {
       await publishVersion({
         templateId: id as Id<"templates">,
@@ -158,6 +161,8 @@ export function TemplateEditPage() {
       setGlobalGuidance(null);
       setCoachInstructions(null);
       setDraftCoachInstructions(null);
+    } catch (err) {
+      setPublishError(err instanceof Error ? err.message : "Failed to publish version");
     } finally {
       setPublishing(false);
     }
@@ -166,10 +171,13 @@ export function TemplateEditPage() {
   async function handleArchive() {
     if (!id) return;
     setArchiving(true);
+    setArchiveError(null);
     try {
       await archiveTemplate({ templateId: id as Id<"templates"> });
       setShowArchiveModal(false);
       navigate("/admin/templates");
+    } catch (err) {
+      setArchiveError(err instanceof Error ? err.message : "Failed to archive template");
     } finally {
       setArchiving(false);
     }
@@ -305,6 +313,16 @@ export function TemplateEditPage() {
                   />
                 </div>
 
+                {publishError && (
+                  <p role="alert" className="text-label text-danger">
+                    {publishError}
+                  </p>
+                )}
+                {archiveError && (
+                  <p role="alert" className="text-label text-danger">
+                    {archiveError}
+                  </p>
+                )}
                 <div className="flex items-center justify-between pt-2">
                   {!isArchived && (
                     <Button
