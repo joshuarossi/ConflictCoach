@@ -20,8 +20,7 @@ export function PrivacyBanner({ text, otherPartyName }: PrivacyBannerProps) {
     <div
       role="region"
       aria-label="Privacy notice"
-      className="private-tint flex items-center gap-2 px-4 py-2"
-      style={{ backgroundColor: "#F0E9E0" }}
+      className="bg-private-tint flex items-center gap-2 px-4 py-2"
     >
       <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <button
