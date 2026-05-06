@@ -255,8 +255,9 @@ export const recordAiUsage = internalMutation({
 export const writeSoftCapAuditLog = internalMutation({
   args: {
     caseId: v.id("cases"),
+    action: v.optional(v.string()),
   },
-  handler: async (ctx: any, args: { caseId: string }) => {
+  handler: async (ctx: any, args: { caseId: string; action?: string }) => {
     const caseDoc = await ctx.db.get(args.caseId);
     if (!caseDoc) return;
 
@@ -271,7 +272,7 @@ export const writeSoftCapAuditLog = internalMutation({
     // Write audit log entry — use initiator as actor since this is a system event
     await writeAuditLog(ctx, {
       actorUserId: String(caseDoc.initiatorUserId),
-      action: "COST_SOFT_CAP_REACHED",
+      action: args.action ?? "COST_SOFT_CAP_REACHED",
       targetType: "case",
       targetId: String(args.caseId),
       metadata: { currentCostUsd: String(current.totalCostUsd) },
@@ -327,7 +328,7 @@ export async function enforceCostBudget(
   if (status === "soft_cap") {
     // Write audit log if this is the first time hitting soft cap
     if (!usage?.softCapReachedAt) {
-      await ctx.runMutation(writeSoftCapAuditLogRef, { caseId });
+      await ctx.runMutation(writeSoftCapAuditLogRef, { caseId, action: "COST_SOFT_CAP_REACHED" });
     }
     return { allowed: false, status, boilerplate: SOFT_CAP_BOILERPLATE };
   }
