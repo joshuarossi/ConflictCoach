@@ -36,7 +36,8 @@ function outcomeBadgeClasses(status: string): string {
   }
 }
 
-function formatDate(ts: number): string {
+function formatDate(ts: number | undefined): string {
+  if (!ts) return "Unknown date";
   return new Date(ts).toLocaleDateString(undefined, {
     year: "numeric",
     month: "long",
@@ -51,7 +52,7 @@ function formatDate(ts: number): string {
 export interface ClosedCaseViewProps {
   caseName?: string;
   category?: string;
-  closedAt?: number;
+  closedAt?: number | undefined;
   status?: string;
   closureSummary?: string | null;
   jointMessages?: Array<{
@@ -80,7 +81,7 @@ export interface ClosedCaseViewProps {
 export function ClosedCaseView({
   caseName = "",
   category = "",
-  closedAt = Date.now(),
+  closedAt,
   status = "",
   closureSummary,
   jointMessages = [],
