@@ -195,3 +195,40 @@ export async function callMutation(
     { mutation, args },
   );
 }
+
+/**
+ * Advances a case to the given status via the __TEST_ADVANCE_CASE__ window
+ * hook exposed in test mode (CLAUDE_MOCK=true). The hook drives the backend
+ * test-support mutation that force-transitions case status for E2E scenarios.
+ */
+export async function advanceCaseToStatus(
+  page: Page,
+  caseId: string,
+  targetStatus: string,
+): Promise<void> {
+  await page.waitForFunction(
+    () =>
+      (window as unknown as { __TEST_ADVANCE_CASE__?: unknown })
+        .__TEST_ADVANCE_CASE__ !== undefined,
+    null,
+    { timeout: 10000 },
+  );
+  await page.evaluate(
+    async ({ caseId, targetStatus }) => {
+      const w = window as unknown as {
+        __TEST_ADVANCE_CASE__?: (args: {
+          caseId: string;
+          targetStatus: string;
+        }) => Promise<void>;
+      };
+      if (!w.__TEST_ADVANCE_CASE__) {
+        throw new Error(
+          "Test advance-case hook __TEST_ADVANCE_CASE__ not found on window. " +
+            "Ensure CLAUDE_MOCK=true and the test advance shim is mounted.",
+        );
+      }
+      await w.__TEST_ADVANCE_CASE__({ caseId, targetStatus });
+    },
+    { caseId, targetStatus },
+  );
+}
