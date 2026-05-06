@@ -28,24 +28,30 @@ const baseMockCase = {
   templateVersionId: "templateVersions:tv1",
 };
 
-let currentMockCase: typeof baseMockCase;
+// The convex anyApi proxy throws on String() coercion. Mock the api module
+// so refs become string tokens, then dispatch on those by identity. Use
+// vi.hoisted so the mutable ref survives across the hoisted vi.mock factory.
+import {
+  apiMock,
+  makeUseQueryDispatcher,
+} from "./__helpers__/closed-case-mocks";
+
+const ref = vi.hoisted(() => ({
+  current: { caseDoc: undefined as unknown },
+}));
+
+vi.mock("../../convex/_generated/api", () => apiMock);
 
 vi.mock("convex/react", () => ({
-  useQuery: (queryRef: unknown) => {
-    const name = String(queryRef);
-    if (name.includes("cases") || name.includes("get")) return currentMockCase;
-    if (name.includes("messages") || name.includes("jointChat")) return [];
-    if (name.includes("myMessages") || name.includes("private")) return [];
-    if (name.includes("mySynthesis") || name.includes("synthesis")) return null;
-    return undefined;
-  },
+  useQuery: (token: unknown) =>
+    makeUseQueryDispatcher({ caseDoc: ref.current.caseDoc as never })(token),
   useMutation: () => vi.fn(),
 }));
 
 import { ClosedCaseView } from "@/pages/ClosedCasePage";
 
 function renderView(caseOverrides: Partial<typeof baseMockCase> = {}) {
-  currentMockCase = { ...baseMockCase, ...caseOverrides };
+  ref.current.caseDoc = { ...baseMockCase, ...caseOverrides };
   return render(
     <MemoryRouter initialEntries={["/cases/test1/closed"]}>
       <Routes>

@@ -57,16 +57,22 @@ const mockCase = {
   templateVersionId: "templateVersions:tv1",
 };
 
+// The convex anyApi proxy throws on String() coercion. Mock the api module
+// so refs become string tokens, then dispatch on those by identity.
+import {
+  apiMock,
+  makeUseQueryDispatcher,
+} from "./__helpers__/closed-case-mocks";
+
+vi.mock("../../convex/_generated/api", () => apiMock);
+
+const dispatch = makeUseQueryDispatcher({
+  caseDoc: mockCase,
+  jointMessages: mockJointMessages,
+});
+
 vi.mock("convex/react", () => ({
-  useQuery: (queryRef: unknown) => {
-    const name = String(queryRef);
-    if (name.includes("cases") || name.includes("get")) return mockCase;
-    if (name.includes("messages") || name.includes("jointChat"))
-      return mockJointMessages;
-    if (name.includes("myMessages") || name.includes("private")) return [];
-    if (name.includes("mySynthesis") || name.includes("synthesis")) return null;
-    return undefined;
-  },
+  useQuery: (ref: unknown) => dispatch(ref),
   useMutation: () => vi.fn(),
 }));
 

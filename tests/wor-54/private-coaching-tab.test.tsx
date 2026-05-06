@@ -50,16 +50,22 @@ const myPrivateMessages = [
   },
 ];
 
+// The convex anyApi proxy throws on String() coercion. Mock the api module
+// so refs become string tokens, then dispatch on those by identity.
+import {
+  apiMock,
+  makeUseQueryDispatcher,
+} from "./__helpers__/closed-case-mocks";
+
+vi.mock("../../convex/_generated/api", () => apiMock);
+
+const dispatch = makeUseQueryDispatcher({
+  caseDoc: mockCase,
+  privateMessages: myPrivateMessages,
+});
+
 vi.mock("convex/react", () => ({
-  useQuery: (queryRef: unknown) => {
-    const name = String(queryRef);
-    if (name.includes("cases") || name.includes("get")) return mockCase;
-    if (name.includes("myMessages") || name.includes("private"))
-      return myPrivateMessages;
-    if (name.includes("messages") || name.includes("jointChat")) return [];
-    if (name.includes("mySynthesis") || name.includes("synthesis")) return null;
-    return undefined;
-  },
+  useQuery: (ref: unknown) => dispatch(ref),
   useMutation: () => vi.fn(),
 }));
 
@@ -80,14 +86,10 @@ describe("AC5: My Private Coaching tab shows viewer's private messages", () => {
     const user = userEvent.setup();
     renderView();
 
-    await user.click(
-      screen.getByRole("tab", { name: /my private coaching/i }),
-    );
+    await user.click(screen.getByRole("tab", { name: /my private coaching/i }));
 
     expect(
-      screen.getByText(
-        "I'm feeling frustrated about the project timeline.",
-      ),
+      screen.getByText("I'm feeling frustrated about the project timeline."),
     ).toBeInTheDocument();
     expect(
       screen.getByText(
@@ -101,9 +103,7 @@ describe("AC5: My Private Coaching tab shows viewer's private messages", () => {
 
     // Private coaching content should NOT be visible on the joint chat tab
     expect(
-      screen.queryByText(
-        "I'm feeling frustrated about the project timeline.",
-      ),
+      screen.queryByText("I'm feeling frustrated about the project timeline."),
     ).not.toBeInTheDocument();
   });
 });

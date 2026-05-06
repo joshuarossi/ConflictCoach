@@ -31,16 +31,22 @@ const mockCase = {
 const mockSynthesisText =
   "## Key Areas of Agreement\n\n- Both value timely communication\n- Budget transparency is important to both parties\n\n## Suggested Approach\n\nLead with curiosity rather than accusation.";
 
+// The convex anyApi proxy throws on String() coercion. Mock the api module
+// so refs become string tokens, then dispatch on those by identity.
+import {
+  apiMock,
+  makeUseQueryDispatcher,
+} from "./__helpers__/closed-case-mocks";
+
+vi.mock("../../convex/_generated/api", () => apiMock);
+
+const dispatch = makeUseQueryDispatcher({
+  caseDoc: mockCase,
+  synthesis: mockSynthesisText,
+});
+
 vi.mock("convex/react", () => ({
-  useQuery: (queryRef: unknown) => {
-    const name = String(queryRef);
-    if (name.includes("cases") || name.includes("get")) return mockCase;
-    if (name.includes("myMessages") || name.includes("private")) return [];
-    if (name.includes("messages") || name.includes("jointChat")) return [];
-    if (name.includes("mySynthesis") || name.includes("synthesis"))
-      return mockSynthesisText;
-    return undefined;
-  },
+  useQuery: (ref: unknown) => dispatch(ref),
   useMutation: () => vi.fn(),
 }));
 
@@ -64,9 +70,7 @@ describe("AC6: My Guidance tab shows viewer's synthesis text", () => {
     await user.click(screen.getByRole("tab", { name: /my guidance/i }));
 
     // Should render the synthesis text (possibly with markdown formatting)
-    expect(
-      screen.getByText(/key areas of agreement/i),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/key areas of agreement/i)).toBeInTheDocument();
     expect(
       screen.getByText(/lead with curiosity rather than accusation/i),
     ).toBeInTheDocument();
