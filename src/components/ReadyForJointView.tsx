@@ -10,22 +10,54 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useNetworkErrorToast } from "@/hooks/useNetworkErrorToast";
 
 // ---------------------------------------------------------------------------
-// Props-based presentational component (used directly by unit tests)
+// ReadyForJointView — accepts caseId, fetches synthesis + other party name
 // ---------------------------------------------------------------------------
 
 export interface ReadyForJointViewProps {
-  synthesisText: string | null;
-  otherPartyName: string;
-  onEnterJointSession: () => void;
-  isEntering?: boolean;
+  caseId: string;
 }
 
-export function ReadyForJointView({
-  synthesisText,
-  otherPartyName,
-  onEnterJointSession,
-  isEntering = false,
-}: ReadyForJointViewProps) {
+export function ReadyForJointView({ caseId }: ReadyForJointViewProps) {
+  const navigate = useNavigate();
+  const typedCaseId = caseId as Id<"cases">;
+
+  const synthesisData = useQuery(api.jointChat.mySynthesis, {
+    caseId: typedCaseId,
+  });
+
+  const enterJointSessionMutation = useMutation(
+    api.jointChat.enterJointSession,
+  );
+  const showNetworkError = useNetworkErrorToast();
+  const [isEntering, setIsEntering] = useState(false);
+
+  const handleEnterJointSession = useCallback(async () => {
+    setIsEntering(true);
+    try {
+      await enterJointSessionMutation({ caseId: typedCaseId });
+      navigate(`/cases/${caseId}/joint`);
+    } catch (err) {
+      showNetworkError(
+        err instanceof Error ? err.message : "Failed to enter joint session",
+      );
+      setIsEntering(false);
+    }
+  }, [enterJointSessionMutation, typedCaseId, caseId, navigate, showNetworkError]);
+
+  // Loading state
+  if (synthesisData === undefined) {
+    return (
+      <div className="mx-auto w-full max-w-[720px] px-4 py-8 space-y-4">
+        <Skeleton className="h-6 w-48" />
+        <Skeleton className="h-64 w-full rounded-lg" />
+        <Skeleton className="mx-auto h-10 w-48" />
+      </div>
+    );
+  }
+
+  const synthesisText = synthesisData?.synthesisText ?? null;
+  const otherPartyName = synthesisData?.otherPartyName ?? "the other party";
+
   return (
     <div className="mx-auto w-full max-w-[720px] px-4 py-8">
       {/* Synthesis card with private-tint background */}
@@ -56,11 +88,11 @@ export function ReadyForJointView({
       <div className="mt-8 flex flex-col items-center gap-3">
         <Button
           size="lg"
-          onClick={onEnterJointSession}
+          onClick={handleEnterJointSession}
           disabled={isEntering}
           className="w-full max-w-xs"
         >
-          {isEntering ? "Entering…" : "Enter Joint Session"}
+          {isEntering ? "Entering\u2026" : "Enter Joint Session"}
         </Button>
 
         <p className="text-sm text-text-secondary">
@@ -72,82 +104,12 @@ export function ReadyForJointView({
 }
 
 // ---------------------------------------------------------------------------
-// Connected wrapper — uses Convex hooks, renders at /cases/:id/ready
+// Connected wrapper — extracts caseId from URL params for route rendering
 // ---------------------------------------------------------------------------
 
 export function ConnectedReadyForJointView() {
   const { caseId } = useParams<{ caseId: string }>();
-  const navigate = useNavigate();
   const typedCaseId = caseId as Id<"cases">;
 
-  const caseData = useQuery(api.cases.get, { caseId: typedCaseId });
-  const partyData = useQuery(api.cases.partyStates, { caseId: typedCaseId });
-  const synthesisData = useQuery(api.jointChat.mySynthesis, {
-    caseId: typedCaseId,
-  });
-
-  const enterJointSession = useMutation(api.jointChat.enterJointSession);
-  const showNetworkError = useNetworkErrorToast();
-  const [isEntering, setIsEntering] = useState(false);
-
-  const handleEnterJointSession = useCallback(async () => {
-    setIsEntering(true);
-    try {
-      await enterJointSession({ caseId: typedCaseId });
-      navigate(`/cases/${caseId}/joint`);
-    } catch (err) {
-      showNetworkError(
-        err instanceof Error ? err.message : "Failed to enter joint session",
-      );
-      setIsEntering(false);
-    }
-  }, [enterJointSession, typedCaseId, caseId, navigate, showNetworkError]);
-
-  // Loading state
-  if (
-    caseData === undefined ||
-    partyData === undefined ||
-    synthesisData === undefined
-  ) {
-    return (
-      <div className="mx-auto w-full max-w-[720px] px-4 py-8 space-y-4">
-        <Skeleton className="h-6 w-48" />
-        <Skeleton className="h-64 w-full rounded-lg" />
-        <Skeleton className="mx-auto h-10 w-48" />
-      </div>
-    );
-  }
-
-  if (caseData === null) {
-    return (
-      <div className="flex min-h-screen items-center justify-center">
-        <p className="text-text-secondary">Case not found.</p>
-      </div>
-    );
-  }
-
-  // Redirect if case is no longer READY_FOR_JOINT
-  if (caseData.status === "JOINT_ACTIVE") {
-    navigate(`/cases/${caseId}/joint`, { replace: true });
-    return null;
-  }
-
-  if (caseData.status !== "READY_FOR_JOINT") {
-    navigate(`/cases/${caseId}`, { replace: true });
-    return null;
-  }
-
-  const otherPartyName =
-    partyData?.otherPhaseOnly?.displayName ??
-    partyData?.otherPartyName ??
-    "the other party";
-
-  return (
-    <ReadyForJointView
-      synthesisText={synthesisData?.synthesisText ?? null}
-      otherPartyName={otherPartyName}
-      onEnterJointSession={handleEnterJointSession}
-      isEntering={isEntering}
-    />
-  );
+  return <ReadyForJointView caseId={typedCaseId} />;
 }
