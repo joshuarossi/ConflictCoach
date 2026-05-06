@@ -14,7 +14,13 @@
  */
 import { describe, test, expect, vi } from "vitest";
 
-import { parseSynthesisResponse, writeSynthesisResults, generateSynthesis } from "../../convex/synthesis/generate";
+import {
+  parseSynthesisResponse,
+  writeSynthesisResults,
+  generateSynthesis,
+  _getAllPrivateMessages,
+} from "../../convex/synthesis/generate";
+import { _getCase, _getPartyStates } from "../../convex/privateCoaching";
 
 // Mock the Anthropic SDK at module level so AC8 can verify non-streaming usage
 const mockCreate = vi.fn().mockResolvedValue({
@@ -205,35 +211,42 @@ describe("AC8: Synthesis is one-shot, non-streaming", () => {
     // Reset the module-level mock so we can inspect calls from this test
     mockCreate.mockClear();
 
-    // Build a minimal action context for the generate action.
-    // The handler issues three runQuery calls in order: _getCase,
-    // _getPartyStates, _getAllPrivateMessages. A single canned mockResolvedValue
-    // returns the case-shaped object for every call and the partyStates branch
-    // (which expects an array) collapses to [], causing the handler to throw
-    // before ever reaching the SDK. Differentiate per-call so the handler
-    // reaches messages.create.
+    // Build a minimal action context. The handler issues runQuery calls in
+    // this order: enforceCostBudget()._getCaseAiUsage, _getCase,
+    // _getPartyStates, _getAllPrivateMessages. Earlier versions of this
+    // test used .mockResolvedValueOnce-chained values that broke when the
+    // cost-budget query was added. Switch to a discriminator that inspects
+    // the query function ref and returns shape-correct data per call —
+    // resilient to additional internal queries appearing in the handler.
+    const partyStatesData = [
+      {
+        _id: "partyStates:initPS",
+        role: "INITIATOR",
+        userId: "users:initUser",
+      },
+      {
+        _id: "partyStates:invPS",
+        role: "INVITEE",
+        userId: "users:invUser",
+      },
+    ];
+    const caseData = {
+      _id: "cases:abc123",
+      status: "BOTH_PRIVATE_COACHING_COMPLETE",
+      initiatorPartyStateId: "partyStates:initPS",
+      inviteePartyStateId: "partyStates:invPS",
+    };
     const mockRunMutation = vi.fn();
-    const mockRunQuery = vi
-      .fn()
-      .mockResolvedValueOnce({
-        _id: "cases:abc123",
-        status: "BOTH_PRIVATE_COACHING_COMPLETE",
-        initiatorPartyStateId: "partyStates:initPS",
-        inviteePartyStateId: "partyStates:invPS",
-      })
-      .mockResolvedValueOnce([
-        {
-          _id: "partyStates:initPS",
-          role: "INITIATOR",
-          userId: "users:initUser",
-        },
-        {
-          _id: "partyStates:invPS",
-          role: "INVITEE",
-          userId: "users:invUser",
-        },
-      ])
-      .mockResolvedValueOnce([]);
+    // Dispatch by identity against the imported function refs. The convex
+    // proxy refs throw on String() coercion, so don't stringify them.
+    const mockRunQuery = vi.fn(async (queryRef: unknown) => {
+      if (queryRef === _getCase) return caseData;
+      if (queryRef === _getPartyStates) return partyStatesData;
+      if (queryRef === _getAllPrivateMessages) return [];
+      // enforceCostBudget calls _getCaseAiUsage — return a no-usage row so
+      // the cost gate doesn't short-circuit before generation.
+      return { totalCostUsd: 0, totalInputTokens: 0, totalOutputTokens: 0 };
+    });
     const mockActionCtx = {
       runMutation: mockRunMutation,
       runQuery: mockRunQuery,
@@ -244,13 +257,16 @@ describe("AC8: Synthesis is one-shot, non-streaming", () => {
     const handler =
       typeof generateSynthesis === "function"
         ? generateSynthesis
-        : generateSynthesis.handler ?? generateSynthesis;
+        : (generateSynthesis.handler ?? generateSynthesis);
 
+    // The handler may throw downstream of messages.create (e.g. on a missing
+    // privacy filter shape) — that's OK. We only care that it reached the
+    // SDK call and used the non-streaming shape. AC8 is about "stream"
+    // never being passed, so subsequent failure paths don't invalidate it.
     try {
       await handler(mockActionCtx as any, { caseId: "cases:abc123" as any });
     } catch {
-      // Action may throw due to incomplete mock context — that's OK.
-      // We only need to verify the SDK call shape if it was reached.
+      /* handler reached the SDK before failing — assertion below verifies */
     }
 
     // The mocked Anthropic SDK's messages.create must have been called

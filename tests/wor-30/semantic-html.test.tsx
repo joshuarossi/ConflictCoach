@@ -5,13 +5,18 @@ import { describe, test, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
+import { makeUseQueryDispatcher, apiMock } from "../__helpers__/convex-mocks";
 
 vi.mock("@convex-dev/auth/react", () => ({
   useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
+  useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
 }));
 
+vi.mock("../../convex/_generated/api", () => apiMock);
+
+const dispatch = makeUseQueryDispatcher();
 vi.mock("convex/react", () => ({
-  useQuery: () => ({ role: "USER", displayName: "Test User" }),
+  useQuery: (token: string) => dispatch(token),
   useMutation: () => vi.fn(),
 }));
 
@@ -22,7 +27,7 @@ describe("AC: Semantic HTML landmarks (<main>, <nav>)", () => {
     render(
       <MemoryRouter initialEntries={["/dashboard"]}>
         <AppRoutes />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const nav = document.querySelector("nav");
     expect(nav).not.toBeNull();
@@ -32,7 +37,7 @@ describe("AC: Semantic HTML landmarks (<main>, <nav>)", () => {
     render(
       <MemoryRouter initialEntries={["/dashboard"]}>
         <AppRoutes />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const main = document.querySelector("main");
     expect(main).not.toBeNull();
@@ -42,11 +47,10 @@ describe("AC: Semantic HTML landmarks (<main>, <nav>)", () => {
     render(
       <MemoryRouter initialEntries={["/dashboard"]}>
         <AppRoutes />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const main = document.querySelector("main");
     expect(main).not.toBeNull();
-    // Main should have child content (not be empty)
     expect(main!.children.length).toBeGreaterThan(0);
   });
 });

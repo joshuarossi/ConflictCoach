@@ -7,13 +7,18 @@ import { render, screen, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { MemoryRouter, useLocation } from "react-router-dom";
 
+import { makeUseQueryDispatcher, apiMock } from "../__helpers__/convex-mocks";
+
 vi.mock("@convex-dev/auth/react", () => ({
   useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
   useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
 }));
 
+vi.mock("../../convex/_generated/api", () => apiMock);
+
+const dispatch = makeUseQueryDispatcher();
 vi.mock("convex/react", () => ({
-  useQuery: () => null,
+  useQuery: (token: string) => dispatch(token),
   useMutation: () => vi.fn(),
 }));
 
@@ -53,9 +58,7 @@ describe("WOR-32: Post-auth redirect", () => {
 
   test("authenticated user visiting /login with returnTo param gets redirected appropriately", async () => {
     render(
-      <MemoryRouter
-        initialEntries={["/login?returnTo=%2Finvite%2Fabc123"]}
-      >
+      <MemoryRouter initialEntries={["/login?returnTo=%2Finvite%2Fabc123"]}>
         <AppRoutes />
         <LocationDisplay />
       </MemoryRouter>,

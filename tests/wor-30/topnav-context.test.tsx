@@ -3,22 +3,30 @@
  *     dashboard mode vs inside-case mode (with case name and phase indicator)
  */
 import { describe, test, expect, vi, beforeEach } from "vitest";
-import { render, screen } from "@testing-library/react";
+import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
+import {
+  makeUseQueryDispatcher,
+  apiMock,
+  defaultUser,
+  defaultCaseGet,
+  type ConvexMockOptions,
+} from "../__helpers__/convex-mocks";
 
 vi.mock("@convex-dev/auth/react", () => ({
   useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
   useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
 }));
 
-// Module-level mutable ref to control useQuery return value per test
-const queryResult = vi.hoisted(() => ({
-  current: { role: "USER", displayName: "Alex" } as Record<string, unknown>,
-}));
+vi.mock("../../convex/_generated/api", () => apiMock);
 
+// Per-test mutable options so we can swap inside-case vs dashboard data.
+const opts = vi.hoisted(() => ({
+  current: {} as ConvexMockOptions,
+}));
 vi.mock("convex/react", () => ({
-  useQuery: () => queryResult.current,
+  useQuery: (token: string) => makeUseQueryDispatcher(opts.current)(token),
   useMutation: () => vi.fn(),
 }));
 
@@ -27,28 +35,36 @@ import { AppRoutes } from "@/App";
 describe("AC: TopNav renders context-appropriate header", () => {
   describe("dashboard mode", () => {
     beforeEach(() => {
-      queryResult.current = { role: "USER", displayName: "Alex" };
+      opts.current = {
+        user: { ...defaultUser, displayName: "Alex" },
+        cases: [],
+      };
     });
 
     test("dashboard mode shows a simple header without case-specific info", () => {
       render(
         <MemoryRouter initialEntries={["/dashboard"]}>
           <AppRoutes />
-        </MemoryRouter>
+        </MemoryRouter>,
       );
       const nav = document.querySelector("nav");
       expect(nav).toBeInTheDocument();
-      // Dashboard nav should NOT contain phase indicators
       const navText = nav?.textContent || "";
-      expect(navText).not.toMatch(/Private Coaching|Ready for Joint|Joint Chat|Closed/);
+      expect(navText).not.toMatch(
+        /Private Coaching|Ready for Joint|Joint Chat|Closed/,
+      );
     });
   });
 
   describe("inside-case mode", () => {
     beforeEach(() => {
-      queryResult.current = {
-        status: "BOTH_PRIVATE_COACHING",
-        otherPartyName: "Jordan",
+      opts.current = {
+        user: { ...defaultUser, displayName: "Alex" },
+        caseGet: {
+          ...defaultCaseGet,
+          status: "BOTH_PRIVATE_COACHING",
+          otherPartyName: "Jordan",
+        },
       };
     });
 
@@ -56,14 +72,11 @@ describe("AC: TopNav renders context-appropriate header", () => {
       render(
         <MemoryRouter initialEntries={["/cases/case-123/private"]}>
           <AppRoutes />
-        </MemoryRouter>
+        </MemoryRouter>,
       );
       const nav = document.querySelector("nav");
       expect(nav).toBeInTheDocument();
-      // Should display the other party's name somewhere within the nav
       expect(nav).toHaveTextContent(/Jordan/);
-      // Should display a phase indicator within the nav (the page body may
-      // also contain placeholder phase labels — assert it's in the nav).
       expect(nav).toHaveTextContent(
         /Private Coaching|Ready for Joint|Joint Chat|Closed/,
       );

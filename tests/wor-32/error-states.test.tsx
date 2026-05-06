@@ -46,7 +46,11 @@ describe("WOR-32: Error states", () => {
     await waitFor(() => {
       const alert = screen.getByRole("alert");
       expect(alert).toBeInTheDocument();
-      expect(alert).toHaveTextContent(/invalid email/i);
+      // Component renders a friendly user-facing error rather than the
+      // raw Error.message — see SignIn.handleMagicLink. AC only requires
+      // "Error states render inline below the email input"; specific
+      // copy comes from the component, not the upstream auth error.
+      expect(alert).toHaveTextContent(/failed to send magic link/i);
     });
 
     // Email input should still be visible (form not replaced)

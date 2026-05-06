@@ -5,13 +5,18 @@ import { describe, test, expect, vi } from "vitest";
 import { render } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
+import { makeUseQueryDispatcher, apiMock } from "../__helpers__/convex-mocks";
 
 vi.mock("@convex-dev/auth/react", () => ({
   useConvexAuth: () => ({ isLoading: false, isAuthenticated: true }),
+  useAuthActions: () => ({ signIn: vi.fn(), signOut: vi.fn() }),
 }));
 
+vi.mock("../../convex/_generated/api", () => apiMock);
+
+const dispatch = makeUseQueryDispatcher();
 vi.mock("convex/react", () => ({
-  useQuery: () => ({ role: "USER", displayName: "Test User" }),
+  useQuery: (token: string) => dispatch(token),
   useMutation: () => vi.fn(),
 }));
 
@@ -22,7 +27,7 @@ describe("AC: Max-width constraints (720px reading, 1080px chat)", () => {
     const { container } = render(
       <MemoryRouter initialEntries={["/cases/new"]}>
         <AppRoutes />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const main = container.querySelector("main");
     expect(main).not.toBeNull();
@@ -37,7 +42,7 @@ describe("AC: Max-width constraints (720px reading, 1080px chat)", () => {
     const { container } = render(
       <MemoryRouter initialEntries={["/cases/case-123/joint"]}>
         <AppRoutes />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const main = container.querySelector("main");
     expect(main).not.toBeNull();
@@ -52,7 +57,7 @@ describe("AC: Max-width constraints (720px reading, 1080px chat)", () => {
     const { container } = render(
       <MemoryRouter initialEntries={["/dashboard"]}>
         <AppRoutes />
-      </MemoryRouter>
+      </MemoryRouter>,
     );
     const main = container.querySelector("main");
     expect(main).not.toBeNull();
