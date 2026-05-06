@@ -79,7 +79,6 @@ describe("AC: Skeleton screens for loading states", () => {
       };
     });
 
-    // @ts-expect-error WOR-69: CaseDetailView may not exist yet
     const { CaseDetailView } = await import("@/pages/CaseDetailView");
 
     const { container } = render(

@@ -17,7 +17,6 @@ vi.mock("convex/react", () => ({
   useAction: () => vi.fn(),
 }));
 
-// @ts-expect-error WOR-69 red-state import: NewCaseForm is created by task-implement.
 import { NewCaseForm } from "@/components/NewCaseForm";
 
 describe("AC: Form errors render inline below input fields", () => {

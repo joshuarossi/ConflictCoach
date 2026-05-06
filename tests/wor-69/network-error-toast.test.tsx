@@ -6,9 +6,7 @@ import { describe, test, expect, vi, beforeEach, afterEach } from "vitest";
 import { render, screen, act, waitFor } from "@testing-library/react";
 import "@testing-library/jest-dom";
 
-// @ts-expect-error WOR-69 red-state import: toast utility is created by task-implement.
 import { useNetworkErrorToast } from "@/hooks/useNetworkErrorToast";
-// @ts-expect-error WOR-69 red-state import: Toaster provider is created by task-implement.
 import { Toaster } from "@/components/ui/toaster";
 
 describe("AC: Network error toast notifications", () => {
