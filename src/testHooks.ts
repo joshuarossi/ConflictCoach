@@ -30,6 +30,10 @@ declare global {
       mutation: string,
       args: Record<string, unknown>,
     ) => Promise<unknown>;
+    __TEST_CALL_QUERY__?: (
+      query: string,
+      args: Record<string, unknown>,
+    ) => Promise<unknown>;
   }
 }
 
@@ -103,10 +107,44 @@ export function TestHooksMount(): null {
       return await convex.mutation(funcRef as never, args as never);
     };
 
+    window.__TEST_CALL_QUERY__ = async (
+      queryPath: string,
+      args: Record<string, unknown>,
+    ) => {
+      const colonIdx = queryPath.indexOf(":");
+      if (colonIdx === -1) {
+        throw new Error(
+          `Invalid query path "${queryPath}": expected "module:function" format`,
+        );
+      }
+      const moduleName = queryPath.slice(0, colonIdx);
+      const funcName = queryPath.slice(colonIdx + 1);
+
+      const apiAny = api as unknown as Record<
+        string,
+        Record<string, unknown>
+      >;
+      const mod = apiAny[moduleName];
+      if (!mod) {
+        throw new Error(
+          `Module "${moduleName}" not found in Convex API`,
+        );
+      }
+      const funcRef = mod[funcName];
+      if (!funcRef) {
+        throw new Error(
+          `Function "${funcName}" not found in module "${moduleName}"`,
+        );
+      }
+
+      return await convex.query(funcRef as never, args as never);
+    };
+
     return () => {
       delete window.__TEST_SIGN_IN__;
       delete window.__TEST_CREATE_CASE__;
       delete window.__TEST_CALL_MUTATION__;
+      delete window.__TEST_CALL_QUERY__;
     };
   }, [signIn, convex]);
 
