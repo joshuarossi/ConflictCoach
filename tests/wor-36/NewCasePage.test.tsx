@@ -119,9 +119,12 @@ describe("AC6: Submit calls mutation and routes to invite screen", () => {
     const submitButton = screen.getByRole("button", { name: /Start Case/i });
     await user.click(submitButton);
 
-    // Wait for async mutation to resolve
+    // Wait for async mutation to resolve. Navigate is called with
+    // (path, optional state object) — assert on path only since the
+    // state payload is an internal optimization for InviteSharingPage.
     await vi.waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith(
+      expect(mockNavigate).toHaveBeenCalled();
+      expect(mockNavigate.mock.calls[0][0]).toBe(
         "/cases/test-case-id-123/invite",
       );
     });
@@ -184,9 +187,11 @@ describe("AC6: Submit calls mutation and routes to invite screen", () => {
       }),
     );
 
-    // Should still navigate to invite page
+    // Should still navigate to invite page. Navigate is called with
+    // (path, optional state object) — assert on path only.
     await vi.waitFor(() => {
-      expect(mockNavigate).toHaveBeenCalledWith(
+      expect(mockNavigate).toHaveBeenCalled();
+      expect(mockNavigate.mock.calls[0][0]).toBe(
         "/cases/test-case-id-123/invite",
       );
     });

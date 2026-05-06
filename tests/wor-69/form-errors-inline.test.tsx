@@ -3,6 +3,7 @@
  */
 import { describe, test, expect, vi } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
+import userEvent from "@testing-library/user-event";
 import "@testing-library/jest-dom";
 import { MemoryRouter } from "react-router-dom";
 
@@ -19,13 +20,26 @@ vi.mock("convex/react", () => ({
 
 import { NewCaseForm } from "@/components/NewCaseForm";
 
+/**
+ * Helper: NewCaseForm uses progressive disclosure. The submit button only
+ * renders after a category is selected. Pick "Workplace" so the submit
+ * button is in the DOM, then we can click it to trigger validation.
+ */
+async function renderAndAdvanceToSubmit() {
+  const user = userEvent.setup();
+  const result = render(
+    <MemoryRouter>
+      <NewCaseForm />
+    </MemoryRouter>,
+  );
+  const workplaceRadio = screen.getByRole("radio", { name: /workplace/i });
+  await user.click(workplaceRadio);
+  return result;
+}
+
 describe("AC: Form errors render inline below input fields", () => {
   test("shows inline error below required field when submitted empty", async () => {
-    render(
-      <MemoryRouter>
-        <NewCaseForm />
-      </MemoryRouter>,
-    );
+    await renderAndAdvanceToSubmit();
 
     // Submit form without filling required fields
     const submitButton = screen.getByRole("button", { name: /create|start|submit/i });
@@ -39,11 +53,7 @@ describe("AC: Form errors render inline below input fields", () => {
   });
 
   test("inline error is associated with the relevant input field", async () => {
-    render(
-      <MemoryRouter>
-        <NewCaseForm />
-      </MemoryRouter>,
-    );
+    await renderAndAdvanceToSubmit();
 
     const submitButton = screen.getByRole("button", { name: /create|start|submit/i });
     fireEvent.click(submitButton);
@@ -59,11 +69,7 @@ describe("AC: Form errors render inline below input fields", () => {
   });
 
   test("form errors do NOT use toast notifications", async () => {
-    const { container } = render(
-      <MemoryRouter>
-        <NewCaseForm />
-      </MemoryRouter>,
-    );
+    const { container } = await renderAndAdvanceToSubmit();
 
     const submitButton = screen.getByRole("button", { name: /create|start|submit/i });
     fireEvent.click(submitButton);

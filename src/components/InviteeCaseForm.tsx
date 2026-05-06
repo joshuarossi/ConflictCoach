@@ -106,7 +106,12 @@ export function InviteeCaseForm({
           id="mainTopic"
           type="text"
           value={mainTopic}
-          onChange={(e) => setMainTopic(e.target.value)}
+          onChange={(e) => {
+            setMainTopic(e.target.value);
+            if (errors.mainTopic && e.target.value.trim()) {
+              setErrors((prev) => ({ ...prev, mainTopic: undefined }));
+            }
+          }}
           disabled={disabled}
           placeholder="What is this conflict about?"
           aria-describedby="mainTopic-counter mainTopic-error"

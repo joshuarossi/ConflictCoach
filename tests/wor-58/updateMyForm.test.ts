@@ -24,7 +24,7 @@ const updateMyForm: (
   updateMyFormMutation !== null &&
   "handler" in (updateMyFormMutation as Record<string, unknown>)
     ? (updateMyFormMutation as unknown as { handler: (...a: unknown[]) => Promise<void> }).handler
-    : (updateMyFormMutation as (ctx: unknown, args: Record<string, unknown>) => Promise<void>);
+    : (updateMyFormMutation as unknown as (ctx: unknown, args: Record<string, unknown>) => Promise<void>);
 
 // ---------------------------------------------------------------------------
 // Test constants
