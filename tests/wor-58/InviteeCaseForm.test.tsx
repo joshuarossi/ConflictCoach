@@ -15,7 +15,6 @@ import { describe, it, expect, vi } from "vitest";
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 
-// @ts-expect-error WOR-58 red-state import: implementation is created by task-implement.
 import { InviteeCaseForm } from "@/components/InviteeCaseForm";
 
 // ---------------------------------------------------------------------------

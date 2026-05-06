@@ -12,7 +12,6 @@
 import { describe, test, expect } from "vitest";
 import { ConvexError } from "convex/values";
 
-// @ts-expect-error WOR-58 red-state import: implementation is created by task-implement.
 import { updateMyForm as updateMyFormMutation } from "../../convex/cases/updateMyForm";
 
 // Convex mutation() returns a wrapper with `.handler`. Extract the handler so
