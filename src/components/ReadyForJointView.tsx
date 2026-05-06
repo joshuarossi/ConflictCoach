@@ -15,9 +15,10 @@ import { useNetworkErrorToast } from "@/hooks/useNetworkErrorToast";
 
 export interface ReadyForJointViewProps {
   caseId: string;
+  otherPartyName?: string;
 }
 
-export function ReadyForJointView({ caseId }: ReadyForJointViewProps) {
+export function ReadyForJointView({ caseId, otherPartyName: otherPartyNameProp }: ReadyForJointViewProps) {
   const navigate = useNavigate();
   const typedCaseId = caseId as Id<"cases">;
 
@@ -56,7 +57,7 @@ export function ReadyForJointView({ caseId }: ReadyForJointViewProps) {
   }
 
   const synthesisText = synthesisData?.synthesisText ?? null;
-  const otherPartyName = synthesisData?.otherPartyName ?? "the other party";
+  const otherPartyName = otherPartyNameProp ?? synthesisData?.otherPartyName ?? "the other party";
 
   return (
     <div className="mx-auto w-full max-w-[720px] px-4 py-8">
