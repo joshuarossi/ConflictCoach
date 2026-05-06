@@ -61,15 +61,47 @@ export interface StreamAIResponseOptions {
 // Internal mutations — called from the streaming action via ctx.runMutation
 // ---------------------------------------------------------------------------
 
+/**
+ * Fields the caller may pass through. Per-table schema validation still
+ * happens at db.insert (Convex enforces the table validator there), so
+ * we accept the full superset of message-table fields here. Anything
+ * not declared on the target table will be rejected by Convex when the
+ * insert runs.
+ *
+ * NOTE: this validator must list every field that any of privateMessages,
+ * jointMessages, or draftMessages declares in convex/schema.ts. If a new
+ * field is added to one of those tables, add it here too.
+ */
+const insertStreamingMessageArgs = {
+  table: v.union(
+    v.literal("privateMessages"),
+    v.literal("jointMessages"),
+    v.literal("draftMessages"),
+  ),
+  // Common
+  content: v.string(),
+  status: v.union(
+    v.literal("STREAMING"),
+    v.literal("COMPLETE"),
+    v.literal("ERROR"),
+  ),
+  createdAt: v.number(),
+  caseId: v.optional(v.id("cases")),
+  // privateMessages
+  userId: v.optional(v.id("users")),
+  role: v.optional(v.union(v.literal("USER"), v.literal("AI"))),
+  // jointMessages
+  authorType: v.optional(v.union(v.literal("USER"), v.literal("COACH"))),
+  authorUserId: v.optional(v.id("users")),
+  isIntervention: v.optional(v.boolean()),
+  replyToId: v.optional(v.id("jointMessages")),
+  // draftMessages
+  draftSessionId: v.optional(v.id("draftSessions")),
+};
+
 /** Insert a placeholder message row with status=STREAMING and empty content. */
 export const insertStreamingMessage = internalMutation({
-  args: {
-    table: v.union(
-      v.literal("privateMessages"),
-      v.literal("jointMessages"),
-      v.literal("draftMessages"),
-    ),
-  },
+  args: insertStreamingMessageArgs,
   handler: async (ctx: any, args: any) => {
     const { table, ...fields } = args;
     if (table === "privateMessages") {
@@ -81,6 +113,28 @@ export const insertStreamingMessage = internalMutation({
     }
   },
 });
+
+/**
+ * Caller-supplied fields that are used by streaming infrastructure (mock-mode
+ * branching, logging, etc.) but are NOT persisted on the message row. Strip
+ * these before forwarding to the insert mutation, otherwise Convex rejects
+ * them as "extra fields not in the validator."
+ *
+ * Keep in sync with any new transient fields added to StreamAIResponseOptions
+ * .messageFields.
+ */
+const TRANSIENT_MESSAGE_FIELDS = ["aiRole", "partyRole"] as const;
+
+function stripTransientFields(
+  fields: Record<string, unknown>,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = {};
+  for (const [k, v] of Object.entries(fields)) {
+    if ((TRANSIENT_MESSAGE_FIELDS as readonly string[]).includes(k)) continue;
+    out[k] = v;
+  }
+  return out;
+}
 
 /** Patch a message row with partial fields (content, status, tokens). */
 export const updateStreamingMessage = internalMutation({
@@ -143,12 +197,15 @@ export async function streamAIResponse(
     caseId,
   } = options;
 
-  // 1. Insert placeholder message with status=STREAMING and empty content
+  // 1. Insert placeholder message with status=STREAMING and empty content.
+  // Strip transient fields (aiRole, partyRole) — these are used by streaming
+  // infrastructure (mock-mode branching) but not persisted on message rows.
+  const persistedFields = stripTransientFields(messageFields);
   const messageId: string = await ctx.runMutation(
     insertRef,
     {
       table,
-      ...messageFields,
+      ...persistedFields,
       content: "",
       status: "STREAMING" as const,
       createdAt: Date.now(),
