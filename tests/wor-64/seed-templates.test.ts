@@ -15,14 +15,24 @@ import {
   type MockTemplateVersion,
 } from "./helpers";
 
-const EXPECTED_CATEGORIES = ["family", "personal", "workplace"] as const;
+// Updated to cover all 5 categories listed in cases/create.ts:VALID_CATEGORIES.
+// Adding contractual + other closed a real prod bug: seed only seeded 3
+// categories but the create mutation accepted 5, so users picking
+// "contractual" or "other" got NOT_FOUND.
+const EXPECTED_CATEGORIES = [
+  "contractual",
+  "family",
+  "other",
+  "personal",
+  "workplace",
+] as const;
 
 beforeEach(() => {
   vi.stubEnv("NODE_ENV", "development");
 });
 
 describe("AC3: Creates 3 default templates (workplace, family, personal)", () => {
-  test("creates exactly 3 templates", async () => {
+  test("creates exactly 5 templates (one per VALID_CATEGORIES entry)", async () => {
     const seedModule = await importSeedModule();
     const handler = getSeedHandler(seedModule);
     const { ctx, getTable } = createMockActionContext();
@@ -30,10 +40,10 @@ describe("AC3: Creates 3 default templates (workplace, family, personal)", () =>
     await callHandler(handler, ctx);
 
     const templates = getTable<MockTemplate>("templates");
-    expect(templates).toHaveLength(3);
+    expect(templates).toHaveLength(5);
   });
 
-  test("templates cover all three required categories", async () => {
+  test("templates cover all five required categories", async () => {
     const seedModule = await importSeedModule();
     const handler = getSeedHandler(seedModule);
     const { ctx, getTable } = createMockActionContext();
@@ -79,7 +89,7 @@ describe("AC3: Creates 3 default templates (workplace, family, personal)", () =>
 });
 
 describe("AC4: Each template has an initial templateVersion (v1)", () => {
-  test("creates exactly 3 template versions (one per template)", async () => {
+  test("creates exactly 5 template versions (one per template)", async () => {
     const seedModule = await importSeedModule();
     const handler = getSeedHandler(seedModule);
     const { ctx, getTable } = createMockActionContext();
@@ -87,7 +97,7 @@ describe("AC4: Each template has an initial templateVersion (v1)", () => {
     await callHandler(handler, ctx);
 
     const versions = getTable<MockTemplateVersion>("templateVersions");
-    expect(versions).toHaveLength(3);
+    expect(versions).toHaveLength(5);
   });
 
   test("each version has version number 1", async () => {
