@@ -7,6 +7,8 @@ import { ChatWindow, type ChatMessage } from "./ChatWindow";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useNetworkErrorToast } from "@/hooks/useNetworkErrorToast";
 import { ConnectedDraftCoachPanel } from "./DraftCoachPanel";
+import { CaseClosureModal } from "./CaseClosureModal";
+import { ClosureConfirmationBanner } from "./ClosureConfirmationBanner";
 import { Sparkles, ArrowLeft } from "lucide-react";
 import {
   Dialog,
@@ -15,16 +17,6 @@ import {
   DialogTitle,
   DialogDescription,
 } from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 
 // ---------------------------------------------------------------------------
 // Props-based presentational component (used directly by unit tests)
@@ -58,8 +50,20 @@ export interface JointChatViewProps {
   onSendMessage?: (content: string) => void;
   /** Opens the Draft Coach panel */
   onOpenDraftCoach?: () => void;
-  /** Opens the closure modal/flow */
-  onOpenClosure?: () => void;
+  /** Propose closure with summary (resolved path) */
+  onProposeClosure?: (summary: string) => void;
+  /** Unilateral close (not resolved path) */
+  onUnilateralClose?: (reason?: string) => void;
+  /** Confirm a closure proposal from the other party */
+  onConfirmClosure?: () => void;
+  /** Reject a closure proposal from the other party */
+  onRejectClosure?: () => void;
+  /** Whether the other party has proposed closure */
+  closureProposed?: boolean;
+  /** The proposer's summary text */
+  closureSummary?: string;
+  /** Name of the party who proposed closure */
+  closureProposerName?: string;
   onBack?: () => void;
 }
 
@@ -74,7 +78,13 @@ export function JointChatView({
   synthesisText,
   onSendMessage,
   onOpenDraftCoach,
-  onOpenClosure,
+  onProposeClosure,
+  onUnilateralClose,
+  onConfirmClosure,
+  onRejectClosure,
+  closureProposed = false,
+  closureSummary,
+  closureProposerName,
   onBack,
 }: JointChatViewProps) {
   const [guidanceOpen, setGuidanceOpen] = useState(false);
@@ -123,10 +133,21 @@ export function JointChatView({
     [messages, initiatorUserId, initiatorName, inviteeName],
   );
 
-  const handleClosureConfirm = useCallback(() => {
-    setClosureOpen(false);
-    onOpenClosure?.();
-  }, [onOpenClosure]);
+  const handleProposeClosure = useCallback(
+    (summary: string) => {
+      setClosureOpen(false);
+      onProposeClosure?.(summary);
+    },
+    [onProposeClosure],
+  );
+
+  const handleUnilateralClose = useCallback(
+    (reason?: string) => {
+      setClosureOpen(false);
+      onUnilateralClose?.(reason);
+    },
+    [onUnilateralClose],
+  );
 
   return (
     <div
@@ -170,6 +191,16 @@ export function JointChatView({
       {/* Chat area */}
       <div className="mx-auto flex w-full max-w-[1080px] flex-1 flex-col overflow-hidden">
         <ChatWindow messages={chatMessages} isStreaming={isStreaming} />
+
+        {/* Closure confirmation banner (shown to the other party) */}
+        {closureProposed && (
+          <ClosureConfirmationBanner
+            proposerName={closureProposerName ?? otherPartyName}
+            summaryText={closureSummary}
+            onConfirm={() => onConfirmClosure?.()}
+            onReject={() => onRejectClosure?.()}
+          />
+        )}
 
         {/* Input area with Send + Draft with Coach */}
         <div className="flex items-end gap-2 border-t border-border-default px-4 py-3">
@@ -235,23 +266,13 @@ export function JointChatView({
       </Dialog>
 
       {/* Closure modal */}
-      <AlertDialog open={closureOpen} onOpenChange={setClosureOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Close this case?</AlertDialogTitle>
-            <AlertDialogDescription>
-              Proposing closure will notify the other party. They can accept or
-              decline. You can also choose to close unilaterally.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleClosureConfirm}>
-              Propose closure
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CaseClosureModal
+        open={closureOpen}
+        onOpenChange={setClosureOpen}
+        otherPartyName={otherPartyName}
+        onProposeClosure={handleProposeClosure}
+        onUnilateralClose={handleUnilateralClose}
+      />
     </div>
   );
 }
@@ -275,9 +296,12 @@ export function ConnectedJointChatView() {
 
   // Mutations
   const sendMessage = useMutation(api.jointChat.sendUserMessage);
-  const proposeClosure = useMutation(api.caseClosure.proposeClosure);
+  const proposeClosureMutation = useMutation(api.caseClosure.proposeClosure);
+  const confirmClosureMutation = useMutation(api.caseClosure.confirmClosure);
+  const rejectClosureMutation = useMutation(api.caseClosure.rejectClosure);
+  const unilateralCloseMutation = useMutation(api.caseClosure.unilateralClose);
 
-  // Network error toast (DesignDoc §6.2) — supersedes inline mutationError
+  // Network error toast (DesignDoc §6.2)
   const showNetworkError = useNetworkErrorToast();
   const [isDraftCoachOpen, setIsDraftCoachOpen] = useState(false);
 
@@ -294,15 +318,55 @@ export function ConnectedJointChatView() {
     [sendMessage, typedCaseId, showNetworkError],
   );
 
-  const handleProposeClosure = useCallback(async () => {
+  const handleProposeClosure = useCallback(
+    async (summary: string) => {
+      try {
+        await proposeClosureMutation({
+          caseId: typedCaseId,
+          closureSummary: summary,
+        });
+      } catch (err) {
+        showNetworkError(
+          err instanceof Error ? err.message : "Failed to propose closure",
+        );
+      }
+    },
+    [proposeClosureMutation, typedCaseId, showNetworkError],
+  );
+
+  const handleUnilateralClose = useCallback(
+    async (reason?: string) => {
+      try {
+        await unilateralCloseMutation({ caseId: typedCaseId, reason });
+      } catch (err) {
+        showNetworkError(
+          err instanceof Error ? err.message : "Failed to close case",
+        );
+      }
+    },
+    [unilateralCloseMutation, typedCaseId, showNetworkError],
+  );
+
+  const handleConfirmClosure = useCallback(async () => {
     try {
-      await proposeClosure({ caseId: typedCaseId });
+      await confirmClosureMutation({ caseId: typedCaseId });
+      navigate(`/cases/${caseId}/closed`);
     } catch (err) {
       showNetworkError(
-        err instanceof Error ? err.message : "Failed to propose closure",
+        err instanceof Error ? err.message : "Failed to confirm closure",
       );
     }
-  }, [proposeClosure, typedCaseId, showNetworkError]);
+  }, [confirmClosureMutation, typedCaseId, navigate, caseId, showNetworkError]);
+
+  const handleRejectClosure = useCallback(async () => {
+    try {
+      await rejectClosureMutation({ caseId: typedCaseId });
+    } catch (err) {
+      showNetworkError(
+        err instanceof Error ? err.message : "Failed to reject closure",
+      );
+    }
+  }, [rejectClosureMutation, typedCaseId, showNetworkError]);
 
   const handleEditDraft = useCallback((draftText: string) => {
     setIsDraftCoachOpen(false);
@@ -325,6 +389,17 @@ export function ConnectedJointChatView() {
       ) ?? false,
     [messagesData],
   );
+
+  // Redirect to closed view when case transitions to a closed status
+  useEffect(() => {
+    if (
+      caseData &&
+      (caseData.status === "CLOSED_RESOLVED" ||
+        caseData.status === "CLOSED_UNRESOLVED")
+    ) {
+      navigate(`/cases/${caseId}/closed`, { replace: true });
+    }
+  }, [caseData, caseId, navigate]);
 
   // Loading state — skeleton chat bubbles per DesignDoc §6.3
   if (caseData === undefined || partyData === undefined) {
@@ -409,7 +484,13 @@ export function ConnectedJointChatView() {
         synthesisText={synthesisData?.synthesisText}
         onSendMessage={handleSendMessage}
         onOpenDraftCoach={() => setIsDraftCoachOpen(true)}
-        onOpenClosure={handleProposeClosure}
+        onProposeClosure={handleProposeClosure}
+        onUnilateralClose={handleUnilateralClose}
+        onConfirmClosure={handleConfirmClosure}
+        onRejectClosure={handleRejectClosure}
+        closureProposed={partyData.otherPhaseOnly?.closureProposed === true}
+        closureSummary={caseData.closureSummary as string | undefined}
+        closureProposerName={partyData.otherPartyName}
         onBack={() => navigate(`/cases/${caseId}`)}
       />
       <ConnectedDraftCoachPanel
