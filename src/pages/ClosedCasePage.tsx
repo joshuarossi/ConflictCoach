@@ -73,12 +73,11 @@ export interface ClosedCaseViewProps {
   }>;
   synthesisText?: string | null;
   initiatorUserId?: string;
-  currentUserId?: string;
   defaultTab?: string;
   onTabChange?: (tab: string) => void;
 }
 
-export function ClosedCaseView({
+function ClosedCaseViewInner({
   caseName = "",
   category = "",
   closedAt,
@@ -135,7 +134,7 @@ export function ClosedCaseView({
       </div>
 
       {/* AC1: Header with case name, category, closure date, outcome */}
-      <header className="mb-6">
+      <header className="mb-6" data-testid="closed-case-header">
         <h1 className="text-2xl font-bold text-[var(--text-primary)]">
           {caseName}
         </h1>
@@ -156,7 +155,7 @@ export function ClosedCaseView({
       {status === "CLOSED_RESOLVED" && closureSummary && (
         <div
           className="mb-6 rounded-lg border border-[var(--success)]/30 bg-[var(--success)]/5 p-4"
-          data-testid="closure-summary"
+          data-testid="closure-summary-card"
         >
           <h2 className="mb-2 text-sm font-semibold text-[var(--success)]">
             Resolution Summary
@@ -228,7 +227,7 @@ export function ClosedCaseView({
 // Connected wrapper — uses Convex hooks, renders at /cases/:caseId/closed
 // ---------------------------------------------------------------------------
 
-export function ClosedCasePage() {
+export function ClosedCaseView() {
   const { caseId: caseIdParam } = useParams<{ caseId: string }>();
   const [searchParams, setSearchParams] = useSearchParams();
   const caseId = caseIdParam as Id<"cases">;
@@ -273,8 +272,13 @@ export function ClosedCasePage() {
   }
 
   // Derive case name from initiator's partyState mainTopic
+  const partyDataAny = partyData as Record<string, unknown>;
+  const selfRecord = partyDataAny?.self as Record<string, unknown> | undefined;
   const caseName =
-    partyData.self?.mainTopic ?? caseData.otherPartyName ?? "Untitled Case";
+    (selfRecord?.mainTopic as string) ??
+    (partyDataAny?.mainTopic as string) ??
+    caseData.otherPartyName ??
+    "Untitled Case";
 
   const normalizedJointMessages = (
     jointMessages as Array<{
@@ -312,9 +316,15 @@ export function ClosedCasePage() {
     createdAt: m.createdAt as number,
   }));
 
+  // Handle both raw string and {synthesisText: string} shapes
+  const resolvedSynthesis =
+    typeof synthesisData === "string"
+      ? synthesisData
+      : synthesisData?.synthesisText ?? null;
+
   return (
-    <ClosedCaseView
-      caseName={caseName}
+    <ClosedCaseViewInner
+      caseName={caseName as string}
       category={caseData.category as string}
       closedAt={(caseData.closedAt as number) ?? (caseData.updatedAt as number)}
       status={caseData.status as string}
@@ -326,11 +336,13 @@ export function ClosedCasePage() {
       }
       jointMessages={normalizedJointMessages}
       privateMessages={normalizedPrivateMessages}
-      synthesisText={synthesisData?.synthesisText ?? null}
+      synthesisText={resolvedSynthesis}
       initiatorUserId={caseData.initiatorUserId as string}
-      currentUserId={partyData.self?._id as string}
       defaultTab={currentTab}
       onTabChange={handleTabChange}
     />
   );
 }
+
+// Backward-compat alias for App.tsx
+export { ClosedCaseView as ClosedCasePage };
