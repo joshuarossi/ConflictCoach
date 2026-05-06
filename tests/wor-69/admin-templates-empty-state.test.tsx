@@ -27,9 +27,12 @@ describe("AC: Admin templates empty state", () => {
       </MemoryRouter>,
     );
 
+    // AC copy "No templates yet. The app will use a built-in default
+    // baseline." — page may include additional explanatory prose after it
+    // (e.g. "Create a template when you want to tune…"). Substring match.
     expect(
       screen.getByText(
-        "No templates yet. The app will use a built-in default baseline.",
+        /No templates yet\. The app will use a built-in default baseline\./,
       ),
     ).toBeInTheDocument();
   });
