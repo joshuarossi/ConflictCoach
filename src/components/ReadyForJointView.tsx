@@ -79,7 +79,7 @@ export function ReadyForJointView({ caseId, otherPartyName: otherPartyNameProp }
         {/* Privacy indicator */}
         <div className="mb-4 flex items-center gap-2">
           <Lock size={16} strokeWidth={1.5} aria-label="Private" />
-          <span className="text-sm text-text-secondary">
+          <span className="text-label text-text-secondary">
             Private to you — {otherPartyName} has their own version
           </span>
         </div>
@@ -105,7 +105,7 @@ export function ReadyForJointView({ caseId, otherPartyName: otherPartyNameProp }
           {isEntering ? "Entering\u2026" : "Enter Joint Session"}
         </Button>
 
-        <p className="text-sm text-text-secondary">
+        <p className="text-label text-text-secondary">
           {otherPartyName} will see you&apos;ve entered when they enter too.
         </p>
       </div>

@@ -5,7 +5,7 @@
 export function SoloBanner() {
   return (
     <div
-      className="bg-amber-50 border-b border-amber-200 px-4 py-2 text-center text-sm font-medium text-amber-800"
+      className="bg-warning-subtle border-b border-warning px-4 py-2 text-center text-label font-medium text-warning"
       data-testid="solo-banner"
     >
       Solo Mode — You are playing both parties

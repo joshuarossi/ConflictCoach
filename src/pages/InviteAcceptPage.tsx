@@ -22,12 +22,12 @@ export function InviteAcceptPage() {
   if (!token) {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-4">
-        <div className="w-full max-w-[480px] rounded-lg border bg-white p-8 shadow-sm text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">Invalid Invite Link</h1>
-          <p className="text-gray-600 mb-6">This invite link is missing a token.</p>
+        <div className="w-full max-w-[480px] rounded-lg border bg-surface p-8 shadow-1 text-center">
+          <h1 className="text-h1 font-medium text-text-primary mb-4">Invalid Invite Link</h1>
+          <p className="text-text-secondary mb-6">This invite link is missing a token.</p>
           <div className="flex flex-col gap-3">
-            <Link to="/login" className="text-blue-600 hover:underline">Log in</Link>
-            <Link to="/dashboard" className="text-blue-600 hover:underline">Go to dashboard</Link>
+            <Link to="/login" className="text-accent hover:underline">Log in</Link>
+            <Link to="/dashboard" className="text-accent hover:underline">Go to dashboard</Link>
           </div>
         </div>
       </div>
@@ -37,8 +37,8 @@ export function InviteAcceptPage() {
   // Loading states
   if (authLoading || invite === undefined) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-50">
-        <p className="text-gray-500">Loading…</p>
+      <div className="flex min-h-screen items-center justify-center bg-canvas">
+        <p className="text-text-tertiary">Loading…</p>
       </div>
     );
   }
@@ -50,16 +50,16 @@ export function InviteAcceptPage() {
   if (invite === null || invite.status === "INVALID" || invite.status === "CONSUMED") {
     return (
       <div className="flex flex-col items-center justify-center py-24 px-4">
-        <div className="w-full max-w-[480px] rounded-lg border bg-white p-8 shadow-sm text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="w-full max-w-[480px] rounded-lg border bg-surface p-8 shadow-1 text-center">
+          <h1 className="text-h1 font-medium text-text-primary mb-4">
             Invite No Longer Available
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-text-secondary mb-6">
             This invite link has already been used or is no longer valid.
           </p>
           <div className="flex flex-col gap-3">
-            <Link to="/login" className="text-blue-600 hover:underline">Log in</Link>
-            <Link to="/dashboard" className="text-blue-600 hover:underline">Go to dashboard</Link>
+            <Link to="/login" className="text-accent hover:underline">Log in</Link>
+            <Link to="/dashboard" className="text-accent hover:underline">Go to dashboard</Link>
           </div>
         </div>
       </div>
@@ -75,11 +75,11 @@ export function InviteAcceptPage() {
 
     return (
       <div className="flex flex-col items-center justify-center py-24 px-4">
-        <div className="w-full max-w-[480px] rounded-lg border bg-white p-8 shadow-sm text-center">
-          <h1 className="text-2xl font-bold text-gray-900 mb-4">
+        <div className="w-full max-w-[480px] rounded-lg border bg-surface p-8 shadow-1 text-center">
+          <h1 className="text-h1 font-medium text-text-primary mb-4">
             {invite.initiatorName} has invited you to work through something together
           </h1>
-          <p className="text-gray-600 mb-6">
+          <p className="text-text-secondary mb-6">
             Conflict Coach is a guided space for two people to work through a
             disagreement with the help of an AI mediator. Each person gets
             private coaching before a joint conversation.
@@ -87,7 +87,7 @@ export function InviteAcceptPage() {
           <button
             type="button"
             onClick={handleSignIn}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+            className="w-full rounded-md bg-accent px-4 py-2 text-label font-medium text-accent-on hover:bg-accent-hover"
           >
             Sign in to continue
           </button>
@@ -128,34 +128,34 @@ export function InviteAcceptPage() {
 
   return (
     <div className="flex flex-col items-center justify-center py-24 px-4">
-      <div className="w-full max-w-[480px] rounded-lg border bg-white p-8 shadow-sm">
-        <h1 className="text-2xl font-bold text-gray-900 mb-4 text-center">
+      <div className="w-full max-w-[480px] rounded-lg border bg-surface p-8 shadow-1">
+        <h1 className="text-h1 font-medium text-text-primary mb-4 text-center">
           {invite.initiatorName} has invited you to work through something together
         </h1>
 
         <div className="mb-4 space-y-2">
           {invite.mainTopic && (
             <div>
-              <span className="text-sm font-medium text-gray-500">Topic</span>
-              <p className="text-gray-900">{invite.mainTopic}</p>
+              <span className="text-label font-medium text-text-tertiary">Topic</span>
+              <p className="text-text-primary">{invite.mainTopic}</p>
             </div>
           )}
           <div>
-            <span className="text-sm font-medium text-gray-500">Category</span>
-            <p className="text-gray-900 capitalize">{invite.category}</p>
+            <span className="text-label font-medium text-text-tertiary">Category</span>
+            <p className="text-text-primary capitalize">{invite.category}</p>
           </div>
         </div>
 
         {/* Privacy callout */}
-        <div className="rounded-md bg-blue-50 p-4 mb-6">
-          <p className="text-sm text-blue-900">
+        <div className="rounded-md bg-accent-subtle p-4 mb-6">
+          <p className="text-label text-text-primary">
             {invite.initiatorName} wrote this in the shared summary. You&apos;ll
             have your own private space to share your perspective.
           </p>
         </div>
 
         {error && (
-          <p role="alert" className="text-sm text-red-600 mb-4">
+          <p role="alert" className="text-label text-danger mb-4">
             {error}
           </p>
         )}
@@ -165,7 +165,7 @@ export function InviteAcceptPage() {
             type="button"
             onClick={handleAccept}
             disabled={accepting || declining}
-            className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+            className="w-full rounded-md bg-accent px-4 py-2 text-label font-medium text-accent-on hover:bg-accent-hover disabled:opacity-50"
           >
             {accepting ? "Accepting…" : "Accept"}
           </button>
@@ -173,7 +173,7 @@ export function InviteAcceptPage() {
             type="button"
             onClick={handleDecline}
             disabled={accepting || declining}
-            className="w-full rounded-md border px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            className="w-full rounded-md border border-border-default px-4 py-2 text-label font-medium text-text-secondary hover:bg-surface-subtle disabled:opacity-50"
           >
             {declining ? "Declining…" : "Decline"}
           </button>

@@ -28,7 +28,7 @@ export function AppLayout({ contentWidth = "reading" }: AppLayoutProps) {
   const isSolo = caseData?.isSolo === true;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-canvas">
       <TopNav>{isSolo && <PartyToggle />}</TopNav>
       <main>
         <div className={`mx-auto px-4 py-6 ${maxWidthClass}`}>

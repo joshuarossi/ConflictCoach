@@ -119,7 +119,7 @@ function CaseRowItem({ caseItem }: { caseItem: CaseRow }) {
     >
       <div className="flex items-center gap-3 min-w-0 flex-1">
         <span
-          className={`${indicator.colorClass} text-lg shrink-0`}
+          className={`${indicator.colorClass} text-h3 shrink-0`}
           aria-label={indicator.label}
           data-testid="status-indicator"
         >
@@ -132,7 +132,7 @@ function CaseRowItem({ caseItem }: { caseItem: CaseRow }) {
             </span>
             {caseItem.isSolo && (
               <span
-                className="inline-flex items-center rounded-full bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800"
+                className="inline-flex items-center rounded-full bg-warning-subtle px-2 py-0.5 text-timestamp font-medium text-warning"
                 data-testid="solo-badge"
               >
                 Solo
@@ -166,7 +166,7 @@ export function Dashboard() {
     return (
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-h1 font-bold text-text-primary">Dashboard</h1>
+          <h1 className="text-h1 font-medium text-text-primary">Dashboard</h1>
         </div>
         <div className="flex flex-col gap-2">
           {[0, 1, 2].map((i) => (
@@ -197,7 +197,7 @@ export function Dashboard() {
     return (
       <div>
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-h1 font-bold text-text-primary">Dashboard</h1>
+          <h1 className="text-h1 font-medium text-text-primary">Dashboard</h1>
           <Link to="/cases/new">
             <Button>+ New Case</Button>
           </Link>
@@ -213,7 +213,7 @@ export function Dashboard() {
   return (
     <div>
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-h1 font-bold text-text-primary">Dashboard</h1>
+        <h1 className="text-h1 font-medium text-text-primary">Dashboard</h1>
         <Link to="/cases/new">
           <Button>+ New Case</Button>
         </Link>
@@ -221,7 +221,7 @@ export function Dashboard() {
 
       {activeCases.length > 0 && (
         <section className="mb-8">
-          <h2 className="text-h2 font-semibold text-text-primary mb-3">
+          <h2 className="text-h2 font-medium text-text-primary mb-3">
             Active
           </h2>
           <div className="flex flex-col gap-2">
@@ -236,7 +236,7 @@ export function Dashboard() {
         <section>
           <button
             onClick={() => setClosedExpanded(!closedExpanded)}
-            className="flex items-center gap-2 text-h2 font-semibold text-text-primary mb-3 hover:text-accent transition-colors"
+            className="flex items-center gap-2 text-h2 font-medium text-text-primary mb-3 hover:text-accent transition-colors"
             aria-expanded={closedExpanded}
           >
             <span className="text-label">{closedExpanded ? "▼" : "▶"}</span>

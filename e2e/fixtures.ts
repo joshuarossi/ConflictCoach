@@ -55,6 +55,31 @@ export async function createTestUser(_page?: Page): Promise<TestUser> {
 }
 
 /**
+ * Seeds the admin user (admin@conflictcoach.dev) via the seed mutation and
+ * returns credentials for login. The seed mutation is idempotent — safe to
+ * call multiple times. Requires test hooks to be mounted, so the page must
+ * have navigated to at least "/" first (handled by loginAsUser).
+ */
+export async function createTestAdminUser(page: Page): Promise<TestUser> {
+  // Navigate so test hooks mount (callMutation needs them)
+  await page.goto("/");
+  await page.waitForFunction(
+    () =>
+      (window as unknown as { __TEST_CALL_MUTATION__?: unknown })
+        .__TEST_CALL_MUTATION__ !== undefined,
+    null,
+    { timeout: 10000 },
+  );
+  // Seed ensures admin@conflictcoach.dev exists with role ADMIN
+  await callMutation(page, "seed:seed", {});
+  return {
+    email: "admin@conflictcoach.dev",
+    password: "admin-test-password",
+    name: "Admin",
+  };
+}
+
+/**
  * Authenticates the Playwright browser context as the given user via the
  * test-mode Password provider. After this resolves, subsequent navigation
  * sees the user as signed in.

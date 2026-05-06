@@ -74,11 +74,11 @@ function UserMenu() {
     <div className="relative" ref={menuRef}>
       <button
         onClick={() => setOpen((v) => !v)}
-        className="flex items-center gap-2 rounded-md px-3 py-1.5 text-sm text-gray-700 hover:bg-gray-100"
+        className="flex items-center gap-2 rounded-md px-3 py-1.5 text-label text-text-secondary hover:bg-surface-subtle"
         aria-label="User menu"
         data-testid="user-menu-button"
       >
-        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-gray-200 text-xs font-medium text-gray-600">
+        <span className="inline-flex h-6 w-6 items-center justify-center rounded-full bg-surface-subtle text-timestamp font-medium text-text-secondary">
           {(user?.displayName || user?.email || "?")[0].toUpperCase()}
         </span>
         <span className="hidden sm:inline">{displayLabel}</span>
@@ -86,15 +86,15 @@ function UserMenu() {
       {open && (
         <div
           role="menu"
-          className="absolute right-0 top-full z-10 mt-1 w-48 rounded-md border bg-white py-1 shadow-lg"
+          className="absolute right-0 top-full z-10 mt-1 w-48 rounded-md border bg-surface py-1 shadow-3"
         >
-          <div className="border-b px-3 py-2 text-sm text-gray-500 truncate">
+          <div className="border-b px-3 py-2 text-label text-text-tertiary truncate">
             {user?.email}
           </div>
           <button
             role="menuitem"
             onClick={handleLogout}
-            className="w-full px-3 py-2 text-left text-sm text-gray-700 hover:bg-gray-100"
+            className="w-full px-3 py-2 text-left text-label text-text-secondary hover:bg-surface-subtle"
             data-testid="logout-button"
           >
             Log out
@@ -133,20 +133,20 @@ export function TopNav({ children }: TopNavProps) {
       ? `Case with ${otherPartyName}`
       : `Case ${params.caseId}`;
     return (
-      <nav aria-label="Case navigation" className="border-b bg-white px-4 py-3">
+      <nav aria-label="Case navigation" className="border-b bg-surface px-4 py-3">
         <div className="flex items-center gap-3">
           <Link
             to="/dashboard"
-            className="text-sm text-blue-600 hover:text-blue-800"
+            className="text-label text-accent hover:text-accent-hover"
           >
             ← Back to Dashboard
           </Link>
-          <span className="text-gray-300">|</span>
-          <span className="text-sm font-medium text-gray-900">
+          <span className="text-text-tertiary">|</span>
+          <span className="text-label font-medium text-text-primary">
             {caseLabel}
             {phaseLabel && (
               <>
-                <span className="text-gray-400"> · </span>
+                <span className="text-text-tertiary"> · </span>
                 <span data-testid="phase-indicator">{phaseLabel}</span>
               </>
             )}
@@ -159,9 +159,9 @@ export function TopNav({ children }: TopNavProps) {
 
   // Dashboard / non-case mode
   return (
-    <nav aria-label="Main navigation" className="border-b bg-white px-4 py-3">
+    <nav aria-label="Main navigation" className="border-b bg-surface px-4 py-3">
       <div className="flex items-center justify-between">
-        <Link to="/dashboard" className="text-lg font-bold text-gray-900">
+        <Link to="/dashboard" className="text-h3 font-medium text-text-primary">
           Conflict Coach
         </Link>
         <div className="flex items-center gap-4">

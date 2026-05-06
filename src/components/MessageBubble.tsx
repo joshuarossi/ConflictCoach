@@ -135,7 +135,7 @@ export function MessageBubble({
         {isJoint && (
           <div
             className={cn(
-              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-medium text-white",
+              "flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-timestamp font-medium text-accent-on",
               avatarClass,
               avatarBg,
             )}

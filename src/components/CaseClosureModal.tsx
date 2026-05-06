@@ -182,29 +182,29 @@ export function CaseClosureModal({
                 required
               />
               {validationError && (
-                <p className="text-sm text-red-600" role="alert">
+                <p className="text-label text-danger" role="alert">
                   {validationError}
                 </p>
               )}
-              <p className="text-sm text-text-secondary">
+              <p className="text-label text-text-secondary">
                 {otherPartyName} will see this summary and confirm. The case
                 won&apos;t close until you both agree.
               </p>
-              <p className="text-sm text-text-secondary">
+              <p className="text-label text-text-secondary">
                 This closes the case for both of you.
               </p>
               <div className="mt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="inline-flex h-9 items-center rounded-md border border-border-default bg-surface px-4 text-sm font-medium text-text-primary hover:bg-surface-subtle"
+                  className="inline-flex h-10 items-center rounded-md border border-border-default bg-surface px-4 text-label font-medium text-text-primary hover:bg-surface-subtle"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleProposeResolution}
-                  className="inline-flex h-9 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-on hover:bg-accent-hover"
+                  className="inline-flex h-10 items-center rounded-md bg-accent px-4 text-label font-medium text-accent-on hover:bg-accent-hover"
                 >
                   Propose Resolution
                 </button>
@@ -216,7 +216,7 @@ export function CaseClosureModal({
           {selected === "not_resolved" && (
             <div className="flex flex-col gap-2">
               <div className="rounded-md border border-warning bg-warning/10 px-3 py-2">
-                <p className="text-sm font-medium text-warning">
+                <p className="text-label font-medium text-warning">
                   This closes the case immediately for both of you. You can
                   reopen by starting a new case.
                 </p>
@@ -235,21 +235,21 @@ export function CaseClosureModal({
                 className="w-full resize-none rounded-md border border-border-default bg-surface px-3 py-2 text-body text-text-primary placeholder:text-text-tertiary focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 placeholder="Optional note…"
               />
-              <p className="text-sm text-text-secondary">
+              <p className="text-label text-text-secondary">
                 This closes the case for both of you.
               </p>
               <div className="mt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="inline-flex h-9 items-center rounded-md border border-border-default bg-surface px-4 text-sm font-medium text-text-primary hover:bg-surface-subtle"
+                  className="inline-flex h-10 items-center rounded-md border border-border-default bg-surface px-4 text-label font-medium text-text-primary hover:bg-surface-subtle"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleCloseWithoutResolution}
-                  className="inline-flex h-9 items-center rounded-md bg-warning px-4 text-sm font-medium text-white hover:bg-warning/90"
+                  className="inline-flex h-10 items-center rounded-md bg-warning px-4 text-label font-medium text-accent-on hover:bg-warning/90"
                 >
                   Close without resolution
                 </button>
@@ -260,21 +260,21 @@ export function CaseClosureModal({
           {/* Take a break panel */}
           {selected === "take_a_break" && (
             <div className="flex flex-col gap-2">
-              <p className="text-sm text-text-secondary">
+              <p className="text-label text-text-secondary">
                 The case will stay open. You can come back any time.
               </p>
               <div className="mt-2 flex justify-end gap-2">
                 <button
                   type="button"
                   onClick={handleClose}
-                  className="inline-flex h-9 items-center rounded-md border border-border-default bg-surface px-4 text-sm font-medium text-text-primary hover:bg-surface-subtle"
+                  className="inline-flex h-10 items-center rounded-md border border-border-default bg-surface px-4 text-label font-medium text-text-primary hover:bg-surface-subtle"
                 >
                   Cancel
                 </button>
                 <button
                   type="button"
                   onClick={handleTakeABreak}
-                  className="inline-flex h-9 items-center rounded-md bg-accent px-4 text-sm font-medium text-accent-on hover:bg-accent-hover"
+                  className="inline-flex h-10 items-center rounded-md bg-accent px-4 text-label font-medium text-accent-on hover:bg-accent-hover"
                 >
                   Take a break
                 </button>

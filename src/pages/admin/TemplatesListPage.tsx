@@ -86,13 +86,10 @@ export function TemplatesListPage() {
   }
 
   return (
-    <div
-      style={{ background: "var(--bg-canvas, #f9fafb)" }}
-      className="min-h-screen"
-    >
+    <div className="min-h-screen bg-canvas">
       <div className="px-4 py-6">
         <div className="flex items-center justify-between mb-6">
-          <h1 className="text-2xl font-bold text-gray-900">Templates</h1>
+          <h1 className="text-h1 font-medium text-text-primary">Templates</h1>
           <Button
             onClick={() => setShowCreateForm(true)}
           >
@@ -101,9 +98,9 @@ export function TemplatesListPage() {
         </div>
 
         {templates === undefined ? (
-          <p className="text-gray-500">Loading…</p>
+          <p className="text-text-tertiary">Loading…</p>
         ) : templates.length === 0 ? (
-          <p className="text-gray-500">
+          <p className="text-text-tertiary">
             No templates yet. The app will use a built-in default baseline.
             Create a template when you want to tune the Coach's behavior per
             category.
@@ -111,35 +108,20 @@ export function TemplatesListPage() {
         ) : (
           <table aria-label="Templates" className="w-full border-collapse">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th
-                  className="text-left py-3 px-4 text-sm font-semibold"
-                  style={{ color: "var(--text-primary, #111827)" }}
-                >
+              <tr className="border-b border-border-default">
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">
                   Category
                 </th>
-                <th
-                  className="text-left py-3 px-4 text-sm font-semibold"
-                  style={{ color: "var(--text-primary, #111827)" }}
-                >
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">
                   Name
                 </th>
-                <th
-                  className="text-left py-3 px-4 text-sm font-semibold"
-                  style={{ color: "var(--text-primary, #111827)" }}
-                >
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">
                   Current Version
                 </th>
-                <th
-                  className="text-left py-3 px-4 text-sm font-semibold"
-                  style={{ color: "var(--text-primary, #111827)" }}
-                >
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">
                   Status
                 </th>
-                <th
-                  className="text-left py-3 px-4 text-sm font-semibold"
-                  style={{ color: "var(--text-primary, #111827)" }}
-                >
+                <th className="text-left py-3 px-4 text-label font-medium text-text-primary">
                   Pinned Cases Count
                 </th>
               </tr>
@@ -149,38 +131,25 @@ export function TemplatesListPage() {
                 <tr
                   key={t._id}
                   onClick={() => navigate(`/admin/templates/${t._id}`)}
-                  className="border-b border-gray-100 hover:bg-gray-50 cursor-pointer"
-                  style={{ background: "var(--bg-surface, #ffffff)" }}
+                  className="border-b border-border-default hover:bg-surface-subtle cursor-pointer bg-surface"
                 >
-                  <td
-                    className="py-3 px-4 text-sm capitalize"
-                    style={{ color: "var(--text-primary, #111827)" }}
-                  >
+                  <td className="py-3 px-4 text-label capitalize text-text-primary">
                     {t.category}
                   </td>
-                  <td
-                    className="py-3 px-4 text-sm"
-                    style={{ color: "var(--text-primary, #111827)" }}
-                  >
+                  <td className="py-3 px-4 text-label text-text-primary">
                     {t.name}
                   </td>
-                  <td
-                    className="py-3 px-4 text-sm"
-                    style={{ color: "var(--text-secondary, #6b7280)" }}
-                  >
+                  <td className="py-3 px-4 text-label text-text-secondary">
                     {t.currentVersion ?? "—"}
                   </td>
-                  <td className="py-3 px-4 text-sm">
+                  <td className="py-3 px-4 text-label">
                     {t.archivedAt ? (
-                      <span className="text-red-600 font-medium">Archived</span>
+                      <span className="text-danger font-medium">Archived</span>
                     ) : (
-                      <span className="text-green-600 font-medium">Active</span>
+                      <span className="text-success font-medium">Active</span>
                     )}
                   </td>
-                  <td
-                    className="py-3 px-4 text-sm"
-                    style={{ color: "var(--text-secondary, #6b7280)" }}
-                  >
+                  <td className="py-3 px-4 text-label text-text-secondary">
                     {t.pinnedCasesCount}
                   </td>
                 </tr>
@@ -209,7 +178,7 @@ export function TemplatesListPage() {
             <div>
               <label
                 htmlFor="create-category"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-label font-medium text-text-secondary mb-1"
               >
                 Category
               </label>
@@ -217,7 +186,7 @@ export function TemplatesListPage() {
                 id="create-category"
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm bg-white"
+                className="w-full rounded-md border border-border-strong px-3 py-2 text-label bg-surface focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               >
                 {CATEGORIES.map((c) => (
                   <option key={c} value={c}>
@@ -229,7 +198,7 @@ export function TemplatesListPage() {
             <div>
               <label
                 htmlFor="create-name"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-label font-medium text-text-secondary mb-1"
               >
                 Name
               </label>
@@ -238,14 +207,14 @@ export function TemplatesListPage() {
                 type="text"
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm"
+                className="w-full rounded-md border border-border-strong px-3 py-2 text-label focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 required
               />
             </div>
             <div>
               <label
                 htmlFor="create-globalGuidance"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-label font-medium text-text-secondary mb-1"
               >
                 Global Guidance
               </label>
@@ -254,14 +223,14 @@ export function TemplatesListPage() {
                 value={globalGuidance}
                 onChange={(e) => setGlobalGuidance(e.target.value)}
                 rows={4}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono"
+                className="w-full rounded-md border border-border-strong px-3 py-2 text-label font-mono focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
                 required
               />
             </div>
             <div>
               <label
                 htmlFor="create-coachInstructions"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-label font-medium text-text-secondary mb-1"
               >
                 Coach Instructions
               </label>
@@ -270,13 +239,13 @@ export function TemplatesListPage() {
                 value={coachInstructions}
                 onChange={(e) => setCoachInstructions(e.target.value)}
                 rows={3}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono"
+                className="w-full rounded-md border border-border-strong px-3 py-2 text-label font-mono focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               />
             </div>
             <div>
               <label
                 htmlFor="create-draftCoachInstructions"
-                className="block text-sm font-medium text-gray-700 mb-1"
+                className="block text-label font-medium text-text-secondary mb-1"
               >
                 Draft Coach Instructions
               </label>
@@ -285,7 +254,7 @@ export function TemplatesListPage() {
                 value={draftCoachInstructions}
                 onChange={(e) => setDraftCoachInstructions(e.target.value)}
                 rows={3}
-                className="w-full rounded-md border border-gray-300 px-3 py-2 text-sm font-mono"
+                className="w-full rounded-md border border-border-strong px-3 py-2 text-label font-mono focus:border-accent focus:outline-none focus:ring-1 focus:ring-accent"
               />
             </div>
             <div className="flex justify-end gap-2 pt-2">

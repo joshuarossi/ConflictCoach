@@ -20,7 +20,7 @@ export function PartyToggle() {
 
   return (
     <div
-      className="inline-flex rounded-md border border-[var(--coach-accent,#6366f1)] overflow-hidden"
+      className="inline-flex rounded-md border border-coach-accent overflow-hidden"
       role="group"
       aria-label="Party toggle"
       data-testid="party-toggle"
@@ -28,10 +28,10 @@ export function PartyToggle() {
       <button
         type="button"
         onClick={() => setParty("initiator")}
-        className={`px-3 py-1 text-sm font-medium transition-colors ${
+        className={`px-3 py-1 text-label font-medium transition-colors ${
           activeParty === "initiator"
-            ? "bg-[var(--coach-accent,#6366f1)] text-white"
-            : "bg-white text-[var(--coach-accent,#6366f1)] hover:bg-gray-50"
+            ? "bg-coach-accent text-accent-on"
+            : "bg-surface text-coach-accent hover:bg-surface-subtle"
         }`}
         aria-pressed={activeParty === "initiator"}
         data-testid="toggle-initiator"
@@ -41,10 +41,10 @@ export function PartyToggle() {
       <button
         type="button"
         onClick={() => setParty("invitee")}
-        className={`px-3 py-1 text-sm font-medium transition-colors ${
+        className={`px-3 py-1 text-label font-medium transition-colors ${
           activeParty === "invitee"
-            ? "bg-[var(--coach-accent,#6366f1)] text-white"
-            : "bg-white text-[var(--coach-accent,#6366f1)] hover:bg-gray-50"
+            ? "bg-coach-accent text-accent-on"
+            : "bg-surface text-coach-accent hover:bg-surface-subtle"
         }`}
         aria-pressed={activeParty === "invitee"}
         data-testid="toggle-invitee"

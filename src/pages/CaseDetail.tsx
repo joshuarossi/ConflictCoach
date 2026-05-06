@@ -34,7 +34,7 @@ function CaseDetailSkeleton() {
   return (
     <div className="space-y-6" data-testid="case-detail-skeleton">
       <Skeleton className="h-8 w-48" />
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm space-y-4">
+      <div className="rounded-lg border border-border-default bg-surface p-6 shadow-1 space-y-4">
         <Skeleton className="h-4 w-32" />
         <Skeleton className="h-4 w-64" />
         <Skeleton className="h-4 w-40" />
@@ -49,11 +49,11 @@ function NotFoundView() {
       className="flex flex-col items-center justify-center py-24 px-4"
       data-testid="case-not-found"
     >
-      <h1 className="text-4xl font-bold text-gray-900 mb-2">404</h1>
-      <p className="text-lg text-gray-600">Case not found.</p>
+      <h1 className="text-h1 font-medium text-text-primary mb-2">404</h1>
+      <p className="text-h3 text-text-secondary">Case not found.</p>
       <Link
         to="/dashboard"
-        className="mt-4 text-blue-600 hover:text-blue-800 underline"
+        className="mt-4 text-accent hover:text-accent-hover underline"
       >
         Back to Dashboard
       </Link>
@@ -64,14 +64,14 @@ function NotFoundView() {
 function PrivateCoachingSubView({ caseId }: { caseId: string }) {
   return (
     <div data-testid="private-coaching-view" className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">Private Coaching</h2>
-      <p className="text-gray-600">
+      <h2 className="text-h2 font-medium text-text-primary">Private Coaching</h2>
+      <p className="text-text-secondary">
         You are in the private coaching phase. Work with your AI coach to
         prepare for the joint conversation.
       </p>
       <Link
         to={`/cases/${caseId}/private`}
-        className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        className="inline-block rounded-md bg-accent px-4 py-2 text-label font-medium text-accent-on hover:bg-accent-hover"
       >
         Continue Private Coaching
       </Link>
@@ -82,16 +82,16 @@ function PrivateCoachingSubView({ caseId }: { caseId: string }) {
 function ReadyForJointSubView({ caseId }: { caseId: string }) {
   return (
     <div data-testid="ready-for-joint-view" className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">
+      <h2 className="text-h2 font-medium text-text-primary">
         Ready for Joint Session
       </h2>
-      <p className="text-gray-600">
+      <p className="text-text-secondary">
         Both parties have completed private coaching. The joint session is ready
         to begin.
       </p>
       <Link
         to={`/cases/${caseId}/ready`}
-        className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        className="inline-block rounded-md bg-accent px-4 py-2 text-label font-medium text-accent-on hover:bg-accent-hover"
       >
         View Synthesis &amp; Enter Joint Session
       </Link>
@@ -102,13 +102,13 @@ function ReadyForJointSubView({ caseId }: { caseId: string }) {
 function JointChatSubView({ caseId }: { caseId: string }) {
   return (
     <div data-testid="joint-chat-view" className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">Joint Chat</h2>
-      <p className="text-gray-600">
+      <h2 className="text-h2 font-medium text-text-primary">Joint Chat</h2>
+      <p className="text-text-secondary">
         The joint conversation is active. Continue the facilitated discussion.
       </p>
       <Link
         to={`/cases/${caseId}/joint`}
-        className="inline-block rounded-md bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700"
+        className="inline-block rounded-md bg-accent px-4 py-2 text-label font-medium text-accent-on hover:bg-accent-hover"
       >
         Continue Joint Chat
       </Link>
@@ -119,11 +119,11 @@ function JointChatSubView({ caseId }: { caseId: string }) {
 function ClosedCaseSubView({ status }: { status: string }) {
   return (
     <div data-testid="closed-case-view" className="space-y-4">
-      <h2 className="text-xl font-semibold text-gray-900">Case Closed</h2>
-      <p className="text-gray-600">{getPhaseLabel(status)}</p>
+      <h2 className="text-h2 font-medium text-text-primary">Case Closed</h2>
+      <p className="text-text-secondary">{getPhaseLabel(status)}</p>
       <Link
         to="/dashboard"
-        className="inline-block rounded-md bg-gray-600 px-4 py-2 text-sm font-medium text-white hover:bg-gray-700"
+        className="inline-block rounded-md bg-surface-subtle px-4 py-2 text-label font-medium text-text-primary hover:bg-surface-subtle/80"
       >
         Back to Dashboard
       </Link>
@@ -170,7 +170,7 @@ function CaseDetailContent() {
         return <ClosedCaseSubView status={caseStatus} />;
       default:
         return (
-          <p className="text-gray-600">Unknown case status: {caseStatus}</p>
+          <p className="text-text-secondary">Unknown case status: {caseStatus}</p>
         );
     }
   }
@@ -182,10 +182,10 @@ function CaseDetailContent() {
     <div className="space-y-6">
       {isSolo && <SoloBanner />}
       <header className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-gray-900">
+        <h1 className="text-h1 font-medium text-text-primary">
           {isSolo ? "Solo Case" : `Case with ${caseData.otherPartyName || "the other party"}`}
         </h1>
-        <span className="rounded-full bg-gray-100 px-3 py-1 text-sm font-medium text-gray-700">
+        <span className="rounded-full bg-surface-subtle px-3 py-1 text-label font-medium text-text-secondary">
           {getPhaseLabel(caseStatus)}
         </span>
       </header>

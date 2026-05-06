@@ -90,8 +90,8 @@ export function DraftCoachPanel({
   return (
     <div
       className={cn(
-        "fixed z-40 flex flex-col bg-[var(--bg-surface)] transition-transform duration-200",
-        "shadow-[0_12px_32px_rgba(0,0,0,0.10)]",
+        "fixed z-40 flex flex-col bg-surface transition-transform duration-200",
+        "shadow-3",
         isMobile
           ? // Mobile: full-screen bottom sheet
             "inset-0 bottom-sheet"
@@ -104,17 +104,17 @@ export function DraftCoachPanel({
       data-layout={isMobile ? "bottom-sheet" : "side-panel"}
     >
       {/* Header */}
-      <header className="flex items-center justify-between border-b border-[var(--border-default)] px-4 py-3">
+      <header className="flex items-center justify-between border-b border-border-default px-4 py-3">
         <div className="flex items-center gap-2">
-          <Sparkles size={16} className="text-[var(--coach-accent)]" />
-          <span className="text-sm font-medium text-[var(--text-primary)]">
+          <Sparkles size={16} className="text-coach-accent" />
+          <span className="text-label font-medium text-text-primary">
             Draft Coach
           </span>
         </div>
         <button
           type="button"
           onClick={onClose}
-          className="inline-flex items-center justify-center rounded-sm p-1 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+          className="inline-flex items-center justify-center rounded-sm p-1 text-text-secondary hover:text-text-primary"
           aria-label="Close Draft Coach"
         >
           <X size={18} />
@@ -123,7 +123,7 @@ export function DraftCoachPanel({
 
       {/* Privacy banner */}
       <div
-        className="flex items-center gap-2 bg-[var(--private-tint)] px-4 py-2"
+        className="flex items-center gap-2 bg-private-tint px-4 py-2"
         role="region"
         aria-label="Privacy notice"
         data-testid="privacy-banner"
@@ -131,7 +131,7 @@ export function DraftCoachPanel({
         <span title={tooltipText} className="shrink-0 cursor-help">
           <Lock size={16} strokeWidth={1.5} aria-label="Lock icon" />
         </span>
-        <span className="text-xs text-[var(--text-secondary)]">
+        <span className="text-meta text-text-secondary">
           {privacyText}
         </span>
       </div>
@@ -153,7 +153,7 @@ export function DraftCoachPanel({
 
         {/* Input area with Draft it for me button */}
         {!showDraftCard && (
-          <div className="border-t border-[var(--border-default)]">
+          <div className="border-t border-border-default">
             <MessageInput
               onSend={onSendMessage}
               isStreaming={isStreaming}
@@ -164,10 +164,10 @@ export function DraftCoachPanel({
                 type="button"
                 onClick={onDraftItForMe}
                 disabled={isStreaming}
-                className="inline-flex items-center gap-1.5 rounded-[var(--radius-sm)] border border-[var(--border-default)] bg-[var(--bg-surface)] px-3 py-1.5 text-sm text-[var(--text-secondary)] hover:bg-[var(--bg-surface-subtle)] disabled:cursor-not-allowed disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 rounded-sm border border-border-default bg-surface px-3 py-1.5 text-label text-text-secondary hover:bg-surface-subtle disabled:cursor-not-allowed disabled:opacity-50"
                 aria-label="Draft it for me"
               >
-                <Sparkles size={14} className="text-[var(--coach-accent)]" />
+                <Sparkles size={14} className="text-coach-accent" />
                 Draft it for me
               </button>
             </div>

@@ -67,7 +67,7 @@ AI-powered conflict resolution coaching platform built with React, Convex, and C
 ## Tech Stack
 
 - **Frontend:** React 18, Vite, TypeScript (strict mode)
-- **Styling:** Tailwind CSS v4, shadcn/ui
+- **Styling:** Tailwind CSS v4, shadcn/ui, design tokens ([guide](docs/design-tokens.md))
 - **Routing:** React Router v6
 - **Backend:** Convex (database, serverless functions, realtime, auth)
 - **AI:** Anthropic Claude (via `@anthropic-ai/sdk`)
