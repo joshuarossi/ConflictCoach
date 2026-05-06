@@ -23,8 +23,8 @@ export interface TestCase {
   caseId: string;
   category: string;
   isSolo: boolean;
-  /** Initial case status — always DRAFT_PRIVATE_COACHING from createCaseForEmail. */
-  status: "DRAFT_PRIVATE_COACHING";
+  /** Initial case status — BOTH_PRIVATE_COACHING for solo cases, DRAFT_PRIVATE_COACHING otherwise. */
+  status: "DRAFT_PRIVATE_COACHING" | "BOTH_PRIVATE_COACHING";
 }
 
 function uniqueSuffix(): string {
@@ -136,5 +136,5 @@ export async function createTestCase(
     },
     { email: user.email, category, isSolo },
   );
-  return { caseId, category, isSolo, status: "DRAFT_PRIVATE_COACHING" };
+  return { caseId, category, isSolo, status: isSolo ? "BOTH_PRIVATE_COACHING" : "DRAFT_PRIVATE_COACHING" };
 }
