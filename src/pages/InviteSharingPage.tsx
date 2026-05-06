@@ -121,6 +121,7 @@ export function InviteSharingView({
           variant="outline"
           className="w-full"
           onClick={() => handleCopy(inviteUrl, "just-copy")}
+          aria-label="Copy URL to clipboard"
         >
           {copiedButton === "just-copy" ? (
             <>
