@@ -240,6 +240,13 @@ export async function enterJointSessionHandler(
   const user = await requireAuth(ctx);
   const { caseDoc } = await requireCaseParty(ctx, args.caseId, user._id);
 
+  // Idempotent: if the case is already JOINT_ACTIVE, the other party
+  // already promoted the state. Return early so the caller's navigate()
+  // runs without error. Also prevents scheduling a duplicate opening message.
+  if (caseDoc.status === "JOINT_ACTIVE") {
+    return;
+  }
+
   // Validate transition via state machine
   validateTransition(caseDoc.status, "JOINT_ACTIVE");
 

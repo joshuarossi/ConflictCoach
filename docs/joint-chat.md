@@ -54,6 +54,22 @@ Reactive query that returns the authenticated caller's own `synthesisText` from 
 
 **Returns:** `{ synthesisText: string | null }`
 
+### `jointChat/enterJointSession` (mutation)
+
+Transitions a case from `READY_FOR_JOINT` to `JOINT_ACTIVE` and schedules the Coach opening message. The mutation is **idempotent**: if the case is already `JOINT_ACTIVE` (because the other party entered first), the call returns successfully as a no-op — no status change, no duplicate Coach message. This lets both parties click "Enter joint session" without errors.
+
+**Args:**
+
+| Field    | Type          | Description                         |
+| -------- | ------------- | ----------------------------------- |
+| `caseId` | `Id<"cases">` | The case to enter joint session for |
+
+**Access rules:**
+
+- Caller must be authenticated.
+- Caller must be a party to the case. Throws `FORBIDDEN` otherwise.
+- Case must be in `READY_FOR_JOINT` or `JOINT_ACTIVE` status. Any other status (draft, private coaching, or closed) throws `CONFLICT`.
+
 ## Authorization Model
 
 All three functions use a two-step authorization check:
