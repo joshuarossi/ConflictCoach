@@ -1,26 +1,29 @@
 /**
- * AC 5: Visual style matches DesignDoc §4.7: persistent banner, lock icon is not decorative
+ * AC 5: Visual style matches style-guide §08: persistent banner, lock icon IS decorative
+ * Updated for WOR-86: lock icon is now aria-hidden, not a button.
  */
 import { describe, test, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { PrivacyBanner } from "@/components/PrivacyBanner";
 
-describe("AC 5: Visual style matches DesignDoc §4.7: persistent banner, lock icon is not decorative", () => {
-  test("lock icon is not decorative (has aria-label, not aria-hidden)", () => {
-    render(<PrivacyBanner text="Private" />);
+describe("AC 5: Visual style matches style-guide §08: persistent banner, lock icon is decorative", () => {
+  test("lock icon is decorative (aria-hidden, not a button)", () => {
+    const { container } = render(<PrivacyBanner />);
 
-    // The lock icon button must be interactive and accessible.
-    // It must NOT have aria-hidden="true" since it is functional.
-    const lockButton = screen.getByRole("button", { name: /lock/i });
-    expect(lockButton).not.toHaveAttribute("aria-hidden", "true");
+    // Per WOR-86 / style-guide §08: the lock icon is decorative.
+    // It must NOT be wrapped in a button.
+    expect(
+      screen.queryByRole("button", { name: /lock/i }),
+    ).not.toBeInTheDocument();
 
-    // The button should have an accessible name
-    expect(lockButton).toHaveAccessibleName();
+    // The SVG should have aria-hidden="true"
+    const lockSvg = container.querySelector("svg.lucide-lock");
+    expect(lockSvg).toHaveAttribute("aria-hidden", "true");
   });
 
   test("banner is persistent (no dismiss/close button on the banner itself)", () => {
-    const { container } = render(<PrivacyBanner text="Private" />);
+    const { container } = render(<PrivacyBanner />);
 
     const banner = container.firstElementChild as HTMLElement;
     // The banner should not have a dismiss/close button
@@ -34,12 +37,7 @@ describe("AC 5: Visual style matches DesignDoc §4.7: persistent banner, lock ic
   });
 
   test("snapshot: PrivacyBanner renders expected structure", () => {
-    const { container } = render(
-      <PrivacyBanner
-        text="This conversation is private to you."
-        otherPartyName="Jordan"
-      />,
-    );
+    const { container } = render(<PrivacyBanner />);
 
     // Snapshot test to catch unintended visual regressions
     expect(container.firstElementChild).toMatchSnapshot();
