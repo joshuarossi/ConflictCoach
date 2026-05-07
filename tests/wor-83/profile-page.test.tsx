@@ -68,7 +68,6 @@ vi.mock("react-router-dom", async () => {
   };
 });
 
-// @ts-expect-error WOR-83 — ProfilePage does not exist yet
 import { ProfilePage } from "@/pages/ProfilePage";
 
 function renderProfilePage() {
