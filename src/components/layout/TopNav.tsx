@@ -218,32 +218,30 @@ export function TopNav({ children }: TopNavProps) {
         aria-label="Case navigation"
         className="border-b bg-surface px-4 py-3"
       >
-        <div className="flex items-center gap-3">
-          <Link
-            to="/dashboard"
-            className="text-label text-accent hover:text-accent-hover"
-          >
-            ← Back to Dashboard
-          </Link>
-          <span className="text-text-tertiary">|</span>
-          <span className="text-label font-medium text-text-primary">
-            {caseLabel}
-            {phaseLabel && (
-              <>
-                <span className="text-text-tertiary"> · </span>
-                <span data-testid="phase-indicator">{phaseLabel}</span>
-              </>
-            )}
-          </span>
-          {caseContext?.isSolo === true && (
-            <div className="ml-auto">
-              <PartyToggle />
-            </div>
-          )}
-          {children && !caseContext?.isSolo && (
-            <div className="ml-auto">{children}</div>
-          )}
-          <UserMenu />
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Link
+              to="/dashboard"
+              className="text-label text-accent hover:text-accent-hover"
+            >
+              ← Back to Dashboard
+            </Link>
+            <span className="text-text-tertiary">|</span>
+            <span className="text-label font-medium text-text-primary">
+              {caseLabel}
+              {phaseLabel && (
+                <>
+                  <span className="text-text-tertiary"> · </span>
+                  <span data-testid="phase-indicator">{phaseLabel}</span>
+                </>
+              )}
+            </span>
+          </div>
+          <div className="flex items-center gap-3">
+            {caseContext?.isSolo === true && <PartyToggle />}
+            {children && !caseContext?.isSolo && children}
+            <UserMenu />
+          </div>
         </div>
       </nav>
     );
