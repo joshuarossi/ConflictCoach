@@ -9,9 +9,7 @@ import { Button } from "@/components/ui/button";
 export function ProfilePage() {
   const navigate = useNavigate();
   const user = useQuery(api.users.me);
-  const updateDisplayName = useMutation(
-    (api as any).users.updateDisplayName,
-  );
+  const updateDisplayName = useMutation((api as any).users.updateDisplayName);
   const { signOut } = useAuthActions();
 
   const [displayName, setDisplayName] = useState("");
@@ -38,8 +36,7 @@ export function ProfilePage() {
 
   const trimmedName = displayName.trim();
   const hasChanges = trimmedName !== (user.displayName ?? "");
-  const saveDisabled =
-    isSubmitting || !hasChanges || trimmedName.length === 0;
+  const saveDisabled = isSubmitting || !hasChanges || trimmedName.length === 0;
 
   async function handleSave() {
     setIsSubmitting(true);

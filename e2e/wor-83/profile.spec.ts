@@ -24,9 +24,9 @@ test.describe("WOR-83: /profile route", () => {
     await page.waitForLoadState("networkidle");
 
     await expect(page).toHaveURL(/\/profile/);
-    await expect(
-      page.getByRole("heading", { name: /profile/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("heading", { name: /profile/i })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 
   test("AC2: unauthenticated user is redirected to /login", async ({
@@ -48,9 +48,7 @@ test.describe("WOR-83: /profile route", () => {
     await page.waitForLoadState("networkidle");
 
     // Open the user menu dropdown
-    const userMenuButton = page.locator(
-      "[data-testid='user-menu-button']",
-    );
+    const userMenuButton = page.locator("[data-testid='user-menu-button']");
     await expect(userMenuButton).toBeVisible({ timeout: 10_000 });
     await userMenuButton.click();
 
@@ -61,8 +59,8 @@ test.describe("WOR-83: /profile route", () => {
     // Click the Profile link and verify navigation
     await profileLink.click();
     await expect(page).toHaveURL(/\/profile/, { timeout: 10_000 });
-    await expect(
-      page.getByRole("heading", { name: /profile/i }),
-    ).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByRole("heading", { name: /profile/i })).toBeVisible({
+      timeout: 10_000,
+    });
   });
 });

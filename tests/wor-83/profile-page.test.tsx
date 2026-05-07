@@ -155,9 +155,7 @@ describe("WOR-83: ProfilePage", () => {
   describe("AC7: Sign out button", () => {
     test("renders a Sign out button", () => {
       renderProfilePage();
-      expect(
-        screen.getByRole("button", { name: /sign out/i }),
-      ).toBeVisible();
+      expect(screen.getByRole("button", { name: /sign out/i })).toBeVisible();
     });
 
     test("clicking Sign out calls signOut and navigates to /login", async () => {

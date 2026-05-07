@@ -4,7 +4,7 @@ ticket_summary: "Profile page (/profile) missing — DesignDoc §3.1 lists it as
 ac_refs:
   - "Route /profile is registered in src/App.tsx, nested under AuthGuard, using ReadingLayout (per WOR-30 / DesignDoc layout conventions)"
   - "A new src/pages/ProfilePage.tsx renders the user's email (from useQuery(api.users.me)), the display name as an editable input, a Save button that calls a Convex mutation to update users.displayName, and a Sign out button that delegates to useAuthActions().signOut()"
-  - "The TopNav UserMenu dropdown includes a \"Profile\" link to /profile in addition to the existing \"Log out\" entry"
+  - 'The TopNav UserMenu dropdown includes a "Profile" link to /profile in addition to the existing "Log out" entry'
   - "Updating the display name updates the users row and the change is reflected immediately via reactive query"
 files:
   - path: src/App.tsx
@@ -95,6 +95,7 @@ Add a `<Route path="/profile" element={<ProfilePage />} />` inside the existing 
 Why connected (not presentational): The page is a route-level component with exactly one data source (`api.users.me`) and one mutation. Splitting into a presentational shell would add a file and a prop interface with no testing benefit — the unit tests can mock the Convex hooks directly. This matches the pattern established by `NewCasePage`, `Dashboard`, `ClosedCasePage`, etc.
 
 **Component structure:**
+
 - `<h1>` heading: "Profile"
 - Email row: label + read-only text showing `user.email`
 - Display name row: label + `<input>` pre-filled with `user.displayName ?? ""`, maxLength 80
@@ -110,6 +111,7 @@ Add a `<Link to="/profile">` menu item inside the `UserMenu` dropdown, between t
 ### `convex/users.ts` (modify, mutation)
 
 Add a new public mutation `updateDisplayName`. This mutation:
+
 1. Calls `requireAuth(ctx)` to get the authenticated user
 2. Validates `displayName` is a non-empty string of at most 80 characters (trimmed)
 3. Calls `ctx.db.patch(user._id, { displayName: args.displayName.trim() })`
@@ -122,6 +124,7 @@ The validator: `args: { displayName: v.string() }`. The 80-char length check is 
 ### `api.users.me` (query, existing)
 
 Returns the full user record: `{ _id: Id<"users">, email: string, displayName?: string, role: "USER" | "ADMIN", createdAt: number }`. ProfilePage reads:
+
 - `email` — rendered as read-only text
 - `displayName` — pre-fills the editable input; may be `undefined` for users who haven't set one
 
@@ -168,6 +171,7 @@ Args: `{ displayName: string }`. Patches the authenticated caller's `users` row.
 ### Unit tests (`tests/wor-83/profile-page.test.tsx`)
 
 **AC2: ProfilePage renders email, editable displayName, Save, Sign out.**
+
 - Test that the page renders the user's email as static text (not in an input)
 - Test that the display name input is pre-filled with the user's current displayName
 - Test that the Save button is present and uses the Button component
@@ -175,22 +179,27 @@ Args: `{ displayName: string }`. Patches the authenticated caller's `users` row.
 - Test that the display name input has maxLength=80
 
 **AC2: Save button calls updateDisplayName mutation.**
+
 - Test that clicking Save with a changed display name calls the mutation with the trimmed value
 - Test that Save is disabled when input matches current displayName (no changes)
 - Test that Save is disabled when input is empty
 - Test that Save is disabled while submission is in progress
 
 **AC4: Display name update reflected immediately.**
+
 - Unit test verifies the mutation is called with correct args; reactivity is inherent to Convex's useQuery and doesn't need explicit unit testing. The E2E test covers the full reactive update.
 
 ### E2E tests (`e2e/wor-83/profile.spec.ts`)
 
 **AC1: Route /profile registered under AuthGuard + ReadingLayout.**
+
 - Navigate to `/profile` while authenticated; assert the page loads with the "Profile" heading
 - Navigate to `/profile` while unauthenticated; assert redirect to `/login`
 
 **AC3: TopNav UserMenu includes Profile link.**
+
 - Click the user menu button (`data-testid="user-menu-button"`); assert a "Profile" link (`data-testid="profile-link"`) is visible; click it; assert navigation to `/profile`
 
 **AC4: Display name update persists via reactive query.**
+
 - On `/profile`, change the display name input, click Save, assert the input reflects the new value. Optionally navigate away and back to confirm persistence.
