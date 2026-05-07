@@ -250,6 +250,8 @@ export function TopNav({ children }: TopNavProps) {
   }
 
   // Dashboard / non-case mode
+  const isDashboardActive = location.pathname.startsWith("/dashboard");
+
   return (
     <nav aria-label="Main navigation" className="border-b bg-surface px-4 py-3">
       <div className="flex items-center justify-between">
@@ -257,6 +259,18 @@ export function TopNav({ children }: TopNavProps) {
           Conflict Coach
         </Link>
         <div className="flex items-center gap-4">
+          <div className="flex items-center gap-1">
+            <Link
+              to="/dashboard"
+              className={`text-label text-text-secondary px-3 py-1.5 rounded-md hover:bg-surface-subtle ${
+                isDashboardActive
+                  ? "text-text-primary hover:text-text-primary"
+                  : ""
+              }`}
+            >
+              Dashboard
+            </Link>
+          </div>
           {children}
           <AdminMenu />
           <UserMenu />
