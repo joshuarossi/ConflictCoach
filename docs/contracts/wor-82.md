@@ -111,6 +111,7 @@ When `user?.role !== "ADMIN"` (including when user is `undefined` or `null`),
 `AdminMenu` returns `null` — no DOM elements are rendered.
 
 The component is placed in the non-case nav's button row:
+
 ```
 <div className="flex items-center gap-4">
   {children}
@@ -130,6 +131,7 @@ the mock user set to either `{ role: "ADMIN", displayName: "Admin" }` or
 
 E2E tests using the `createTestAdminUser` / `createTestUser` / `loginAsUser`
 fixtures from `e2e/fixtures.ts`. Verifies:
+
 - Admin user sees the Admin dropdown trigger on /dashboard
 - Clicking it reveals links to /admin/templates and /admin/audit
 - Clicking "Templates" navigates to /admin/templates
@@ -140,6 +142,7 @@ fixtures from `e2e/fixtures.ts`. Verifies:
 ### `api.users.me`
 
 Returns the authenticated user's record:
+
 ```ts
 {
   _id: Id<"users">,

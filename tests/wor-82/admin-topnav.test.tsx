@@ -37,8 +37,16 @@ vi.mock("convex/react", () => ({
 
 import { AppRoutes } from "@/App";
 
-const adminUser = { ...defaultUser, role: "ADMIN" as const, displayName: "Admin" };
-const regularUser = { ...defaultUser, role: "USER" as const, displayName: "Regular" };
+const adminUser = {
+  ...defaultUser,
+  role: "ADMIN" as const,
+  displayName: "Admin",
+};
+const regularUser = {
+  ...defaultUser,
+  role: "USER" as const,
+  displayName: "Regular",
+};
 
 describe("WOR-82: TopNav admin entry point", () => {
   describe("AC1: ADMIN user sees Admin menu with dropdown links", () => {
@@ -52,7 +60,9 @@ describe("WOR-82: TopNav admin entry point", () => {
           <AppRoutes />
         </MemoryRouter>,
       );
-      expect(screen.getByRole("button", { name: /admin/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /admin/i }),
+      ).toBeInTheDocument();
     });
 
     test("clicking Admin button reveals Templates and Audit Log links", async () => {
@@ -85,7 +95,9 @@ describe("WOR-82: TopNav admin entry point", () => {
           <AppRoutes />
         </MemoryRouter>,
       );
-      expect(screen.queryByRole("button", { name: /admin/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /admin/i }),
+      ).not.toBeInTheDocument();
     });
 
     test("no admin links are present in the DOM for USER role", () => {
@@ -94,8 +106,12 @@ describe("WOR-82: TopNav admin entry point", () => {
           <AppRoutes />
         </MemoryRouter>,
       );
-      expect(screen.queryByRole("link", { name: /templates/i })).not.toBeInTheDocument();
-      expect(screen.queryByRole("link", { name: /audit log/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /templates/i }),
+      ).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("link", { name: /audit log/i }),
+      ).not.toBeInTheDocument();
     });
   });
 
@@ -107,7 +123,9 @@ describe("WOR-82: TopNav admin entry point", () => {
           <AppRoutes />
         </MemoryRouter>,
       );
-      expect(screen.getByRole("button", { name: /admin/i })).toBeInTheDocument();
+      expect(
+        screen.getByRole("button", { name: /admin/i }),
+      ).toBeInTheDocument();
     });
 
     test("USER role from useQuery hides Admin button", () => {
@@ -117,7 +135,9 @@ describe("WOR-82: TopNav admin entry point", () => {
           <AppRoutes />
         </MemoryRouter>,
       );
-      expect(screen.queryByRole("button", { name: /admin/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /admin/i }),
+      ).not.toBeInTheDocument();
     });
 
     test("undefined user (loading state) hides Admin button", () => {
@@ -127,7 +147,9 @@ describe("WOR-82: TopNav admin entry point", () => {
           <AppRoutes />
         </MemoryRouter>,
       );
-      expect(screen.queryByRole("button", { name: /admin/i })).not.toBeInTheDocument();
+      expect(
+        screen.queryByRole("button", { name: /admin/i }),
+      ).not.toBeInTheDocument();
     });
   });
 
