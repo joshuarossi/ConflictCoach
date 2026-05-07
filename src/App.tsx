@@ -14,6 +14,7 @@ import { JointChatPage } from "@/pages/JointChatPage";
 import { ClosedCasePage } from "@/pages/ClosedCasePage";
 import { InviteSharingPage } from "@/pages/InviteSharingPage";
 import { InviteeCaseFormPage } from "@/pages/InviteeCaseFormPage";
+import { ProfilePage } from "@/pages/ProfilePage";
 import { TemplatesListPage } from "@/pages/admin/TemplatesListPage";
 import { TemplateEditPage } from "@/pages/admin/TemplateEditPage";
 import { AuditLogPage } from "@/pages/admin/AuditLogPage";
@@ -37,6 +38,7 @@ export function App() {
           <Route path="/cases/:caseId/form" element={<InviteeCaseFormPage />} />
           <Route path="/cases/:caseId/invite" element={<InviteSharingPage />} />
           <Route path="/cases/:caseId/closed" element={<ClosedCasePage />} />
+          <Route path="/profile" element={<ProfilePage />} />
         </Route>
 
         {/* Chat-width layout (1080px) */}
