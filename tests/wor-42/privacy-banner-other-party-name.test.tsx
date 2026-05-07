@@ -21,9 +21,7 @@ describe("AC 4: Component accepts otherPartyName prop (backward compat)", () => 
 
     // The banner always renders the spec's hardcoded text
     expect(screen.getByText(/Private to you\./)).toBeInTheDocument();
-    expect(
-      screen.getByText(/Only you and the AI coach/),
-    ).toBeInTheDocument();
+    expect(screen.getByText(/Only you and the AI coach/)).toBeInTheDocument();
   });
 
   test("works without any props", () => {

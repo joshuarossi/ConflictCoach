@@ -84,6 +84,7 @@ WOR-81 over-corrected the PrivacyBanner geometry by adding rounded corners and h
 This remains a **presentational** component. The props interface changes minimally: `text` becomes optional (the banner now has hardcoded inline copy per the spec: "Private to you. Only you and the AI coach will see this."). The `otherPartyName` prop is kept for backward compat but may become unused.
 
 Key structural changes:
+
 1. **Outer div** — removes `mx-4 mb-2 rounded-md border` and replaces with `border-b border-border-default`. Alignment changes from `items-center` to `items-start`.
 2. **Lock icon** — no longer wrapped in a `<button>`. Rendered as a bare `<Lock>` with `aria-hidden="true"` and `className="mt-px text-text-secondary shrink-0"`.
 3. **Text content** — structured as: bold prefix span ("Private to you.") + body text ("Only you and the AI coach will see this.") + inline link ("Learn more about privacy").
@@ -105,6 +106,7 @@ Modal trigger changes from `getByRole("button", { name: /lock/i })` to `getByRol
 ### `tests/wor-86/privacy-banner-full-bleed.test.tsx` (create)
 
 New unit tests covering all six ACs. Renders `<PrivacyBanner />` and asserts:
+
 - Outer div classes match the full-bleed spec
 - No `rounded-*`, no `mx-*` classes present
 - Lock icon SVG has `aria-hidden="true"`
