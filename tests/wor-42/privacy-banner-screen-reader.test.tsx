@@ -7,7 +7,7 @@ import "@testing-library/jest-dom";
 import { PrivacyBanner } from "@/components/PrivacyBanner";
 
 describe('AC 3: Screen reader text: "Private conversation. Only you and the AI coach see this."', () => {
-  test.skip("contains the required screen reader text [WOR-86 regression: sr-only span removed; needs follow-up]", () => {
+  test("contains the required screen reader text", () => {
     render(<PrivacyBanner text="This is private" />);
 
     // The exact text must be present for screen readers, either as

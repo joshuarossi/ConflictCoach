@@ -36,7 +36,7 @@ function renderView(props: { otherPartyName?: string } = {}) {
 }
 
 describe("AC 1: Privacy banner is persistent at top with other party's display name", () => {
-  test.skip("Privacy banner is persistent at top with otherPartyName [WOR-86 regression: otherPartyName prop unused; needs follow-up]", () => {
+  test("Privacy banner is persistent at top with otherPartyName", () => {
     renderView({ otherPartyName: "Jordan" });
 
     // The banner must contain text that names the other party
@@ -44,14 +44,14 @@ describe("AC 1: Privacy banner is persistent at top with other party's display n
     expect(bannerText).toBeInTheDocument();
   });
 
-  test.skip("Privacy banner includes the exact other party name when it differs [WOR-86 regression: otherPartyName prop unused; needs follow-up]", () => {
+  test("Privacy banner includes the exact other party name when it differs", () => {
     renderView({ otherPartyName: "Alex" });
 
     const bannerText = screen.getByText(/Alex will never see any of it/i);
     expect(bannerText).toBeInTheDocument();
   });
 
-  test.skip("Privacy banner states the conversation is private to the user [WOR-86 regression: text prop unused; needs follow-up]", () => {
+  test("Privacy banner states the conversation is private to the user", () => {
     renderView();
 
     const privateText = screen.getByText(

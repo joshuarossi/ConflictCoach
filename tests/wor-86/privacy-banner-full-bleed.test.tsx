@@ -45,18 +45,20 @@ describe("WOR-86: PrivacyBanner full-bleed layout", () => {
     expect(lockSvg).toHaveAttribute("aria-hidden", "true");
   });
 
-  test("AC3: content text uses correct typography tokens with bold prefix", () => {
+  test("AC3: content text uses correct typography tokens with bold lead", () => {
     render(<PrivacyBanner />);
 
-    // Bold prefix span
-    const prefixSpan = screen.getByText(/Private to you\./).closest("span");
-    expect(prefixSpan).toHaveClass("font-medium", "text-text-primary");
+    // The default lead headline is "This conversation is private to you."
+    // and renders inside a bold span using the primary text color.
+    const leadSpan = screen
+      .getByText(/this conversation is private to you/i)
+      .closest("span");
+    expect(leadSpan).toHaveClass("font-medium", "text-text-primary");
 
-    // Text container has correct typography
-    const textContainer = screen
-      .getByText(/Only you and the AI coach/)
-      .closest("p, div, span");
-    expect(textContainer).toHaveClass(
+    // The lead is wrapped in a paragraph carrying the meta typography
+    // tokens defined in the style guide.
+    const paragraph = leadSpan?.closest("p");
+    expect(paragraph).toHaveClass(
       "text-meta",
       "text-text-secondary",
       "leading-snug",
