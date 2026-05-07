@@ -91,6 +91,15 @@ function UserMenu() {
           <div className="border-b px-3 py-2 text-label text-text-tertiary truncate">
             {user?.email}
           </div>
+          <Link
+            to="/profile"
+            role="menuitem"
+            className="block w-full px-3 py-2 text-left text-label text-text-secondary hover:bg-surface-subtle"
+            data-testid="profile-link"
+            onClick={() => setOpen(false)}
+          >
+            Profile
+          </Link>
           <button
             role="menuitem"
             onClick={handleLogout}
