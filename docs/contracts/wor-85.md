@@ -3,7 +3,7 @@ task_id: WOR-85
 ticket_summary: "TopNav: Dashboard link missing as a distinct nav item (DesignDoc \xA73.2)"
 ac_refs:
   - "The TopNav case-less mode renders three distinct elements: branding (left), nav cluster (right), user menu (right-most)"
-  - "\"Dashboard\" appears as an explicit nav link in the right-side cluster"
+  - '"Dashboard" appears as an explicit nav link in the right-side cluster'
   - "Active route is visually indicated when the user is on /dashboard (bold text, primary text color, or subtle background)"
   - "Branding is still clickable (back-compat) but visually styled as a wordmark, not as a primary nav link"
 files:
@@ -32,8 +32,8 @@ queries_used:
   - "api.cases.get — called in case-route mode only; not relevant to this ticket's changes"
 invariants:
   - "In dashboard/non-case mode, the nav element contains three visually distinct regions: (1) branding on the left, (2) a nav-cluster with a 'Dashboard' link on the right, (3) UserMenu on the far right"
-  - "The 'Dashboard' nav link is a <Link to=\"/dashboard\"> (or <NavLink>) rendered as a separate DOM element from the branding wordmark"
-  - "The branding wordmark ('Conflict Coach') remains a clickable <Link to=\"/dashboard\"> for back-compat, but is styled as text-h3 font-medium text-text-primary with NO hover:bg-surface-subtle (it's a logo, not a nav button)"
+  - 'The ''Dashboard'' nav link is a <Link to="/dashboard"> (or <NavLink>) rendered as a separate DOM element from the branding wordmark'
+  - 'The branding wordmark (''Conflict Coach'') remains a clickable <Link to="/dashboard"> for back-compat, but is styled as text-h3 font-medium text-text-primary with NO hover:bg-surface-subtle (it''s a logo, not a nav button)'
   - "Nav cluster links (including 'Dashboard') use: text-label text-text-secondary px-3 py-1.5 rounded-md hover:bg-surface-subtle hover:text-text-primary"
   - "Active route indicator: when on /dashboard, the Dashboard link gets text-text-primary (elevated from text-text-secondary) — no separate pill or background, just typography weight"
   - "Nav cluster items are separated by gap-1; the cluster is separated from UserMenu by gap-4"
@@ -50,7 +50,7 @@ tested_by:
   - ac: "The TopNav case-less mode renders three distinct elements: branding (left), nav cluster (right), user menu (right-most)"
     layer: unit
     file: tests/wor-85/topnav-dashboard-link.test.tsx
-  - ac: "\"Dashboard\" appears as an explicit nav link in the right-side cluster"
+  - ac: '"Dashboard" appears as an explicit nav link in the right-side cluster'
     layer: unit
     file: tests/wor-85/topnav-dashboard-link.test.tsx
   - ac: "Active route is visually indicated when the user is on /dashboard"
@@ -123,9 +123,9 @@ Playwright e2e test that navigates to /dashboard as an authenticated user and ve
 
 ## Test coverage
 
-| AC | Layer | File | Reason |
-|----|-------|------|--------|
-| Three distinct elements: branding, nav cluster, user menu | unit | `tests/wor-85/topnav-dashboard-link.test.tsx` | DOM structure can be asserted via @testing-library queries |
-| "Dashboard" appears as explicit nav link | unit | `tests/wor-85/topnav-dashboard-link.test.tsx` | Check for a link element with text "Dashboard" and href="/dashboard" |
-| Active route visually indicated on /dashboard | both | `tests/wor-85/topnav-dashboard-link.test.tsx` + `e2e/wor-85/topnav-dashboard-link.spec.ts` | Unit checks class; e2e confirms visual rendering in browser |
-| Branding clickable but styled as wordmark | unit | `tests/wor-85/topnav-dashboard-link.test.tsx` | Check branding link exists, has wordmark classes, lacks nav-button hover classes |
+| AC                                                        | Layer | File                                                                                       | Reason                                                                           |
+| --------------------------------------------------------- | ----- | ------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------- |
+| Three distinct elements: branding, nav cluster, user menu | unit  | `tests/wor-85/topnav-dashboard-link.test.tsx`                                              | DOM structure can be asserted via @testing-library queries                       |
+| "Dashboard" appears as explicit nav link                  | unit  | `tests/wor-85/topnav-dashboard-link.test.tsx`                                              | Check for a link element with text "Dashboard" and href="/dashboard"             |
+| Active route visually indicated on /dashboard             | both  | `tests/wor-85/topnav-dashboard-link.test.tsx` + `e2e/wor-85/topnav-dashboard-link.spec.ts` | Unit checks class; e2e confirms visual rendering in browser                      |
+| Branding clickable but styled as wordmark                 | unit  | `tests/wor-85/topnav-dashboard-link.test.tsx`                                              | Check branding link exists, has wordmark classes, lacks nav-button hover classes |
