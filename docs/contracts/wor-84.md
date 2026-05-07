@@ -4,7 +4,7 @@ ticket_summary: "TopNav: solo-mode party toggle missing (DesignDoc §3.2)"
 ac_refs:
   - "src/components/layout/TopNav.tsx detects solo cases and renders the PartyToggle in the case-route header, between the case label and the user menu (style-guide §12 mockup: back-link, case-label, party-toggle, user-menu — in that order, with party-toggle margin-left:auto)"
   - "Container styling matches style-guide §12: bg-coach-subtle, border border-coach-accent, rounded-md, p-0.5 (3px ≈ Tailwind p-0.5)"
-  - "\"VIEWING AS\" label uppercase, text-coach-accent, font-size 11px, letter-spacing 0.05em"
+  - '"VIEWING AS" label uppercase, text-coach-accent, font-size 11px, letter-spacing 0.05em'
   - "Active segment: bg-surface, text-text-primary, shadow-1"
   - "Inactive segment: text-text-secondary, hover:text-text-primary"
   - "Clicking a segment calls the existing useActingParty hook (or equivalent state mechanism) to flip which party context downstream views render"
@@ -48,7 +48,7 @@ tested_by:
     layer: unit
     file: tests/wor-84/party-toggle-styling.test.tsx
     reason: ""
-  - ac: "\"VIEWING AS\" label uppercase, text-coach-accent, font-size 11px, letter-spacing 0.05em"
+  - ac: '"VIEWING AS" label uppercase, text-coach-accent, font-size 11px, letter-spacing 0.05em'
     layer: unit
     file: tests/wor-84/party-toggle-styling.test.tsx
     reason: ""
@@ -85,6 +85,7 @@ Solo-mode cases need a chrome-level affordance for switching between viewing-as-
 ### `src/components/layout/TopNav.tsx` (modify, connected)
 
 TopNav already queries `api.cases.get` and has access to `caseContext`. The modification adds:
+
 1. Reading `isSolo` from the caseContext response (it's already returned by `cases.get` via the `...caseDoc` spread).
 2. When `isCaseRoute && caseContext?.isSolo === true`, rendering `<PartyToggle />` between the case label and the user menu.
 3. Adding `<UserMenu />` to the case-route header (currently it only appears on the dashboard route). The order must be: back-link → case-label → PartyToggle (with `ml-auto`) → UserMenu.
@@ -165,6 +166,7 @@ When `?as` is absent, PartyToggle defaults to "initiator" (the existing conventi
 ### `tests/wor-84/topnav-party-toggle.test.tsx` (unit)
 
 Covers the TopNav integration:
+
 - **AC: TopNav detects solo cases** — render TopNav in a case route context with a mocked `cases.get` returning `{ isSolo: true }`, assert `party-toggle` testid is in the DOM.
 - **AC: Hidden when isSolo: false** — render TopNav with mocked `cases.get` returning `{ isSolo: false }`, assert `party-toggle` testid is NOT in the DOM.
 - **AC: Hidden on case-less routes** — render TopNav without a caseId param (dashboard route), assert `party-toggle` testid is NOT in the DOM.
@@ -173,6 +175,7 @@ Covers the TopNav integration:
 ### `tests/wor-84/party-toggle-styling.test.tsx` (unit)
 
 Covers the PartyToggle visual contract:
+
 - **AC: Container styling** — assert the container element has classes `bg-coach-subtle`, `border-coach-accent`, `rounded-md`, `p-0.5`.
 - **AC: VIEWING AS label** — assert a text node with "VIEWING AS" exists, has `text-coach-accent`, uppercase.
 - **AC: Active segment** — with `?as=initiator`, assert the Alex button has `bg-surface`, `text-text-primary`, `shadow-1`.
@@ -181,5 +184,6 @@ Covers the PartyToggle visual contract:
 ### `tests/wor-84/party-toggle-interaction.test.tsx` (unit)
 
 Covers the click behavior:
+
 - **AC: Clicking a segment flips party context** — click the Jordan button, assert `?as=invitee` appears in the URL. Click Alex button, assert `?as=initiator`.
 - Default state (no `?as` param) shows Alex as active.
