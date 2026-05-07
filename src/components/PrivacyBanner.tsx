@@ -13,7 +13,7 @@ interface PrivacyBannerProps {
   otherPartyName?: string;
 }
 
-export function PrivacyBanner({ text, otherPartyName }: PrivacyBannerProps) {
+export function PrivacyBanner(_props: PrivacyBannerProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
