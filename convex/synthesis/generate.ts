@@ -4,8 +4,8 @@ import {
   internalMutation,
   internalQuery,
 } from "../_generated/server";
+import { internal } from "../_generated/api";
 import { v } from "convex/values";
-import { _getCase, _getPartyStates } from "../privateCoaching";
 import * as promptsLib from "../lib/prompts";
 import { checkPrivacyViolation, FALLBACK_TEXT } from "../lib/privacyFilter";
 import { getMockResponse } from "../lib/claudeMock";
@@ -216,7 +216,10 @@ export async function generateSynthesisHandler(
   }
 
   // 1. Read case and party states
-  const caseDoc = await ctx.runQuery(_getCase, {
+  // Use the registered internal references (Convex requires FunctionReference,
+  // not the JS export — passing the raw symbol throws "is not a functionReference"
+  // at runtime even though tests with mocked runQuery don't catch it.)
+  const caseDoc = await ctx.runQuery(internal.privateCoaching._getCase, {
     caseId: args.caseId,
   });
   if (!caseDoc) {
@@ -227,15 +230,21 @@ export async function generateSynthesisHandler(
   const Anthropic = (await import("@anthropic-ai/sdk")).default;
   const anthropicClient = new Anthropic();
 
-  const partyStatesRaw = await ctx.runQuery(_getPartyStates, {
-    caseId: args.caseId,
-  });
+  const partyStatesRaw = await ctx.runQuery(
+    internal.privateCoaching._getPartyStates,
+    {
+      caseId: args.caseId,
+    },
+  );
   const partyStates = Array.isArray(partyStatesRaw) ? partyStatesRaw : [];
 
   // 2. Read ALL private messages for both parties
-  const allPrivateMessagesRaw = await ctx.runQuery(_getAllPrivateMessages, {
-    caseId: args.caseId,
-  });
+  const allPrivateMessagesRaw = await ctx.runQuery(
+    (internal as any)["synthesis/generate"]._getAllPrivateMessages,
+    {
+      caseId: args.caseId,
+    },
+  );
   const allPrivateMessages = Array.isArray(allPrivateMessagesRaw)
     ? allPrivateMessagesRaw
     : [];
@@ -298,13 +307,16 @@ export async function generateSynthesisHandler(
     if (!initiatorPS?._id || !inviteePS?._id) {
       throw new Error("Could not find both party states for case");
     }
-    await ctx.runMutation(writeSynthesisResults, {
-      caseId: args.caseId,
-      initiatorPartyStateId: initiatorPS._id,
-      inviteePartyStateId: inviteePS._id,
-      forInitiator: parsed.forInitiator,
-      forInvitee: parsed.forInvitee,
-    });
+    await ctx.runMutation(
+      (internal as any)["synthesis/generate"].writeSynthesisResults,
+      {
+        caseId: args.caseId,
+        initiatorPartyStateId: initiatorPS._id,
+        inviteePartyStateId: inviteePS._id,
+        forInitiator: parsed.forInitiator,
+        forInvitee: parsed.forInvitee,
+      },
+    );
     return;
   }
 
@@ -407,27 +419,33 @@ export async function generateSynthesisHandler(
       forInvitee: FALLBACK_TEXT,
     };
 
-    await ctx.runMutation(_insertAuditLog, {
-      caseId: args.caseId,
-      actorUserId: initiatorPS.userId,
-      metadata: {
-        reason: lastFailureReason,
-        attempts: totalAttempts,
+    await ctx.runMutation(
+      (internal as any)["synthesis/generate"]._insertAuditLog,
+      {
+        caseId: args.caseId,
+        actorUserId: initiatorPS.userId,
+        metadata: {
+          reason: lastFailureReason,
+          attempts: totalAttempts,
+        },
       },
-    });
+    );
   }
 
   // 7. Atomically write synthesis texts + advance case to READY_FOR_JOINT
   if (!initiatorPS?._id || !inviteePS?._id) {
     throw new Error("Could not find both party states for case");
   }
-  await ctx.runMutation(writeSynthesisResults, {
-    caseId: args.caseId,
-    initiatorPartyStateId: initiatorPS._id,
-    inviteePartyStateId: inviteePS._id,
-    forInitiator: synthesisResult.forInitiator,
-    forInvitee: synthesisResult.forInvitee,
-  });
+  await ctx.runMutation(
+    (internal as any)["synthesis/generate"].writeSynthesisResults,
+    {
+      caseId: args.caseId,
+      initiatorPartyStateId: initiatorPS._id,
+      inviteePartyStateId: inviteePS._id,
+      forInitiator: synthesisResult.forInitiator,
+      forInvitee: synthesisResult.forInvitee,
+    },
+  );
 }
 
 /**
