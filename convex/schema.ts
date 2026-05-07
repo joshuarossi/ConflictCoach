@@ -43,6 +43,11 @@ export default defineSchema({
         totalInputTokens: v.number(),
         totalOutputTokens: v.number(),
         totalCostUsd: v.number(),
+        // `totalCost` is a convenience alias for totalCostUsd that the
+        // AiUsage interface in convex/lib/costBudget.ts also exposes.
+        // Both fields carry the same value; persisting both keeps the
+        // shape consistent across reads and writes.
+        totalCost: v.number(),
         softCapReachedAt: v.optional(v.number()),
       }),
     ),
