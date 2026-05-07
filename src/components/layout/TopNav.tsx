@@ -94,7 +94,6 @@ function AdminMenu() {
         >
           <Link
             to="/admin/templates"
-            role="menuitem"
             className="block w-full px-3 py-2 text-left text-label text-text-secondary hover:bg-surface-subtle"
             onClick={() => setOpen(false)}
           >
@@ -102,7 +101,6 @@ function AdminMenu() {
           </Link>
           <Link
             to="/admin/audit"
-            role="menuitem"
             className="block w-full px-3 py-2 text-left text-label text-text-secondary hover:bg-surface-subtle"
             onClick={() => setOpen(false)}
           >
