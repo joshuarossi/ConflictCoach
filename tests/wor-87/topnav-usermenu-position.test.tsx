@@ -47,10 +47,7 @@ function renderTopNav(route: string, children?: React.ReactNode) {
   return render(
     <MemoryRouter initialEntries={[route]}>
       <Routes>
-        <Route
-          path="/cases/:caseId/*"
-          element={<TopNav>{children}</TopNav>}
-        />
+        <Route path="/cases/:caseId/*" element={<TopNav>{children}</TopNav>} />
         <Route path="/dashboard" element={<TopNav />} />
       </Routes>
     </MemoryRouter>,
@@ -133,9 +130,7 @@ describe("WOR-87: TopNav UserMenu right-alignment", () => {
     const rightGroup = navContainer.children[1] as HTMLElement;
 
     // PartyToggle is in the right group
-    expect(
-      within(rightGroup).getByTestId("party-toggle"),
-    ).toBeInTheDocument();
+    expect(within(rightGroup).getByTestId("party-toggle")).toBeInTheDocument();
 
     // UserMenu is in the right group
     expect(
@@ -172,10 +167,7 @@ describe("WOR-87: TopNav UserMenu right-alignment", () => {
       return undefined;
     });
 
-    renderTopNav(
-      "/cases/case-123/private",
-      <span>Custom Child</span>,
-    );
+    renderTopNav("/cases/case-123/private", <span>Custom Child</span>);
 
     const navContainer = getNavContainer();
 
@@ -254,9 +246,7 @@ describe("WOR-87: TopNav UserMenu right-alignment", () => {
 
     // The right group (second child) contains UserMenu
     const rightGroup = navContainer.children[1] as HTMLElement;
-    expect(rightGroup).toContainElement(
-      screen.getByTestId("user-menu-button"),
-    );
+    expect(rightGroup).toContainElement(screen.getByTestId("user-menu-button"));
 
     // UserMenu's wrapper is the last element in the right group
     expect(rightGroup.lastElementChild).toContainElement(
