@@ -343,19 +343,16 @@ export const markComplete = mutation({
       );
 
     if (bothComplete) {
-      // Path: internal.synthesis.generate (module) .generate (export) →
-      // internalAction at convex/synthesis/generate.ts
-      const synthRef = (internal as any)?.synthesis?.generate?.generate;
-      if (synthRef) {
-        await ctx.scheduler.runAfter(0, synthRef, {
-          caseId: args.caseId,
-        });
-      } else {
-        console.warn(
-          `Synthesis module reference not found for case ${args.caseId}. ` +
-            `Case will not advance to READY_FOR_JOINT automatically.`,
-        );
-      }
+      // Convex registers convex/synthesis/generate.ts under the slash-keyed
+      // namespace "synthesis/generate" — bracket access is required. We
+      // intentionally do NOT use the optional-chaining + warning fallback
+      // pattern here: if the function ref doesn't exist, that's a deploy
+      // bug we want to fail loudly on, not silently leave cases stuck.
+      await ctx.scheduler.runAfter(
+        0,
+        (internal as any)["synthesis/generate"].generate,
+        { caseId: args.caseId },
+      );
     }
   },
 });

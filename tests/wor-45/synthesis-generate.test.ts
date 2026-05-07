@@ -237,15 +237,24 @@ describe("AC8: Synthesis is one-shot, non-streaming", () => {
       inviteePartyStateId: "partyStates:invPS",
     };
     const mockRunMutation = vi.fn();
-    // Dispatch by identity against the imported function refs. The convex
-    // proxy refs throw on String() coercion, so don't stringify them.
-    const mockRunQuery = vi.fn(async (queryRef: unknown) => {
-      if (queryRef === _getCase) return caseData;
-      if (queryRef === _getPartyStates) return partyStatesData;
-      if (queryRef === _getAllPrivateMessages) return [];
-      // enforceCostBudget calls _getCaseAiUsage — return a no-usage row so
-      // the cost gate doesn't short-circuit before generation.
-      return { totalCostUsd: 0, totalInputTokens: 0, totalOutputTokens: 0 };
+    // The handler now uses internal.<module>.<query> references at runtime
+    // (Convex requires real FunctionReferences — passing JS exports throws
+    // "is not a functionReference"). Those refs are opaque in tests, so
+    // we can't dispatch by identity against the imported JS exports
+    // anymore. Dispatch by call order instead: the handler issues queries
+    // in a known sequence — enforceCostBudget._getCaseAiUsage first, then
+    // _getCase, _getPartyStates, _getAllPrivateMessages.
+    const queryReturns = [
+      { totalCostUsd: 0, totalInputTokens: 0, totalOutputTokens: 0 }, // cost budget
+      caseData,
+      partyStatesData,
+      [], // allPrivateMessages
+    ];
+    let queryCallIdx = 0;
+    const mockRunQuery = vi.fn(async () => {
+      const result = queryReturns[queryCallIdx] ?? null;
+      queryCallIdx += 1;
+      return result;
     });
     const mockActionCtx = {
       runMutation: mockRunMutation,

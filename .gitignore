@@ -13,3 +13,6 @@ dist/
 # Playwright artifacts
 test-results/
 playwright-report/
+
+# Coverage reports
+coverage/
