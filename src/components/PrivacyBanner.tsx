@@ -13,7 +13,8 @@ interface PrivacyBannerProps {
   otherPartyName?: string;
 }
 
-export function PrivacyBanner(_props: PrivacyBannerProps) {
+// eslint-disable-next-line no-empty-pattern
+export function PrivacyBanner({}: PrivacyBannerProps) {
   const [modalOpen, setModalOpen] = useState(false);
 
   return (
