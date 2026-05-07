@@ -174,9 +174,9 @@ export function TopNav({ children }: TopNavProps) {
           <div className="flex items-center gap-1">
             <Link
               to="/dashboard"
-              className={`text-label px-3 py-1.5 rounded-md hover:bg-surface-subtle hover:text-text-primary ${
+              className={`text-label px-3 py-1.5 rounded-md hover:bg-surface-subtle ${
                 isDashboardActive
-                  ? "text-text-primary"
+                  ? "text-text-primary hover:text-text-primary"
                   : "text-text-secondary"
               }`}
             >
