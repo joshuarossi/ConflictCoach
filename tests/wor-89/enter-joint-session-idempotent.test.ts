@@ -1,21 +1,17 @@
 /**
- * WOR-46: enterJointSession mutation — unit tests
+ * WOR-89: enterJointSession idempotency — edge-case coverage
  *
- * Tests the server-side mutation that transitions a case from
- * READY_FOR_JOINT → JOINT_ACTIVE when a party clicks "Enter Joint Session".
- *
- * Covers:
- * - Successful transition from READY_FOR_JOINT → JOINT_ACTIVE
- * - Rejection when case is not in READY_FOR_JOINT status (CONFLICT)
- * - Rejection when caller is not a party to the case (FORBIDDEN)
+ * Fills coverage gaps identified in the test review:
+ * - AC3: Non-party caller when case is JOINT_ACTIVE (auth before idempotency)
+ * - AC4: CLOSED_UNRESOLVED and CLOSED_ABANDONED rejections
+ * - AC5: BOTH_PRIVATE_COACHING rejection
  */
 import { describe, test, expect, vi } from "vitest";
-import { ConvexError } from "convex/values";
 
 import { enterJointSession } from "../../convex/jointChat";
 
 // ---------------------------------------------------------------------------
-// Test fixtures
+// Test fixtures (mirrors wor-46 pattern)
 // ---------------------------------------------------------------------------
 const CASE_ID = "cases:test-case" as any;
 const USER_ID = "users:party-a" as any;
@@ -64,7 +60,6 @@ function makeMockCtx(
     db: {
       get: vi.fn().mockImplementation(async (id: string) => {
         if (id === CASE_ID) return caseDoc;
-        // User lookup for requireAuth
         if (id === callerUserId)
           return { _id: callerUserId, role: "USER", displayName: "Party A" };
         return null;
@@ -83,60 +78,12 @@ function makeMockCtx(
 }
 
 // ---------------------------------------------------------------------------
-// Tests
+// AC3: Non-party when JOINT_ACTIVE — auth rejects before idempotency guard
 // ---------------------------------------------------------------------------
-describe("WOR-46: enterJointSession mutation", () => {
-  test("transitions case from READY_FOR_JOINT to JOINT_ACTIVE", async () => {
-    const ctx = makeMockCtx({ caseStatus: "READY_FOR_JOINT" });
-
-    await enterJointSession.handler(ctx as any, { caseId: CASE_ID });
-
-    // The mutation should patch the case status to JOINT_ACTIVE
-    expect(ctx.db.patch).toHaveBeenCalledWith(
-      CASE_ID,
-      expect.objectContaining({ status: "JOINT_ACTIVE" }),
-    );
-
-    // Coach opening message must be scheduled exactly once
-    expect(ctx.scheduler.runAfter).toHaveBeenCalledTimes(1);
-    expect(ctx.scheduler.runAfter).toHaveBeenCalledWith(
-      0,
-      expect.anything(),
-      expect.objectContaining({ caseId: CASE_ID }),
-    );
-  });
-
-  test("throws CONFLICT when case is in DRAFT_PRIVATE_COACHING status", async () => {
-    const ctx = makeMockCtx({ caseStatus: "DRAFT_PRIVATE_COACHING" });
-
-    await expect(
-      enterJointSession.handler(ctx as any, { caseId: CASE_ID }),
-    ).rejects.toThrow(/conflict/i);
-  });
-
-  test("returns successfully when case is already JOINT_ACTIVE (idempotent)", async () => {
-    const ctx = makeMockCtx({ caseStatus: "JOINT_ACTIVE" });
-
-    // Second party joining an already-active session should succeed silently
-    await expect(
-      enterJointSession.handler(ctx as any, { caseId: CASE_ID }),
-    ).resolves.toBeUndefined();
-
-    // No state mutation or duplicate scheduling on the idempotent path
-    expect(ctx.db.patch).not.toHaveBeenCalled();
-    expect(ctx.scheduler.runAfter).not.toHaveBeenCalled();
-  });
-
-  test("throws CONFLICT when case is in CLOSED_RESOLVED status", async () => {
-    const ctx = makeMockCtx({ caseStatus: "CLOSED_RESOLVED" });
-
-    await expect(
-      enterJointSession.handler(ctx as any, { caseId: CASE_ID }),
-    ).rejects.toThrow(/conflict/i);
-  });
-
-  test("throws FORBIDDEN when caller is not a party to the case", async () => {
+describe("WOR-89: enterJointSession — non-party auth ordering", () => {
+  test("AC3: rejects non-party caller with FORBIDDEN even when case is JOINT_ACTIVE", async () => {
     const ctx = makeMockCtx({
+      caseStatus: "JOINT_ACTIVE",
       callerUserId: NON_PARTY_USER_ID,
       hasPartyState: false,
     });
@@ -144,5 +91,43 @@ describe("WOR-46: enterJointSession mutation", () => {
     await expect(
       enterJointSession.handler(ctx as any, { caseId: CASE_ID }),
     ).rejects.toThrow(/forbidden/i);
+
+    // Auth failure must prevent any state mutation
+    expect(ctx.db.patch).not.toHaveBeenCalled();
+    expect(ctx.scheduler.runAfter).not.toHaveBeenCalled();
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AC4: CLOSED_* statuses still reject
+// ---------------------------------------------------------------------------
+describe("WOR-89: enterJointSession — closed-status rejections", () => {
+  test("AC4: throws CONFLICT when case is CLOSED_UNRESOLVED", async () => {
+    const ctx = makeMockCtx({ caseStatus: "CLOSED_UNRESOLVED" });
+
+    await expect(
+      enterJointSession.handler(ctx as any, { caseId: CASE_ID }),
+    ).rejects.toThrow(/conflict/i);
+  });
+
+  test("AC4: throws CONFLICT when case is CLOSED_ABANDONED", async () => {
+    const ctx = makeMockCtx({ caseStatus: "CLOSED_ABANDONED" });
+
+    await expect(
+      enterJointSession.handler(ctx as any, { caseId: CASE_ID }),
+    ).rejects.toThrow(/conflict/i);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// AC5: Premature entry still rejected
+// ---------------------------------------------------------------------------
+describe("WOR-89: enterJointSession — premature-status rejections", () => {
+  test("AC5: throws CONFLICT when case is BOTH_PRIVATE_COACHING", async () => {
+    const ctx = makeMockCtx({ caseStatus: "BOTH_PRIVATE_COACHING" });
+
+    await expect(
+      enterJointSession.handler(ctx as any, { caseId: CASE_ID }),
+    ).rejects.toThrow(/conflict/i);
   });
 });
