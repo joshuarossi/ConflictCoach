@@ -4,7 +4,8 @@ import { useSearchParams } from "react-router-dom";
  * Segmented control for toggling between Initiator and Invitee views
  * in solo mode cases. Persists state via the `?as` URL query param.
  *
- * Styled with --coach-accent color token per DesignDoc D6.
+ * Styled per style-guide §12 — raised-chip segmented control on a
+ * coach-subtle track with coach-accent border/label.
  */
 export function PartyToggle() {
   const [searchParams, setSearchParams] = useSearchParams();
@@ -20,36 +21,39 @@ export function PartyToggle() {
 
   return (
     <div
-      className="inline-flex rounded-md border border-coach-accent overflow-hidden"
+      className="inline-flex items-center rounded-md border border-coach-accent bg-coach-subtle p-0.5"
       role="group"
       aria-label="Party toggle"
       data-testid="party-toggle"
     >
+      <span className="px-2 text-[11px] font-medium uppercase tracking-[0.05em] text-coach-accent">
+        VIEWING AS
+      </span>
       <button
         type="button"
         onClick={() => setParty("initiator")}
-        className={`px-3 py-1 text-label font-medium transition-colors ${
+        className={`rounded-sm px-3 py-1.5 text-[13px] font-medium transition-colors ${
           activeParty === "initiator"
-            ? "bg-coach-accent text-accent-on"
-            : "bg-surface text-coach-accent hover:bg-surface-subtle"
+            ? "bg-surface text-text-primary shadow-1"
+            : "text-text-secondary hover:text-text-primary"
         }`}
         aria-pressed={activeParty === "initiator"}
         data-testid="toggle-initiator"
       >
-        Viewing as Alex
+        Alex
       </button>
       <button
         type="button"
         onClick={() => setParty("invitee")}
-        className={`px-3 py-1 text-label font-medium transition-colors ${
+        className={`rounded-sm px-3 py-1.5 text-[13px] font-medium transition-colors ${
           activeParty === "invitee"
-            ? "bg-coach-accent text-accent-on"
-            : "bg-surface text-coach-accent hover:bg-surface-subtle"
+            ? "bg-surface text-text-primary shadow-1"
+            : "text-text-secondary hover:text-text-primary"
         }`}
         aria-pressed={activeParty === "invitee"}
         data-testid="toggle-invitee"
       >
-        Viewing as Jordan
+        Jordan
       </button>
     </div>
   );
