@@ -21,8 +21,12 @@ jobs:
 
       - run: npm install --prefer-offline --no-audit --no-fund
 
+      # Deploy Convex prod AND build the frontend in one step. Same pattern
+      # as deploy-preview.yml: convex CLI runs `npm run build` as the
+      # subprocess and injects VITE_CONVEX_URL. No `continue-on-error` —
+      # if convex deploy fails the build can't run and the Cloudflare
+      # publish would deploy a broken frontend pointing at stale backend.
       - name: Deploy Convex (prod) and build frontend
-        continue-on-error: true
         env:
           CONVEX_DEPLOY_KEY: ${{ secrets.CONVEX_DEPLOY_KEY_PROD }}
         run: npx convex deploy --cmd "npm run build"
@@ -32,4 +36,4 @@ jobs:
         with:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=main
+          command: pages deploy dist --project-name=${{ vars.CLOUDFLARE_PROJECT_NAME }} --branch=main --commit-dirty=true

@@ -1,2 +1,53 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
-// Snapshot will be regenerated after WOR-86 implementation lands.
+
+exports[`AC 5: Visual style matches style-guide §08: persistent banner, lock icon is decorative > snapshot: PrivacyBanner renders expected structure 1`] = `
+<div
+  aria-label="Privacy notice"
+  class="flex items-start gap-2.5 px-4 py-3 bg-private-tint border-b border-border-default"
+  role="region"
+>
+  <svg
+    aria-hidden="true"
+    class="lucide lucide-lock mt-px text-text-secondary shrink-0"
+    fill="none"
+    height="16"
+    stroke="currentColor"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    stroke-width="1.5"
+    viewBox="0 0 24 24"
+    width="16"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <rect
+      height="11"
+      rx="2"
+      ry="2"
+      width="18"
+      x="3"
+      y="11"
+    />
+    <path
+      d="M7 11V7a5 5 0 0 1 10 0v4"
+    />
+  </svg>
+  <p
+    class="text-meta text-text-secondary leading-snug"
+  >
+    <span
+      class="font-medium text-text-primary"
+    >
+      Private to you.
+    </span>
+     
+    Only you and the AI coach will see this.
+     
+    <button
+      class="underline hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 rounded-sm"
+      type="button"
+    >
+      Learn more about privacy
+    </button>
+  </p>
+</div>
+`;
