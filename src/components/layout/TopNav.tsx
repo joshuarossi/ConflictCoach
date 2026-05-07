@@ -5,6 +5,7 @@ import type { ReactNode } from "react";
 import { useQuery } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
 import { api } from "../../../convex/_generated/api";
+import { PartyToggle } from "../PartyToggle";
 
 /** Maps route segments to human-readable phase labels. */
 function getPhaseLabel(segment: string | undefined): string | null {
@@ -193,7 +194,10 @@ export function TopNav({ children }: TopNavProps) {
   const caseContext = useQuery(
     (api as any).cases?.get,
     isCaseRoute ? { caseId: params.caseId } : "skip",
-  ) as { otherPartyName?: string; status?: string } | null | undefined;
+  ) as
+    | { otherPartyName?: string; status?: string; isSolo?: boolean }
+    | null
+    | undefined;
 
   // Determine phase from the URL segment after /cases/:caseId/, falling back
   // to the case status when the URL doesn't say (e.g. /cases/:id).
@@ -231,7 +235,15 @@ export function TopNav({ children }: TopNavProps) {
               </>
             )}
           </span>
-          {children && <div className="ml-auto">{children}</div>}
+          {caseContext?.isSolo === true && (
+            <div className="ml-auto">
+              <PartyToggle />
+            </div>
+          )}
+          {children && !caseContext?.isSolo && (
+            <div className="ml-auto">{children}</div>
+          )}
+          <UserMenu />
         </div>
       </nav>
     );
