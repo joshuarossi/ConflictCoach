@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery, useMutation } from "convex/react";
 import { useAuthActions } from "@convex-dev/auth/react";
@@ -18,22 +18,15 @@ export function ProfilePage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [successMessage, setSuccessMessage] = useState<string | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [initialized, setInitialized] = useState(false);
 
-  // Pre-fill display name from user data
-  useEffect(() => {
-    if (user && !initialized) {
-      setDisplayName(user.displayName ?? "");
-      setInitialized(true);
-    }
-  }, [user, initialized]);
-
-  // Update local state when user data changes reactively (e.g. after save)
-  useEffect(() => {
-    if (user && initialized && !isSubmitting) {
-      setDisplayName(user.displayName ?? "");
-    }
-  }, [user?.displayName, initialized, isSubmitting]);
+  // Sync display name from server state during render (avoids setState-in-effect)
+  const [prevServerName, setPrevServerName] = useState<string | undefined>(
+    undefined,
+  );
+  if (user && user.displayName !== prevServerName && !isSubmitting) {
+    setPrevServerName(user.displayName);
+    setDisplayName(user.displayName ?? "");
+  }
 
   if (!user) {
     return (
