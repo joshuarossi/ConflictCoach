@@ -14,15 +14,12 @@ describe("AC 1: PrivacyBanner renders with a lock icon, --private-tint backgroun
     ).toBeInTheDocument();
   });
 
-  test("renders a lock icon (Lucide Lock)", () => {
-    render(<PrivacyBanner text="Private" />);
-    // Lucide Lock icon should be rendered as an SVG; the component should
-    // give it an accessible label so it is findable by role.
-    const lockIcon = screen.getByRole("button", { name: /lock/i });
-    expect(lockIcon).toBeInTheDocument();
-    // The icon should contain an SVG element
-    const svg = lockIcon.querySelector("svg");
-    expect(svg).toBeTruthy();
+  test("renders a lock icon (Lucide Lock) as decorative SVG", () => {
+    const { container } = render(<PrivacyBanner />);
+    // Per WOR-86: lock icon is decorative (aria-hidden), not a button.
+    const lockSvg = container.querySelector("svg.lucide-lock");
+    expect(lockSvg).toBeInTheDocument();
+    expect(lockSvg).toHaveAttribute("aria-hidden", "true");
   });
 
   test("applies --private-tint background color (#F0E9E0)", () => {

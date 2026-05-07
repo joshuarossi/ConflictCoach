@@ -1,38 +1,33 @@
 /**
- * AC 4: Component accepts otherPartyName prop for personalized copy
- *       (e.g., "Jordan can't see this")
+ * AC 4: Component accepts otherPartyName prop (backward compat)
+ * Updated for WOR-86: banner now renders hardcoded copy per style-guide §08.
+ * The otherPartyName prop is accepted but no longer displayed inline.
  */
 import { describe, test, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import "@testing-library/jest-dom";
 import { PrivacyBanner } from "@/components/PrivacyBanner";
 
-describe('AC 4: Component accepts otherPartyName prop for personalized copy (e.g., "Jordan can\'t see this")', () => {
-  test("renders personalized copy with otherPartyName", () => {
-    render(<PrivacyBanner text="This is private" otherPartyName="Jordan" />);
-
-    // When otherPartyName is provided, the banner should include
-    // personalized copy mentioning the other party by name
-    expect(screen.getByText(/Jordan/)).toBeInTheDocument();
-    // Should indicate that Jordan can't see this content
-    expect(
-      screen.queryByText(/Jordan.*can't see/i) ??
-        screen.queryByText(/Jordan.*will never see/i),
-    ).toBeInTheDocument();
+describe("AC 4: Component accepts otherPartyName prop (backward compat)", () => {
+  test("renders without crashing when otherPartyName is passed", () => {
+    // Per WOR-86: the banner renders hardcoded copy. otherPartyName is accepted
+    // for backward compat but not displayed inline.
+    const { container } = render(<PrivacyBanner otherPartyName="Jordan" />);
+    expect(container.firstElementChild).toBeInTheDocument();
   });
 
-  test("renders different names correctly", () => {
-    render(<PrivacyBanner text="This is private" otherPartyName="Alex" />);
+  test("renders hardcoded privacy copy regardless of props", () => {
+    render(<PrivacyBanner otherPartyName="Alex" />);
 
-    expect(screen.getByText(/Alex/)).toBeInTheDocument();
+    // The banner always renders the spec's hardcoded text
+    expect(screen.getByText(/Private to you\./)).toBeInTheDocument();
+    expect(screen.getByText(/Only you and the AI coach/)).toBeInTheDocument();
   });
 
-  test("works without otherPartyName (generic copy)", () => {
-    render(<PrivacyBanner text="This conversation is private to you." />);
+  test("works without any props", () => {
+    render(<PrivacyBanner />);
 
-    // Should still render the text without crashing
-    expect(
-      screen.getByText("This conversation is private to you."),
-    ).toBeInTheDocument();
+    // Should render the hardcoded text without crashing
+    expect(screen.getByText(/Private to you\./)).toBeInTheDocument();
   });
 });
