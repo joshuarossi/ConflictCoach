@@ -8,7 +8,7 @@ exports[`AC 5: Visual style matches style-guide §08: persistent banner, lock ic
 >
   <svg
     aria-hidden="true"
-    class="lucide lucide-lock mt-px text-text-secondary shrink-0"
+    class="lucide lucide-lock mt-px text-text-secondary shrink-0 lucide-lock"
     fill="none"
     height="16"
     stroke="currentColor"
@@ -31,18 +31,22 @@ exports[`AC 5: Visual style matches style-guide §08: persistent banner, lock ic
       d="M7 11V7a5 5 0 0 1 10 0v4"
     />
   </svg>
+  <span
+    class="sr-only"
+  >
+    Private conversation. Only you and the AI coach see this.
+  </span>
   <p
     class="text-meta text-text-secondary leading-snug"
   >
     <span
       class="font-medium text-text-primary"
     >
-      Private to you.
+      This conversation is private to you.
     </span>
      
-    Only you and the AI coach will see this.
-     
     <button
+      aria-label="Learn more about privacy"
       class="underline hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 rounded-sm"
       type="button"
     >

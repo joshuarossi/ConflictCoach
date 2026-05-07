@@ -200,15 +200,16 @@ describe("WOR-68: Modal focus trap — AlertDialog (mark-complete confirmation)"
 });
 
 describe("WOR-68: Modal focus trap — PrivacyBanner dialog", () => {
-  it.skip("PrivacyBanner dialog traps focus when open [WOR-86 changed lock from button to inline link; modal trigger now needs different selector — follow-up]", async () => {
+  it("PrivacyBanner dialog traps focus when open", async () => {
     const user = userEvent.setup();
     render(<PrivacyBanner text="This conversation is private to you." />);
 
-    // Open the privacy dialog by clicking the lock button
-    const lockButton = screen.getByLabelText(/lock/i);
-    await user.click(lockButton);
+    // Open the privacy dialog by clicking the inline "Learn more about
+    // privacy" trigger. The lock icon itself is decorative (aria-hidden)
+    // per style-guide §08; the trigger is the inline button beside it.
+    const trigger = screen.getByLabelText(/learn more about privacy/i);
+    await user.click(trigger);
 
-    // Dialog should be open with focus trapped inside
     const dialog = screen.getByRole("dialog");
     expect(dialog).toBeTruthy();
     expect(dialog.contains(document.activeElement)).toBe(true);

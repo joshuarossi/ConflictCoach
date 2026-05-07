@@ -30,7 +30,13 @@ const mockUseQuery = vi.mocked(useQuery) as unknown as {
   mockImplementation: (fn: (ref: unknown) => unknown) => void;
 };
 
-vi.mock("../../../convex/_generated/api", () => ({
+// vi.mock paths resolve relative to the test file. TopNav imports the
+// generated api from '../../../convex/_generated/api' (relative to
+// src/components/layout/) which resolves to <root>/convex/_generated/api.
+// From tests/wor-84/ the same target is reached with two `..`. Using
+// three would resolve above project root and the mock would silently
+// never match TopNav's import, leaving useQuery unstubbed.
+vi.mock("../../convex/_generated/api", () => ({
   api: {
     cases: { get: "cases:get" },
     users: { me: "users:me" },
@@ -53,7 +59,7 @@ function renderTopNav(route: string) {
 
 describe("WOR-84: TopNav PartyToggle integration", () => {
   // --- AC6: PartyToggle visibility gating ---
-  test.skip("PartyToggle is rendered when caseContext.isSolo === true [SKIP: mock setup issue, see WOR-84 follow-up]", () => {
+  test("PartyToggle is rendered when caseContext.isSolo === true", () => {
     mockUseQuery.mockImplementation((queryRef: unknown) => {
       if (queryRef === "cases:get") {
         return {

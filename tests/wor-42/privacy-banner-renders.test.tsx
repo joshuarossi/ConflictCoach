@@ -7,7 +7,7 @@ import "@testing-library/jest-dom";
 import { PrivacyBanner } from "@/components/PrivacyBanner";
 
 describe("AC 1: PrivacyBanner renders with a lock icon, --private-tint background, and configurable text", () => {
-  test.skip("renders the configurable text passed via prop [WOR-86 regression: text prop is unused; needs follow-up to restore]", () => {
+  test("renders the configurable text passed via prop", () => {
     render(<PrivacyBanner text="This conversation is private to you." />);
     expect(
       screen.getByText("This conversation is private to you."),
