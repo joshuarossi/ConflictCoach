@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/dialog";
 
 interface PrivacyBannerProps {
-  text: string;
+  text?: string;
   otherPartyName?: string;
 }
 
@@ -20,18 +20,28 @@ export function PrivacyBanner({ text, otherPartyName }: PrivacyBannerProps) {
     <div
       role="region"
       aria-label="Privacy notice"
-      className="mx-4 mb-2 rounded-md border border-border-default bg-private-tint flex items-center gap-2 px-4 py-3"
+      className="flex items-start gap-2.5 px-4 py-3 bg-private-tint border-b border-border-default"
     >
-      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
+      <Lock
+        size={16}
+        strokeWidth={1.5}
+        aria-hidden="true"
+        className="mt-px text-text-secondary shrink-0"
+      />
+
+      <p className="text-meta text-text-secondary leading-snug">
+        <span className="font-medium text-text-primary">Private to you.</span>{" "}
+        Only you and the AI coach will see this.{" "}
         <button
           type="button"
-          aria-label="Lock — view privacy details"
           onClick={() => setModalOpen(true)}
-          className="inline-flex shrink-0 items-center justify-center rounded-sm focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2"
+          className="underline hover:text-text-primary focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-1 rounded-sm"
         >
-          <Lock size={16} strokeWidth={1.5} />
+          Learn more about privacy
         </button>
+      </p>
 
+      <Dialog open={modalOpen} onOpenChange={setModalOpen}>
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Privacy Boundaries</DialogTitle>
@@ -44,16 +54,6 @@ export function PrivacyBanner({ text, otherPartyName }: PrivacyBannerProps) {
           </DialogHeader>
         </DialogContent>
       </Dialog>
-
-      <span>{text}</span>
-
-      {otherPartyName && (
-        <span className="ml-1">{otherPartyName} can&apos;t see this.</span>
-      )}
-
-      <span className="sr-only">
-        Private conversation. Only you and the AI coach see this.
-      </span>
     </div>
   );
 }
