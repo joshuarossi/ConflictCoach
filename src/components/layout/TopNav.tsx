@@ -45,6 +45,73 @@ export interface TopNavProps {
   children?: ReactNode;
 }
 
+function AdminMenu() {
+  const user = useQuery(api.users.me);
+  const [open, setOpen] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!open) return;
+    function handleClick(e: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClick);
+    return () => document.removeEventListener("mousedown", handleClick);
+  }, [open]);
+
+  if (user?.role !== "ADMIN") return null;
+
+  return (
+    <div className="relative" ref={menuRef}>
+      <button
+        onClick={() => setOpen((v) => !v)}
+        className="flex items-center gap-2 rounded-md px-3 py-1.5 text-label text-text-secondary hover:bg-surface-subtle focus-visible:outline-2 focus-visible:outline-accent focus-visible:outline-offset-2"
+        aria-label="Admin"
+        data-testid="admin-menu-button"
+      >
+        <span className="hidden sm:inline">Admin</span>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden="true"
+        >
+          <path d="m6 9 6 6 6-6" />
+        </svg>
+      </button>
+      {open && (
+        <div
+          role="menu"
+          className="absolute right-0 top-full z-10 mt-1 w-48 rounded-md border bg-surface py-1 shadow-3"
+        >
+          <Link
+            to="/admin/templates"
+            className="block w-full px-3 py-2 text-left text-label text-text-secondary hover:bg-surface-subtle"
+            onClick={() => setOpen(false)}
+          >
+            Templates
+          </Link>
+          <Link
+            to="/admin/audit"
+            className="block w-full px-3 py-2 text-left text-label text-text-secondary hover:bg-surface-subtle"
+            onClick={() => setOpen(false)}
+          >
+            Audit Log
+          </Link>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function UserMenu() {
   const { signOut } = useAuthActions();
   const navigate = useNavigate();
@@ -179,6 +246,7 @@ export function TopNav({ children }: TopNavProps) {
         </Link>
         <div className="flex items-center gap-4">
           {children}
+          <AdminMenu />
           <UserMenu />
         </div>
       </div>
