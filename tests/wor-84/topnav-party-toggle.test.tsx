@@ -49,7 +49,11 @@ describe("WOR-84: TopNav PartyToggle integration", () => {
   test("PartyToggle is rendered when caseContext.isSolo === true", () => {
     mockUseQuery.mockImplementation((queryRef: unknown) => {
       if (queryRef === "cases:get") {
-        return { isSolo: true, otherPartyName: "Taylor", status: "BOTH_PRIVATE_COACHING" };
+        return {
+          isSolo: true,
+          otherPartyName: "Taylor",
+          status: "BOTH_PRIVATE_COACHING",
+        };
       }
       if (queryRef === "users:me") {
         return { displayName: "Test User", email: "test@example.com" };
@@ -64,7 +68,11 @@ describe("WOR-84: TopNav PartyToggle integration", () => {
   test("PartyToggle is NOT rendered when caseContext.isSolo === false", () => {
     mockUseQuery.mockImplementation((queryRef: unknown) => {
       if (queryRef === "cases:get") {
-        return { isSolo: false, otherPartyName: "Taylor", status: "BOTH_PRIVATE_COACHING" };
+        return {
+          isSolo: false,
+          otherPartyName: "Taylor",
+          status: "BOTH_PRIVATE_COACHING",
+        };
       }
       if (queryRef === "users:me") {
         return { displayName: "Test User", email: "test@example.com" };
